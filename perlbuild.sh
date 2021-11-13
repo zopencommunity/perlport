@@ -28,9 +28,11 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
-git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
+if ! [ -d perl5 ]; then
+	git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
+fi
 
-cd Perl
+cd perl5
 MY_ROOT="${PWD}"
 
 chtag -R -h -t -cISO8859-1 "${MY_ROOT}"
@@ -49,7 +51,8 @@ fi
 #
 # Setup the configuration 
 #
-sh Configure -de
+echo "Running configure and directing output to configure.out"
+sh Configure -de -Dccflags="-qlanglvl=extc1x -qascii -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -qfloat=ieee" -Dcc=/bin/c99 >configure.out 2>&1 
 if [ $? -gt 0 ]; then
 	echo "Configure of PERL tree failed." >&2
 	exit 16
