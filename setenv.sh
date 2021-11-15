@@ -10,6 +10,6 @@ else
 	export _TAG_REDIR_IN="txt"
 	export _TAG_REDIR_OUT="txt"
 
-	export M4_VRM="maint-5.34"
-	export M4_ROOT="${PWD}"
+	export PERL_VRM="maint-5.34"
+	export PERL_ROOT="${PWD}"
 fi
