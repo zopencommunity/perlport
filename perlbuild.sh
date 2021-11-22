@@ -48,7 +48,7 @@ fi
 # To create a new patch:
 # cd to perl5 directory
 # copy original file in perl5 directory to: <file>.orig
-# diff -C 2 -f <file>.orig <file>.c >../patches/<file>.patch  
+# diff -C 2 -f <file>.c <file>.orig >../patches/<file>.patch  
 #
 if [ "${PERL_VRM}" = "maint-5.34" ]; then
 	patch -c doio.c <${MY_ROOT}/patches/doio.patch
@@ -58,7 +58,12 @@ if [ "${PERL_VRM}" = "maint-5.34" ]; then
 	fi      
 	patch -c iperlsys.h <${MY_ROOT}/patches/iperlsys.patch
   	if [ $? -gt 0 ]; then
-                echo "Patch of perl tree failed (iperlsys)." >&2
+                echo "Patch of perl tree failed (iperlsys.h)." >&2
+                exit 16
+        fi      
+	patch -c hints/os390.sh <${MY_ROOT}/patches/os390.patch
+  	if [ $? -gt 0 ]; then
+                echo "Patch of perl tree failed (os390.sh)." >&2
                 exit 16
         fi      
 fi  
@@ -66,7 +71,8 @@ fi
 #
 # Setup the configuration 
 #
-sh Configure -de -Dccflags="-g -qsuppress=CCN3159 -qlanglvl=extc1x -qascii -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -qfloat=ieee" -Dcc=/bin/c99 
+sh Configure -de
+#-Dccflags="-g -qsuppress=CCN3159 -qlanglvl=extc1x -qascii -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -qfloat=ieee" -Dcc=/bin/c99 
 if [ $? -gt 0 ]; then
 	echo "Configure of PERL tree failed." >&2
 	exit 16
