@@ -1,5 +1,5 @@
 #!/bin/sh 
-set -x
+#set -x
 #
 # Pre-requisites: 
 #  - cd to the directory of this script before running the script   
