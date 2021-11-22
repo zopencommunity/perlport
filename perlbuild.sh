@@ -61,9 +61,9 @@ if [ "${PERL_VRM}" = "maint-5.34" ]; then
                 echo "Patch of perl tree failed (iperlsys.h)." >&2
                 exit 16
         fi      
-	patch -c hints/os390.sh <${MY_ROOT}/patches/os390.patch
+	(cd hints; patch -c os390.sh <${MY_ROOT}/patches/os390.patch)
   	if [ $? -gt 0 ]; then
-                echo "Patch of perl tree failed (os390.sh)." >&2
+                echo "Patch of perl tree failed (hints/os390.sh)." >&2
                 exit 16
         fi      
 fi  
