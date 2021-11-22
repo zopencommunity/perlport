@@ -66,13 +66,17 @@ if [ "${PERL_VRM}" = "maint-5.34" ]; then
                 echo "Patch of perl tree failed (hints/os390.sh)." >&2
                 exit 16
         fi      
+	patch -c cpan/Perl-OSType/lib/Perl/OSType.pm <${MY_ROOT}/patches/OSType.patch
+  	if [ $? -gt 0 ]; then
+                echo "Patch of perl tree failed (cpan/Perl-OSType/lib/Perl/OSType.pm)." >&2
+                exit 16
+        fi      
 fi  
 
 #
 # Setup the configuration 
 #
 sh Configure -de
-#-Dccflags="-g -qsuppress=CCN3159 -qlanglvl=extc1x -qascii -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -qfloat=ieee" -Dcc=/bin/c99 
 if [ $? -gt 0 ]; then
 	echo "Configure of PERL tree failed." >&2
 	exit 16
