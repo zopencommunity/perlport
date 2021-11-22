@@ -1,4 +1,5 @@
 #!/bin/sh 
+set -x
 #
 # Pre-requisites: 
 #  - cd to the directory of this script before running the script   
@@ -34,13 +35,13 @@ fi
 
 MY_ROOT="${PWD}"
 
-chtag -R -h -t -cISO8859-1 "${MY_ROOT}"
+cd perl5
+chtag -R -h -t -cISO8859-1 "${MY_ROOT}/perl5"
 if [ $? -gt 0 ]; then
 	echo "Unable to tag PERL directory tree as ASCII" >&2
 	exit 16
 fi
 
-cd perl5
 
 #
 # Apply patches
@@ -61,7 +62,6 @@ if [ "${PERL_VRM}" = "maint-5.34" ]; then
                 exit 16
         fi      
 fi  
-fi
 
 #
 # Setup the configuration 
