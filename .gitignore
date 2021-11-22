@@ -4,6 +4,9 @@
 # original perl git source
 perl5
 
+# generated binaries
+tests/iotest
+
 # Object files
 *.o
 *.ko
