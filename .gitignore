@@ -47,6 +47,7 @@ tests/iotest
 *.su
 *.idb
 *.pdb
+*.dbg
 
 # Kernel Module Compile Results
 *.mod*

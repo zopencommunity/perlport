@@ -1,0 +1,47 @@
+*** doio.orig Mon Nov 22 12:17:41 2021
+--- doio.c Mon Nov 22 12:52:00 2021
+***************
+*** 233,236 ****
+--- 233,274 ----
+  }
+  
++ #ifdef __MVS__
++   #if (__CHARSET_LIB == 1)
++     static int setasciiccsid(int fd) {
++       attrib_t attr;
++       const int asciiccsid = 819;
++ 
++       memset(&attr, 0, sizeof(attr));
++       attr.att_filetagchg = 1;
++       attr.att_filetag.ft_ccsid = asciiccsid;
++       attr.att_filetag.ft_txtflag = 1;
++ 
++       return __fchattr(fd, &attr, sizeof(attr));
++     }
++ 
++     int asciiopen(const char* path, int oflag) {
++       int fd = open(path, oflag);
++       if (fd == -1) { 
++         return fd;
++       }
++       if (oflag & O_CREAT) {
++         setasciiccsid(fd);
++       }
++       return fd;
++     }
++ 
++     int asciiopen3(const char* path, int oflag, int perm) {
++       int fd = open(path, oflag, perm);
++       if (fd == -1) { 
++         return fd;
++       }
++       if (oflag & O_CREAT) {
++         setasciiccsid(fd);
++       }
++       return fd;
++     } 
++   #endif
++ #endif
++ 
+  int
+  Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)

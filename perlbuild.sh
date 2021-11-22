@@ -32,7 +32,6 @@ if ! [ -d perl5 ]; then
 	git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
 fi
 
-cd perl5
 MY_ROOT="${PWD}"
 
 chtag -R -h -t -cISO8859-1 "${MY_ROOT}"
@@ -41,11 +40,27 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
+cd perl5
+
 #
 # Apply patches
+# To create a new patch:
+# cd to perl5 directory
+# copy original file in perl5 directory to: <file>.orig
+# diff -C 2 -f <file>.orig <file>.c >../patches/<file>.patch  
 #
 if [ "${PERL_VRM}" = "maint-5.34" ]; then
-	echo "add patches here"
+	patch -c doio.c <${MY_ROOT}/patches/doio.patch
+	if [ $? -gt 0 ]; then
+  		echo "Patch of perl tree failed (doio.c)." >&2
+                exit 16
+	fi      
+	patch -c iperlsys.h <${MY_ROOT}/patches/iperlsys.patch
+  	if [ $? -gt 0 ]; then
+                echo "Patch of perl tree failed (iperlsys)." >&2
+                exit 16
+        fi      
+fi  
 fi
 
 #
