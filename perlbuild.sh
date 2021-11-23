@@ -1,4 +1,5 @@
 #!/bin/sh 
+#set -x
 #
 # Pre-requisites: 
 #  - cd to the directory of this script before running the script   
@@ -32,26 +33,50 @@ if ! [ -d perl5 ]; then
 	git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
 fi
 
-cd perl5
 MY_ROOT="${PWD}"
 
-chtag -R -h -t -cISO8859-1 "${MY_ROOT}"
+cd perl5
+chtag -R -h -t -cISO8859-1 "${MY_ROOT}/perl5"
 if [ $? -gt 0 ]; then
 	echo "Unable to tag PERL directory tree as ASCII" >&2
 	exit 16
 fi
 
+
 #
 # Apply patches
+# To create a new patch:
+# cd to perl5 directory
+# copy original file in perl5 directory to: <file>.orig
+# diff -C 2 -f <file>.c <file>.orig >../patches/<file>.patch  
 #
 if [ "${PERL_VRM}" = "maint-5.34" ]; then
-	echo "add patches here"
-fi
+	patch -c doio.c <${MY_ROOT}/patches/doio.patch
+	if [ $? -gt 0 ]; then
+  		echo "Patch of perl tree failed (doio.c)." >&2
+                exit 16
+	fi      
+	patch -c iperlsys.h <${MY_ROOT}/patches/iperlsys.patch
+  	if [ $? -gt 0 ]; then
+                echo "Patch of perl tree failed (iperlsys.h)." >&2
+                exit 16
+        fi      
+	patch -R -c hints/os390.sh <${MY_ROOT}/patches/os390.patch
+  	if [ $? -gt 0 ]; then
+                echo "Patch of perl tree failed (hints/os390.sh)." >&2
+                exit 16
+        fi      
+	patch -c cpan/Perl-OSType/lib/Perl/OSType.pm <${MY_ROOT}/patches/OSType.patch
+  	if [ $? -gt 0 ]; then
+                echo "Patch of perl tree failed (cpan/Perl-OSType/lib/Perl/OSType.pm)." >&2
+                exit 16
+        fi      
+fi  
 
 #
 # Setup the configuration 
 #
-sh Configure -de -Dccflags="-g -qsuppress=CCN3159 -qlanglvl=extc1x -qascii -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -qfloat=ieee" -Dcc=/bin/c99 
+sh Configure -de
 if [ $? -gt 0 ]; then
 	echo "Configure of PERL tree failed." >&2
 	exit 16

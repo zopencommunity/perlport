@@ -4,6 +4,10 @@
 # original perl git source
 perl5
 
+# generated binaries
+tests/itest
+tests/otest
+
 # Object files
 *.o
 *.ko
@@ -44,6 +48,7 @@ perl5
 *.su
 *.idb
 *.pdb
+*.dbg
 
 # Kernel Module Compile Results
 *.mod*
