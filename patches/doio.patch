@@ -2,21 +2,29 @@
 --- doio.orig Mon Nov 22 12:52:00 2021
 ***************
 *** 233,236 ****
---- 233,274 ----
+--- 233,290 ----
   }
   
 + #ifdef __MVS__
 +   #if (__CHARSET_LIB == 1)
-+     static int setasciiccsid(int fd) {
++     static int setccsid(int fd, int ccsid) {
 +       attrib_t attr;
-+       const int asciiccsid = 819;
 + 
 +       memset(&attr, 0, sizeof(attr));
 +       attr.att_filetagchg = 1;
-+       attr.att_filetag.ft_ccsid = asciiccsid;
++       attr.att_filetag.ft_ccsid = ccsid;
 +       attr.att_filetag.ft_txtflag = 1;
 + 
 +       return __fchattr(fd, &attr, sizeof(attr));
++     }
++
++     static int fdtagged(int fd) {
++       struct stat st;
++       int rc = fstat(fd, &st);
++       if (rc) {
++         return 1;
++       }
++       return st.st_tag.ft_txtflag || st.st_tag.ft_deferred;
 +     }
 + 
 +     int asciiopen(const char* path, int oflag) {
@@ -25,7 +33,11 @@
 +         return fd;
 +       }
 +       if (oflag & O_CREAT) {
-+         setasciiccsid(fd);
++         setccsid(fd, 819);
++       } else if (oflag & O_RDONLY) {
++         if (!fdtagged(fd)) {
++           setccsid(fd, 1047); 
++         }
 +       }
 +       return fd;
 +     }
@@ -36,7 +48,11 @@
 +         return fd;
 +       }
 +       if (oflag & O_CREAT) {
-+         setasciiccsid(fd);
++         setccsid(fd, 819);
++       } else if (oflag & O_RDONLY) {
++         if (!fdtagged(fd)) {
++           setccsid(fd, 1047); 
++         }
 +       }
 +       return fd;
 +     } 

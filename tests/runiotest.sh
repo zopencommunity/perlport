@@ -7,9 +7,7 @@ if [ $? -eq 0 ]; then
 fi
 
 # Test that untagged files are read in as EBCDIC
-input="/tmp/my.in"
-rm -f "${input}"
-ls /bin/sh >"${input}"
+input="/usr/include/errno.h"
 chtag -r "${input}"
 
 c99 -o./itest ${CFLAGS} itest.c
