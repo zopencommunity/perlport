@@ -1,15 +1,15 @@
-*** OSType.orig Mon Nov 22 16:59:37 2021
---- OSType.pm Mon Nov 22 16:59:54 2021
+*** OSType.pm Tue Nov 23 19:46:58 2021
+--- OSType.pm.orig Tue Nov 23 19:38:59 2021
 ***************
 *** 60,64 ****
     MSWin32     Windows
   
-!   os390       EBCDIC
+!   os390       POSIX
     os400       EBCDIC
     posix-bc    EBCDIC
 --- 60,64 ----
     MSWin32     Windows
   
-!   os390       POSIX
+!   os390       EBCDIC
     os400       EBCDIC
     posix-bc    EBCDIC

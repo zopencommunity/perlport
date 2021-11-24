@@ -40,7 +40,7 @@ if [ "${PERL_VRM}" = "maint-5.34" ]; then
 			cp "${CODE_ROOT}/${f}" "${CODE_ROOT}/${f}.orig"
 		fi
 
-		patch -c "${CODE_ROOT}/${f}" <${PATCH_ROOT}/{$f}.patch
+		patch -R -c "${CODE_ROOT}/${f}" <${PATCH_ROOT}/${f}.patch
 		if [ $? -gt 0 ]; then
 			echo "Patch of perl tree failed (${f})." >&2
 			exit 16
