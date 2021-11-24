@@ -1,5 +1,3 @@
-*** /u/ibmuser/perlport/perl5/./hints/os390.sh.orig Tue Nov 23 19:52:23 2021
---- /u/ibmuser/perlport/perl5/./hints/os390.sh Tue Nov 23 22:11:11 2021
 ***************
 *** 1,6 ****
   # hints/os390.sh
@@ -50,7 +48,7 @@
 ! # c99 hides most of the useful header stuff, _ALL_SOURCE turns it on again.
   # YYDYNAMIC ensures that the OS/390 yacc generated parser is reentrant.
   # Prepend your favorites with Configure -Dccflags=your_favorites
-!  def_os390_cflags='-qlanglvl=extc1x -qascii -qsuppress=CCN3159 -qfloat=ieee -qexportall'
+!  def_os390_cflags='-qinfo=pro -qlanglvl=extc1x -qascii -qsuppress=CCN3159 -qfloat=ieee -qexportall'
 !  def_os390_cflags="$def_os390_cflags -q64 -qdll"
 !  def_os390_defs='-DMAXSIG=39 -DOEMVS -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED'
   case "$ccflags" in

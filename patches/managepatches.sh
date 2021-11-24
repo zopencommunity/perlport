@@ -7,7 +7,7 @@
 #   -run managepatches
 #   -This will look at all the patch files, update them, and then patch the source files
 #
-set -x
+#set -x
 if [ $# -ne 0 ]; then
 	echo "Syntax: managepatches" >&2
 	echo "  refreshes patch files" >&2
@@ -39,16 +39,17 @@ if [ "${PERL_VRM}" = "maint-5.34" ]; then
 
 		if [ -f "${o}" ]; then
 			# Original file exists. Regenerate patch, then replace file with original version 
-			diff -C 2 -f "${o}" "${f}" >"${p}"
+			diff -C 2 -f "${o}" "${f}" | tail +3 >"${p}"
 			cp "${o}" "${f}"
 		else
 			# Original file does not exist yet. Create original file
 			cp "${f}" "${o}"
 		fi
 
-		patch -c "${f}" <"${p}"
+		out=`patch -c "${f}" <"${p}" 2>&1`
 		if [ $? -gt 0 ]; then
 			echo "Patch of perl tree failed (${f})." >&2
+			echo "${out}" >&2
 			exit 16
 		fi
 	done

@@ -1,5 +1,3 @@
-*** /u/ibmuser/perlport/perl5/./cpan/Perl-OSType/lib/Perl/OSType.pm.orig Tue Nov 23 19:52:23 2021
---- /u/ibmuser/perlport/perl5/./cpan/Perl-OSType/lib/Perl/OSType.pm Tue Nov 23 22:11:11 2021
 ***************
 *** 60,64 ****
     MSWin32     Windows

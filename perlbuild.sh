@@ -40,7 +40,7 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
-./patches/applypatches.sh "${PERLPORT_ROOT}"
+./patches/applypatches.sh 
 rc=$?
 if [ $rc -gt 0 ]; then
 	exit $rc

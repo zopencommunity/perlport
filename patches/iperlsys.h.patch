@@ -1,5 +1,3 @@
-*** /u/ibmuser/perlport/perl5/./iperlsys.h.orig Tue Nov 23 19:52:23 2021
---- /u/ibmuser/perlport/perl5/./iperlsys.h Tue Nov 23 22:12:18 2021
 ***************
 *** 444,448 ****
   #define PerlDir_close(dir)		closedir((dir))
