@@ -1,15 +1,15 @@
-*** OSType.pm Tue Nov 23 19:46:58 2021
---- OSType.pm.orig Tue Nov 23 19:38:59 2021
+*** /u/ibmuser/perlport/perl5/./cpan/Perl-OSType/lib/Perl/OSType.pm.orig Tue Nov 23 19:52:23 2021
+--- /u/ibmuser/perlport/perl5/./cpan/Perl-OSType/lib/Perl/OSType.pm Tue Nov 23 22:11:11 2021
 ***************
 *** 60,64 ****
     MSWin32     Windows
   
-!   os390       POSIX
+!   os390       EBCDIC
     os400       EBCDIC
     posix-bc    EBCDIC
 --- 60,64 ----
     MSWin32     Windows
   
-!   os390       EBCDIC
+!   os390       POSIX
     os400       EBCDIC
     posix-bc    EBCDIC

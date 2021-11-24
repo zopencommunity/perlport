@@ -1,134 +1,134 @@
---- doio.orig Tue Nov 23 18:15:31 2021
-*** doio.c Tue Nov 23 19:08:38 2021
+*** /u/ibmuser/perlport/perl5/./doio.c.orig Tue Nov 23 19:52:23 2021
+--- /u/ibmuser/perlport/perl5/./doio.c Wed Nov 24 13:51:44 2021
 ***************
-*** 49,54 ****
+*** 49,52 ****
+--- 49,54 ----
   #  endif
   #endif
-- #include <stdio.h>
-- #include <stdlib.h>
++ #include <stdio.h>
++ #include <stdlib.h>
   
   #ifdef O_EXCL
---- 49,52 ----
 ***************
-*** 234,353 ****
+*** 232,235 ****
+--- 234,353 ----
   #endif
   }
-- 
-- #ifdef __MVS__
--   #if (__CHARSET_LIB == 1)
--     #include <iconv.h>
-- 
--     static char* e2ap = NULL;
--     static char e2at[256];
--     static char* e2a_init() {
--       int i;
--       size_t inleft;
--       size_t outleft;
--       int rc;
--       iconv_t cd;
--       char ascii[256];
--       char ebcdic[256];
--       char* inptr = ebcdic;
--       char* outptr = ascii;
-- 
--       for (i=0; i<sizeof(ebcdic); ++i) {
--         ebcdic[i] = i;
--       }
--       if ((cd = iconv_open("IBM-1047", "ISO8859-1")) == (iconv_t)(-1)) {
--         return NULL;
--       }
--       inleft = sizeof(ebcdic);
--       outleft = sizeof(ascii);
--       rc = iconv(cd, &inptr, &inleft, &outptr, &outleft);
--       if (rc == -1 || (inleft != 0)) {
--         return NULL;
--       }
--       iconv_close(cd);
--       memcpy(e2at, ascii, sizeof(ascii));
--       e2ap = e2at;
-- 
--       return e2ap; 
--     }
-- 
--     static size_t e2a(char* buffer) {
--       if (buffer == NULL) {
--         return -1;
--       }
--       if (!e2ap) {
--         e2ap = e2a_init(); /* safe race condition */
--         if (!e2ap) {
--           exit(8); /* hard error */
--         }
--       }
--       size_t len = strlen(buffer);
--       int i;
--       for (i=0; i<len; ++i) {
--         buffer[i] = buffer[e2ap[i]];
--       }
--       return len;
--     }
--     static int setccsid(int fd, int ccsid) {
--       attrib_t attr;
-- 
--       memset(&attr, 0, sizeof(attr));
--       attr.att_filetagchg = 1;
--       attr.att_filetag.ft_ccsid = ccsid;
--       attr.att_filetag.ft_txtflag = 1;
-- 
--       return __fchattr(fd, &attr, sizeof(attr));
--     }
--     static int fdtagged(int fd) {
--       struct stat st;
--       int rc = fstat(fd, &st);
--       if (rc) {
--         return 1;
--       }
--       return st.st_tag.ft_txtflag || st.st_tag.ft_deferred;
--     }
-- 
--     int asciiopen(const char* path, int oflag) {
--       int fd = open(path, oflag);
--       if (fd == -1) { 
--         return fd;
--       }
--       if (oflag & O_CREAT) {
--         setccsid(fd, 819);
--       } else if (oflag & O_RDONLY) {
--         if (!fdtagged(fd)) {
--           setccsid(fd, 1047); 
--         }
--       }
--       return fd;
--     }
-- 
--     int asciiopen3(const char* path, int oflag, int perm) {
--       int fd = open(path, oflag, perm);
--       if (fd == -1) { 
--         return fd;
--       }
--       if (oflag & O_CREAT) {
--         setccsid(fd, 819);
--       } else if (oflag & O_RDONLY) {
--         if (!fdtagged(fd)) {
--           setccsid(fd, 1047); 
--         }
--       }
--       return fd;
--     } 
-- 
--     struct dirent *asciireaddir(DIR *dirp) {
--       struct dirent *entry = readdir(dirp);
--       if (!entry) {
--         return entry;
--       }
--       if (e2a(entry->d_name) < 0) {
--         return NULL;
--       }
-- 
--       return entry;
--     }
--   #endif
-- #endif
++ 
++ #ifdef __MVS__
++   #if (__CHARSET_LIB == 1)
++     #include <iconv.h>
++ 
++     static char* e2ap = NULL;
++     static char e2at[256];
++     static char* e2a_init() {
++       int i;
++       size_t inleft;
++       size_t outleft;
++       int rc;
++       iconv_t cd;
++       char ascii[256];
++       char ebcdic[256];
++       char* inptr = ebcdic;
++       char* outptr = ascii;
++ 
++       for (i=0; i<sizeof(ebcdic); ++i) {
++         ebcdic[i] = i;
++       }
++       if ((cd = iconv_open("IBM-1047", "ISO8859-1")) == (iconv_t)(-1)) {
++         return NULL;
++       }
++       inleft = sizeof(ebcdic);
++       outleft = sizeof(ascii);
++       rc = iconv(cd, &inptr, &inleft, &outptr, &outleft);
++       if (rc == -1 || (inleft != 0)) {
++         return NULL;
++       }
++       iconv_close(cd);
++       memcpy(e2at, ascii, sizeof(ascii));
++       e2ap = e2at;
++ 
++       return e2ap; 
++     }
++ 
++     static size_t e2a(char* buffer) {
++       if (buffer == NULL) {
++         return -1;
++       }
++       if (!e2ap) {
++         e2ap = e2a_init(); /* safe race condition */
++         if (!e2ap) {
++           exit(8); /* hard error */
++         }
++       }
++       size_t len = strlen(buffer);
++       int i;
++       for (i=0; i<len; ++i) {
++         buffer[i] = buffer[e2ap[i]];
++       }
++       return len;
++     }
++     static int setccsid(int fd, int ccsid) {
++       attrib_t attr;
++ 
++       memset(&attr, 0, sizeof(attr));
++       attr.att_filetagchg = 1;
++       attr.att_filetag.ft_ccsid = ccsid;
++       attr.att_filetag.ft_txtflag = 1;
++ 
++       return __fchattr(fd, &attr, sizeof(attr));
++     }
++     static int fdtagged(int fd) {
++       struct stat st;
++       int rc = fstat(fd, &st);
++       if (rc) {
++         return 1;
++       }
++       return st.st_tag.ft_txtflag || st.st_tag.ft_deferred;
++     }
++ 
++     int asciiopen(const char* path, int oflag) {
++       int fd = open(path, oflag);
++       if (fd == -1) { 
++         return fd;
++       }
++       if (oflag & O_CREAT) {
++         setccsid(fd, 819);
++       } else if (oflag & O_RDONLY) {
++         if (!fdtagged(fd)) {
++           setccsid(fd, 1047); 
++         }
++       }
++       return fd;
++     }
++ 
++     int asciiopen3(const char* path, int oflag, int perm) {
++       int fd = open(path, oflag, perm);
++       if (fd == -1) { 
++         return fd;
++       }
++       if (oflag & O_CREAT) {
++         setccsid(fd, 819);
++       } else if (oflag & O_RDONLY) {
++         if (!fdtagged(fd)) {
++           setccsid(fd, 1047); 
++         }
++       }
++       return fd;
++     } 
++ 
++     struct dirent *asciireaddir(DIR *dirp) {
++       struct dirent *entry = readdir(dirp);
++       if (!entry) {
++         return entry;
++       }
++       if (e2a(entry->d_name) < 0) {
++         return NULL;
++       }
++ 
++       return entry;
++     }
++   #endif
++ #endif
   
   int
---- 232,235 ----
