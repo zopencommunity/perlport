@@ -1,5 +1,5 @@
 #define _POSIX_SOURCE
-
+#include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
