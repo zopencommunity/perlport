@@ -42,7 +42,6 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
-
 #
 # Apply patches
 # To create a new patch:
@@ -51,6 +50,14 @@ fi
 # diff -C 2 -f <file>.c <file>.orig >../patches/<file>.patch  
 #
 if [ "${PERL_VRM}" = "maint-5.34" ]; then
+	# Copy files to 'orig' version if not already copied
+	# otherwise restore so that this step can be repeated
+	if ! [ -f doio.c.orig ]; then
+		cp doio.c doio.c.orig
+	else
+		
+	fi
+
 	patch -c doio.c <${MY_ROOT}/patches/doio.patch
 	if [ $? -gt 0 ]; then
   		echo "Patch of perl tree failed (doio.c)." >&2

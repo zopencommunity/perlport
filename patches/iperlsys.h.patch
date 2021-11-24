@@ -1,0 +1,43 @@
+*** iperlsys.h Tue Nov 23 18:19:02 2021
+--- iperlsys.orig Tue Nov 23 18:16:41 2021
+***************
+*** 445,457 ****
+  #define PerlDir_open(name)		opendir((name))
+  #define PerlDir_read(dir)		readdir((dir))
+- #ifdef __MVS__
+-   #if (__CHARSET_LIB == 1)
+- #  define PerlDir_read(dir)		asciireaddir((dir))
+-   #else
+- #  define PerlDir_read(dir)		readdir((dir))
+-   #endif
+- #else
+- #  define PerlDir_read(dir)		readdir((dir))
+- #endif
+  #define PerlDir_rewind(dir)		rewinddir((dir))
+  #define PerlDir_seek(dir, loc)		seekdir((dir), (loc))
+--- 445,448 ----
+***************
+*** 794,809 ****
+  #endif
+  #define PerlLIO_mktemp(file)		mktemp((file))
+! #ifdef __MVS__
+!   #if (__CHARSET_LIB == 1)
+!     #define PerlLIO_open(file, flag)		asciiopen((file), (flag))
+!     #define PerlLIO_open3(file, flag, perm)	asciiopen3((file), (flag), (perm))
+!   #else
+!     #define PerlLIO_open(file, flag)		open((file), (flag))
+!     #define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+!   #endif
+! #else
+! #  define PerlLIO_open(file, flag)		open((file), (flag))
+! #  define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+! #endif
+  #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
+  #define PerlLIO_rename(old, new)	rename((old), (new))
+--- 785,790 ----
+  #endif
+  #define PerlLIO_mktemp(file)		mktemp((file))
+! #define PerlLIO_open(file, flag)	open((file), (flag))
+! #define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+  #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
+  #define PerlLIO_rename(old, new)	rename((old), (new))
