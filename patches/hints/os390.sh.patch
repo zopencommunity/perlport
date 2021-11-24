@@ -102,3 +102,13 @@
 !     lddlflags="-qdll -q64 `pwd`/libperl.x"
       ;;
   esac
+***************
+*** 133,136 ****
+--- 133,139 ----
+  # The following should always be used
+  d_oldpthreads='define'
++ 
++ # chroot not available when _XOPEN_SOURCE >= 600
++ d_chroot='undef'
+  
+  # Header files to include.

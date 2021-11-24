@@ -2,12 +2,12 @@
 *.d
 
 # original perl git source
-perl5
+perl5/
 
 # generated binaries
 tests/itest
 tests/otest
-tests/dirtest
+tests/e2atest
 
 # Object files
 *.o

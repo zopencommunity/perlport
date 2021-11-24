@@ -29,18 +29,22 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
+PERLPORT_ROOT="${PWD}"
 if ! [ -d perl5 ]; then
 	git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
+	if [ $? -gt 0 ]; then
+		echo "Unable to clone PERL directory tree" >&2
+		exit 16
+	fi
+	chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/perl5"
+	if [ $? -gt 0 ]; then
+		echo "Unable to tag PERL directory tree as ASCII" >&2
+		exit 16
+	fi
 fi
 
-PERLPORT_ROOT="${PWD}"
-chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/perl5"
-if [ $? -gt 0 ]; then
-	echo "Unable to tag PERL directory tree as ASCII" >&2
-	exit 16
-fi
 
-./patches/applypatches.sh 
+./patches/managepatches.sh 
 rc=$?
 if [ $rc -gt 0 ]; then
 	exit $rc
