@@ -1,0 +1,114 @@
+***************
+*** 1,6 ****
+  # hints/os390.sh
+  #
+! # OS/390 hints by David J. Fiander <davidf@mks.com>
+  #
+  # OS/390 OpenEdition Release 3 Mon Sep 22 1997 thanks to:
+  # 
+--- 1,8 ----
+  # hints/os390.sh
+  #
+! # OS/390 hints updated by Mike Fulton <fultonm@ca.ibm.com> 2021
+  #
++ # Original hints by David J. Fiander <davidf@mks.com>
++ #
+  # OS/390 OpenEdition Release 3 Mon Sep 22 1997 thanks to:
+  # 
+***************
+*** 16,21 ****
+  #
+  
+! # To get ANSI C, we need to use c89, and ld doesn't exist
+! # You can override this with Configure -Dcc=gcc -Dld=ld.
+  case "$cc" in
+  '') cc='c99' ;;
+--- 18,22 ----
+  #
+  
+! # To get ANSI C, use c99 for both compilation and linking
+  case "$cc" in
+  '') cc='c99' ;;
+***************
+*** 29,39 ****
+  # -D_OE_SOCKETS alters system headers.
+  # -D_XOPEN_SOURCE_EXTENDEDA alters system headers.
+! # c89 hides most of the useful header stuff, _ALL_SOURCE turns it on again.
+  # YYDYNAMIC ensures that the OS/390 yacc generated parser is reentrant.
+- # -DEBCDIC should come from Configure and need not be mentioned here.
+  # Prepend your favorites with Configure -Dccflags=your_favorites
+!  def_os390_cflags='-qlanglvl=extended:extc89:extc99 -qlongname -qxplink -qdll -qfloat=ieee -qexportall -qhaltonmsg=3296:4108'
+!  def_os390_cflags="$def_os390_cflags -Wc,XPLINK,dll,EXPORTALL -Wl,XPLINK,dll"
+!  def_os390_defs='-DMAXSIG=39 -DOEMVS -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -DYYDYNAMIC -D_POSIX_SOURCE=1'
+  case "$ccflags" in
+  '') ccflags="$def_os390_cflags $def_os390_defs"  ;;
+--- 30,39 ----
+  # -D_OE_SOCKETS alters system headers.
+  # -D_XOPEN_SOURCE_EXTENDEDA alters system headers.
+! # c99 hides most of the useful header stuff, _ALL_SOURCE turns it on again.
+  # YYDYNAMIC ensures that the OS/390 yacc generated parser is reentrant.
+  # Prepend your favorites with Configure -Dccflags=your_favorites
+!  def_os390_cflags='-g -qinfo=pro -qlanglvl=extc1x -qascii -qsuppress=CCN3159 -qfloat=ieee -qexportall'
+!  def_os390_cflags="$def_os390_cflags -q64 -qdll"
+!  def_os390_defs='-DMAXSIG=39 -DOEMVS -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED'
+  case "$ccflags" in
+  '') ccflags="$def_os390_cflags $def_os390_defs"  ;;
+***************
+*** 50,54 ****
+  # You can override this with Configure -Ucccdlflags or somesuch.
+  case "$cccdlflags" in
+! '') cccdlflags='-qxplink -qdll -qexportall -Wc,XPLINK,dll,EXPORTALL -Wl,XPLINK,dll' ;;
+  esac
+  
+--- 50,54 ----
+  # You can override this with Configure -Ucccdlflags or somesuch.
+  case "$cccdlflags" in
+! '') cccdlflags='-qdll -q64' ;;
+  esac
+  
+***************
+*** 76,80 ****
+  # Override this option with -Dldflags='whatever else you wanted'.
+  case "$ldflags" in
+! '') ldflags='-qxplink -qdll -Wl,XPLINK,dll' ;;
+  esac
+  case "$optimize" in
+--- 76,80 ----
+  # Override this option with -Dldflags='whatever else you wanted'.
+  case "$ldflags" in
+! '') ldflags='-qdll -q64' ;;
+  esac
+  case "$optimize" in
+***************
+*** 118,127 ****
+      esac
+      libperl="libperl.$so"
+!     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -qxplink"
+!     cccdlflags='-c -qexportall -qxplink -qdll -Wc,XPLINK,dll,EXPORTALL -Wl,XPLINK,dll'
+      # The following will need to be modified for the installed libperl.x.
+      # The modification to Config.pm is done by the installperl script after the build and test.
+!     ccdlflags="-qxplink -qdll -Wl,XPLINK,dll `pwd`/libperl.x"
+!     lddlflags="-qxplink -qdll -Wl,XPLINK,dll `pwd`/libperl.x"
+      ;;
+  esac
+--- 118,127 ----
+      esac
+      libperl="libperl.$so"
+!     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -q64"
+!     cccdlflags='-c -qexportall -qdll -q64'
+      # The following will need to be modified for the installed libperl.x.
+      # The modification to Config.pm is done by the installperl script after the build and test.
+!     ccdlflags="-qdll -q64 `pwd`/libperl.x"
+!     lddlflags="-qdll -q64 `pwd`/libperl.x"
+      ;;
+  esac
+***************
+*** 133,136 ****
+--- 133,139 ----
+  # The following should always be used
+  d_oldpthreads='define'
++ 
++ # chroot not available when _XOPEN_SOURCE >= 600
++ d_chroot='undef'
+  
+  # Header files to include.

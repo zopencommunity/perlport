@@ -1,5 +1,3 @@
-*** iperlsys.h Mon Nov 22 12:17:27 2021
---- iperlsys.orig Mon Nov 22 12:10:05 2021
 ***************
 *** 785,790 ****
   #endif
@@ -8,11 +6,14 @@
 ! #define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
   #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
   #define PerlLIO_rename(old, new)	rename((old), (new))
---- 785,800 ----
+--- 785,803 ----
   #endif
   #define PerlLIO_mktemp(file)		mktemp((file))
 ! #ifdef __MVS__
 !   #if (__CHARSET_LIB == 1)
+!     int asciiopen(const char* path, int oflag);
+!     int asciiopen3(const char* path, int oflag, int perm);
+! 
 !     #define PerlLIO_open(file, flag)		asciiopen((file), (flag))
 !     #define PerlLIO_open3(file, flag, perm)	asciiopen3((file), (flag), (perm))
 !   #else

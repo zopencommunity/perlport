@@ -1,10 +1,18 @@
-*** doio.c Mon Nov 22 12:17:41 2021
---- doio.orig Mon Nov 22 12:52:00 2021
 ***************
-*** 233,236 ****
---- 233,290 ----
-  }
+*** 49,52 ****
+--- 49,54 ----
+  #  endif
+  #endif
++ #include <stdio.h>
++ #include <stdlib.h>
   
+  #ifdef O_EXCL
+***************
+*** 218,221 ****
+--- 220,276 ----
+  #endif
+  }
++ 
 + #ifdef __MVS__
 +   #if (__CHARSET_LIB == 1)
 +     static int setccsid(int fd, int ccsid) {
@@ -17,7 +25,6 @@
 + 
 +       return __fchattr(fd, &attr, sizeof(attr));
 +     }
-+
 +     static int fdtagged(int fd) {
 +       struct stat st;
 +       int rc = fstat(fd, &st);
@@ -58,6 +65,5 @@
 +     } 
 +   #endif
 + #endif
-+ 
+  
   int
-  Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
