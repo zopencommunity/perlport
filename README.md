@@ -30,7 +30,7 @@ The code is built by:
 
 When a problem is uncovered, do the following:
  - Before changing the code, copy the original: `cp <file> <file>.orig`
- - Create an empty patch file in the `patches` directory following the same tree structure, e.g. if the file you updated was `hints/os390.sh`, then you would create a patch file called `hints/os390.patch` in the patches directory
+ - Create an empty patch file in the `patches` directory following the same tree structure, e.g. if the file you updated was `hints/os390.sh`, then you would create a patch file called `hints/os390.sh.patch` in the patches directory
  - After your change is complete, generate a patch: `patches/managepatches.sh`
 
 ## How to push changes
