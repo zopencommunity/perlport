@@ -31,11 +31,14 @@ fi
 
 PERLPORT_ROOT="${PWD}"
 if ! [ -d perl5 ]; then
-	git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
+	${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
 	if [ $? -gt 0 ]; then
 		echo "Unable to clone PERL directory tree" >&2
 		exit 16
 	fi
+	# This is not meant to be something we can do any development on, so
+	# delete the git information
+	rm -rf perl5/git_version.h perl5/.git*
 	chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/perl5"
 	if [ $? -gt 0 ]; then
 		echo "Unable to tag PERL directory tree as ASCII" >&2
