@@ -61,6 +61,7 @@ if [ $? -gt 0 ]; then
 fi
 
 make
+#make # hack - make twice
 if [ $? -gt 0 ]; then
 	echo "MAKE of PERL tree failed." >&2
 	exit 16

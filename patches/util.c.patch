@@ -32,11 +32,11 @@
 + #else
       return PerlIO_fdopen(p[This], mode);
 + #endif
-  
   #else
+  #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
 ***************
-*** 2923,2927 ****
---- 2944,2956 ----
+*** 2922,2926 ****
+--- 2943,2955 ----
       if (did_pipes)
            PerlLIO_close(pp[0]);
 + #ifdef __MVS__

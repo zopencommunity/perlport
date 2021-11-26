@@ -1,0 +1,79 @@
+***************
+*** 6,10 ****
+  =head1 NAME
+  
+! perlos390 - building and installing Perl for OS/390 and z/OS
+  
+  =head1 SYNOPSIS
+--- 6,10 ----
+  =head1 NAME
+  
+! perlos390 - building and installing Perl for z/OS
+  
+  =head1 SYNOPSIS
+***************
+*** 11,23 ****
+  
+  This document will help you Configure, build, test and install Perl
+! on OS/390 (aka z/OS) Unix System Services.
+  
+- B<This document needs to be updated, but we don't know what it should say.
+- Please submit comments to L<https://github.com/Perl/perl5/issues>.>
+- 
+  =head1 DESCRIPTION
+  
+! This is a fully ported Perl for OS/390 Version 2 Release 3, 5, 6, 7,
+! 8, and 9.  It may work on other versions or releases, but those are
+  the ones we have tested it on.
+  
+--- 11,20 ----
+  
+  This document will help you Configure, build, test and install Perl
+! on z/OS Unix System Services.
+  
+  =head1 DESCRIPTION
+  
+! This is a fully ported Perl for z/OS 2.4 and z/OS 2.5. 
+! It may work on other versions or releases, but those are
+  the ones we have tested it on.
+  
+***************
+*** 25,38 ****
+  running the Configure script for Perl.
+  
+  
+! =head2 Tools
+  
+! The z/OS Unix Tools and Toys list may prove helpful and contains links
+! to ports of much of the software helpful for building Perl.
+! L<http://www.ibm.com/servers/eserver/zseries/zos/unix/bpxa1toy.html>
+  
+  
+! =head2 Unpacking Perl distribution on OS/390
+  
+  If using ftp remember to transfer the distribution in binary format.
+  
+--- 22,44 ----
+  running the Configure script for Perl.
+  
++ =head2 Getting Perl Source to z/OS
+  
+! Option 1 (Preferred)
+!  - use the z/OS native git client and clone, e.g.
+!    
+!    git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1
+!  - where PERL_VRM is the branch of Perl you want to work with
+  
+! Option 2 (if you do not have git)
+  
++  - Perform a git clone on your desktop, then transfer your files in binary to z/OS
+  
+! =head2 Tagging source code to ASCII
+  
++  - If you are building an ASCII version of perl, tag your tree as ASCII, e.g.
++   
++    cd perl5 
++    chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/perl5"
++  
+  If using ftp remember to transfer the distribution in binary format.
+  

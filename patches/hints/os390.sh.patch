@@ -50,7 +50,7 @@
   # Prepend your favorites with Configure -Dccflags=your_favorites
 !  def_os390_cflags='-g -qinfo=pro -qlanglvl=extc1x -qascii -qsuppress=CCN3159 -qfloat=ieee -qexportall'
 !  def_os390_cflags="$def_os390_cflags -q64 -qdll"
-!  def_os390_defs='-DMAXSIG=39 -DOEMVS -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED'
+!  def_os390_defs='-Dusedl -DMAXSIG=39 -DOEMVS -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED'
   case "$ccflags" in
   '') ccflags="$def_os390_cflags $def_os390_defs"  ;;
 ***************
@@ -63,25 +63,62 @@
 --- 50,54 ----
   # You can override this with Configure -Ucccdlflags or somesuch.
   case "$cccdlflags" in
-! '') cccdlflags='-qdll -q64' ;;
+! '') cccdlflags='-Dusedl -qdll -q64' ;;
   esac
   
 ***************
-*** 76,80 ****
+*** 76,84 ****
   # Override this option with -Dldflags='whatever else you wanted'.
   case "$ldflags" in
 ! '') ldflags='-qxplink -qdll -Wl,XPLINK,dll' ;;
   esac
   case "$optimize" in
---- 76,80 ----
+  *-g*) ;;
+! *)  ldflags="$ldflags -Wl,EDIT=NO"
+  esac
+  
+--- 76,84 ----
   # Override this option with -Dldflags='whatever else you wanted'.
   case "$ldflags" in
 ! '') ldflags='-qdll -q64' ;;
   esac
   case "$optimize" in
+  *-g*) ;;
+! *)  ldflags="$ldflags"
+  esac
+  
 ***************
-*** 118,127 ****
+*** 92,96 ****
+      usedl='n' 
+      case "$dlext" in
+!     '') dlext='none' ;;
       esac
+      ;;
+--- 92,96 ----
+      usedl='n' 
+      case "$dlext" in
+!     '') dlext='so' ;;
+      esac
+      ;;
+***************
+*** 102,127 ****
+      '') dlsrc='dl_dllload.xs' ;;
+      esac
+-     # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
+-     case "`uname -v`x`uname -r`" in
+-     02x0[89].*|02x1[0-9].*|[0-9][3-9]x*) 
+-         so='so'
+-         case "$dlext" in
+-         '') dlext='so' ;;
+-         esac
+-         ;;
+-     *) 
+-         so='dll'
+-         case "$dlext" in
+-         '') dlext='dll' ;;
+-         esac
+-         ;;
+-     esac
       libperl="libperl.$so"
 !     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -qxplink"
 !     cccdlflags='-c -qexportall -qxplink -qdll -Wc,XPLINK,dll,EXPORTALL -Wl,XPLINK,dll'
@@ -91,10 +128,11 @@
 !     lddlflags="-qxplink -qdll -Wl,XPLINK,dll `pwd`/libperl.x"
       ;;
   esac
---- 118,127 ----
+--- 102,112 ----
+      '') dlsrc='dl_dllload.xs' ;;
       esac
       libperl="libperl.$so"
-!     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -q64"
+!     ccflags="$ccflags -Dusedl -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -q64"
 !     cccdlflags='-c -qexportall -qdll -q64'
       # The following will need to be modified for the installed libperl.x.
       # The modification to Config.pm is done by the installperl script after the build and test.
@@ -104,7 +142,7 @@
   esac
 ***************
 *** 133,136 ****
---- 133,139 ----
+--- 118,124 ----
   # The following should always be used
   d_oldpthreads='define'
 + 
