@@ -10,7 +10,7 @@ else
 	export _TAG_REDIR_IN="txt"
 	export _TAG_REDIR_OUT="txt"
 
-	if [ "$HOME" != '' ] && [ -f $HOME/bin ]; then
+	if [ "$HOME" != '' ] && [ -d $HOME/bin ]; then
 		export PATH=$HOME/bin:/usr/local/bin:/bin:/usr/sbin
 	else
 		export PATH=/usr/local/bin:/bin:/usr/sbin
@@ -19,4 +19,5 @@ else
 
 	export PERL_VRM="maint-5.34"
 	export PERL_ROOT="${PWD}"
+	export GIT_ROOT=/rsusr/ported/bin
 fi
