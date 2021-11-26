@@ -54,7 +54,7 @@ cd perl5
 #
 # Setup the configuration 
 #
-sh Configure -de
+sh Configure -de -Dusedl
 if [ $? -gt 0 ]; then
 	echo "Configure of PERL tree failed." >&2
 	exit 16
