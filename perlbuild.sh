@@ -57,14 +57,13 @@ cd perl5
 #
 # Setup the configuration 
 #
-sh Configure -de -Dusedl
+nohup sh Configure -de -Dusedl >/tmp/config.ascii.out 2>&1
 if [ $? -gt 0 ]; then
 	echo "Configure of PERL tree failed." >&2
 	exit 16
 fi
 
-make
-#make # hack - make twice
+nohup make >/tmp/make.ascii.out 2>&1
 if [ $? -gt 0 ]; then
 	echo "MAKE of PERL tree failed." >&2
 	exit 16

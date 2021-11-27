@@ -88,37 +88,34 @@
   esac
   
 ***************
-*** 92,96 ****
-      usedl='n' 
-      case "$dlext" in
-!     '') dlext='none' ;;
-      esac
-      ;;
---- 92,96 ----
-      usedl='n' 
-      case "$dlext" in
-!     '') dlext='so' ;;
-      esac
-      ;;
+*** 104,108 ****
+      # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
+      case "`uname -v`x`uname -r`" in
+!     02x0[89].*|02x1[0-9].*|[0-9][3-9]x*) 
+          so='so'
+          case "$dlext" in
+--- 104,108 ----
+      # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
+      case "`uname -v`x`uname -r`" in
+!     02x0[89].*|02x1[0-9].*|[0-9][3-9]x*)
+          so='so'
+          case "$dlext" in
 ***************
-*** 102,127 ****
-      '') dlsrc='dl_dllload.xs' ;;
+*** 110,114 ****
+          esac
+          ;;
+!     *) 
+          so='dll'
+          case "$dlext" in
+--- 110,114 ----
+          esac
+          ;;
+!     *)
+          so='dll'
+          case "$dlext" in
+***************
+*** 118,127 ****
       esac
--     # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
--     case "`uname -v`x`uname -r`" in
--     02x0[89].*|02x1[0-9].*|[0-9][3-9]x*) 
--         so='so'
--         case "$dlext" in
--         '') dlext='so' ;;
--         esac
--         ;;
--     *) 
--         so='dll'
--         case "$dlext" in
--         '') dlext='dll' ;;
--         esac
--         ;;
--     esac
       libperl="libperl.$so"
 !     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -qxplink"
 !     cccdlflags='-c -qexportall -qxplink -qdll -Wc,XPLINK,dll,EXPORTALL -Wl,XPLINK,dll'
@@ -128,8 +125,7 @@
 !     lddlflags="-qxplink -qdll -Wl,XPLINK,dll `pwd`/libperl.x"
       ;;
   esac
---- 102,112 ----
-      '') dlsrc='dl_dllload.xs' ;;
+--- 118,127 ----
       esac
       libperl="libperl.$so"
 !     ccflags="$ccflags -Dusedl -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -q64"
@@ -141,12 +137,20 @@
       ;;
   esac
 ***************
-*** 133,136 ****
---- 118,124 ----
-  # The following should always be used
+*** 134,137 ****
+--- 134,140 ----
   d_oldpthreads='define'
-+ 
+  
 + # chroot not available when _XOPEN_SOURCE >= 600
 + d_chroot='undef'
-  
++ 
   # Header files to include.
+  # You can override these with Configure -Ui_time -Ui_systime -Dd_pthread_atfork.
+***************
+*** 243,246 ****
+--- 246,250 ----
+  # INFORMATIONAL CCN4108 ./proto.h:4534 Â The use of keyword '__attribute__' is non-portable.
+  
++ d_attribute_always_inline='undef'
+  d_attribute_deprecated='undef'
+  d_attribute_format='undef'

@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 if [ "${PERL_ROOT}" = '' ]; then
 	echo "Need to set PERL_ROOT - source setenv.sh" >&2
 	exit 16
@@ -42,8 +43,10 @@ fi
 #
 cp os390.sh.dynamic perl5/hints/os390.sh
 cd perl5
-nohup sh Configure -de -Dusedl >/tmp/configure.ebcdic.out 2>&1
-if [ $? -gt 0 ]; then
+nohup sh Configure -de -Dusedl >/tmp/config.ebcdic.out 2>&1
+rc=$?
+if [ $rc -gt 0 ]; then
+  echo "Configure failed with rc:$rc." >&2
   exit 16
 fi
 nohup make >/tmp/make.ebcdic.out 2>&1
