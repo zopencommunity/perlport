@@ -38,7 +38,7 @@ if ! [ -d perl5 ]; then
 	fi
 	# This is not meant to be something we can do any development on, so
 	# delete the git information
-	rm -rf git_version.h .git*
+	rm -rf "${PERLPORT_ROOT}/perl5/git_version.h" "${PERLPORT_ROOT}/perl5/.git*"
 	chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/perl5"
 	if [ $? -gt 0 ]; then
 		echo "Unable to tag PERL directory tree as ASCII" >&2

@@ -3,6 +3,7 @@
 
 # original perl git source
 perl5/
+ebcdic/perl5/
 
 # generated binaries
 tests/itest
