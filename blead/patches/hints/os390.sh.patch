@@ -1,6 +1,23 @@
 ***************
-*** 19,22 ****
---- 19,25 ----
+*** 15,28 ****
+  #  as well as the authors of the aix.sh file
+  #
+- 
+  # It is too late in Configure by the time this is called to change the
+  # compiler.  But xlc or synonyms are the only thing that likely currently will
+  # work.
+  #
+  # But it isn't too late to change 'ld', and the z/OS 390 ld command doesn't
+  # understand some command line options like -W and -q that the loader needs to
+! # know about.  xlc also acts like a loader and does understand them.
+  case "$ld" in
+! '') ld='xlc' ;;
+  esac
+  
+--- 15,33 ----
+  #  as well as the authors of the aix.sh file
+  #
+  # It is too late in Configure by the time this is called to change the
   # compiler.  But xlc or synonyms are the only thing that likely currently will
   # work.
 + # Regarding the previous 2 sentences... 
@@ -8,16 +25,15 @@
 + # does not understand the -l option when trying to compile and link, but xlc does.
   #
   # But it isn't too late to change 'ld', and the z/OS 390 ld command doesn't
-***************
-*** 23,26 ****
---- 26,32 ----
   # understand some command line options like -W and -q that the loader needs to
-  # know about.  xlc also acts like a loader and does understand them.
-+ case "$cc" in
-+ '') cc='xlc' ;;
-+ esac
+! # know about.  c99 also acts like a loader and does understand them.
+! case "$cc" in
+! '') cc='c99' ;;
+! esac
   case "$ld" in
-  '') ld='xlc' ;;
+! '') ld='c99' ;;
+  esac
+  
 ***************
 *** 31,39 ****
   # IBM added the -q series of options to the compiler, which khw thinks should
@@ -29,7 +45,7 @@
   # Prepend your favorites with Configure -Dccflags=your_favorites
   
   # This overrides the name the compiler was called with.  'ext' is required for
---- 37,48 ----
+--- 36,48 ----
   # IBM added the -q series of options to the compiler, which khw thinks should
   # be sufficient.  -Wl are for the loader, and may be required.
 ! # msf agrees - these options are supported, but -q options are preferred
@@ -38,12 +54,18 @@
   # Prepend your favorites with Configure -Dccflags=your_favorites
 + # msf: Check if the environment variable PERL_TGT_OS390_ASCII defined. If so, 
 + # compile with -qascii option
++ # msf: longname is not required with xplink or 64-bit
 + # msf: Check if the environment variable PERL_TGT_OS390_64 defined. If so,
 + # compile with -lp64 and link with -lp64
   
   # This overrides the name the compiler was called with.  'ext' is required for
 ***************
-*** 46,58 ****
+*** 41,58 ****
+  def_os390_cflags='-qlanglvl=extc99';
+  
+- def_os390_cflags="$def_os390_cflags -qlongname";    # khw thinks this is obsolete
+  def_os390_cflags="$def_os390_cflags -qfloat=ieee";  # khw thinks this is obsolete
+  
   # xplink = eXtended Performance linking: "Uses a z/OS linkage specifically
   # designed to increase performance."
 ! def_os390_cflags="$def_os390_cflags -qxplink";
@@ -57,24 +79,35 @@
   
   # Exports all externally defined functions and variables in the compilation
   # unit so that a DLL application can use them."
---- 55,74 ----
+--- 50,80 ----
+  def_os390_cflags='-qlanglvl=extc99';
+  
+  def_os390_cflags="$def_os390_cflags -qfloat=ieee";  # khw thinks this is obsolete
+  
++ 
++ # Turn on POSIX compatibility modes
++ #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
++ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
++ 
   # xplink = eXtended Performance linking: "Uses a z/OS linkage specifically
   # designed to increase performance."
 ! # msf: XPLink is not required to be specified for 64-bit
   
-! #if [ -z "${PERL_TGT_OS390_64+x}" ]; then
+! if [ "${PERL_TGT_OS390_64}" = "" ]; then
 !   def_os390_cflags="$def_os390_cflags -qxplink"
 !   def_os390_cccdlflags="-qxplink"
 !   def_os390_ldflags="-qxplink"
-! #else
-!   def_os390_cflags="$def_os390_cflags -lp64"
-!   def_os390_cccdlflags="-lp64"
-!   def_os390_ldflags="-lp64"
-! #endif
+! # defines a BSD-like socket interface for the function prototypes and structures involved (not required with 64-bit)
+!   def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
+! else
+!   def_os390_cflags="$def_os390_cflags -qlp64"
+!   def_os390_cccdlflags="$def_os390_cflags -qlp64"
+!   def_os390_ldflags="-Wl,lp64"
+! fi
   
-+ #if ! [ -z "${PERL_TGT_ASCII+x}" ]; then
++ if [ "${PERL_TGT_ASCII}" != "" ]; then
 +   def_os390_cflags="$def_os390_cflags -qascii"
-+ #endif
++ fi
 + 
   # Exports all externally defined functions and variables in the compilation
   # unit so that a DLL application can use them."
@@ -85,17 +118,31 @@
 - os390_Wc="$os390_Wc,EXPORTALL"
   
   # 3296= #include file not found;
---- 75,78 ----
+--- 81,84 ----
 ***************
-*** 72,78 ****
-  def_os390_cflags="$def_os390_cflags $os390_Wl";
+*** 68,88 ****
+  def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108"
   
+- # Combinte the -W flags with the rest
+- def_os390_cflags="$def_os390_cflags $os390_Wc";
+- def_os390_cflags="$def_os390_cflags $os390_Wl";
+- 
 - def_os390_cccdlflags="$def_os390_cccdlflags $os390_Wc";
 - def_os390_cccdlflags="$def_os390_cccdlflags $os390_Wl";
 - 
   def_os390_defs='-DMAXSIG=39';               # maximum signal number; not furnished by IBM
   def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
---- 87,90 ----
+  
+- # Turn on POSIX compatibility modes
+- #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
+- def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
+- 
+- # defines a BSD-like socket interface for the function prototypes and structures involved
+- def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
+- 
+  # ensure that the OS/390 yacc generated parser is reentrant.
+  def_os390_defs="$def_os390_defs -DYYDYNAMIC";
+--- 89,95 ----
 ***************
 *** 133,143 ****
   esac
@@ -109,7 +156,7 @@
 ! esac
   
   # In order to build with dynamic be sure to specify:
---- 145,151 ----
+--- 140,146 ----
   esac
   
 ! # msf symbol information is now in NOLOAD section and so, while on disk, 
@@ -119,7 +166,7 @@
   # In order to build with dynamic be sure to specify:
 ***************
 *** 161,164 ****
---- 169,173 ----
+--- 164,168 ----
      esac
      # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
 +    # msf v2.8 is ancient - we should be able to eliminate this check and just use .so
@@ -127,7 +174,7 @@
      02x0[89].*|02x1[0-9].*|[0-9][3-9]x*)
 ***************
 *** 265,268 ****
---- 274,278 ----
+--- 269,273 ----
   # This trick ought to work even if your yacc is byacc.
   #
 + # msf - need to check but I think /etc/yyparse.c is always around now

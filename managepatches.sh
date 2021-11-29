@@ -7,7 +7,7 @@
 #   -run managepatches
 #   -This will look at all the patch files, update them, and then patch the source files
 #
-set -x
+#set -x
 if [ $# -ne 0 ]; then
 	echo "Syntax: managepatches" >&2
 	echo "  refreshes patch files" >&2
@@ -28,7 +28,7 @@ fi
 
 CODE_ROOT="${PERLPORT_ROOT}/${PERL_VRM}/perl5"
 PATCH_ROOT="${PERLPORT_ROOT}/${PERL_VRM}/patches"
-patches=`cd ${PATCH_ROOT}; find . -name "*.patch"`
+patches=`cd ${PATCH_ROOT} && find . -name "*.patch"`
 for patch in $patches; do
 	rp="${patch%*.patch}"
 	o="${CODE_ROOT}/${rp}.orig"

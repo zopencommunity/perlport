@@ -19,6 +19,8 @@ else
 
 	export PERL_VRM="maint-5.34"
 	export PERL_VRM="blead"
+	export PERL_TGT_OS390_64=YES
+	export PERL_TGT_OS390_ASCII=YES
 	export PERL_ROOT="${PWD}"
 	export GIT_ROOT=/rsusr/ported/bin
 fi

@@ -1,5 +1,5 @@
 #!/bin/sh 
-#set -x
+set -x
 #
 # Pre-requisites: 
 #  - cd to the directory of this script before running the script   
@@ -31,8 +31,8 @@ fi
 
 PERLPORT_ROOT="${PWD}"
 if ! [ -d "${PERL_VRM}/perl5" ]; then
-	mkdir -p "${PERL_VRM}"
-	cd "${PERL_VRM}" ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
+	mkdir -p "${PERLPORT_ROOT}/${PERL_VRM}"
+	(cd "${PERLPORT_ROOT}/${PERL_VRM}" && ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1)
 	if [ $? -gt 0 ]; then
 		echo "Unable to clone PERL directory tree" >&2
 		exit 16
