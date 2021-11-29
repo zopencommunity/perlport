@@ -1,0 +1,135 @@
+***************
+*** 19,22 ****
+--- 19,25 ----
+  # compiler.  But xlc or synonyms are the only thing that likely currently will
+  # work.
++ # Regarding the previous 2 sentences... 
++ # msf:(It appears that we _can_ specify the compiler and we need to since 'cc' 
++ # does not understand the -l option when trying to compile and link, but xlc does.
+  #
+  # But it isn't too late to change 'ld', and the z/OS 390 ld command doesn't
+***************
+*** 23,26 ****
+--- 26,32 ----
+  # understand some command line options like -W and -q that the loader needs to
+  # know about.  xlc also acts like a loader and does understand them.
++ case "$cc" in
++ '') cc='xlc' ;;
++ esac
+  case "$ld" in
+  '') ld='xlc' ;;
+***************
+*** 31,39 ****
+  # IBM added the -q series of options to the compiler, which khw thinks should
+  # be sufficient.  -Wl are for the loader, and may be required.
+! os390_Wc="-Wc"
+! os390_Wl="-Wl"
+  
+  # -DEBCDIC should come from Configure and need not be mentioned here.
+  # Prepend your favorites with Configure -Dccflags=your_favorites
+  
+  # This overrides the name the compiler was called with.  'ext' is required for
+--- 37,48 ----
+  # IBM added the -q series of options to the compiler, which khw thinks should
+  # be sufficient.  -Wl are for the loader, and may be required.
+! # msf agrees - these options are supported, but -q options are preferred
+  
+  # -DEBCDIC should come from Configure and need not be mentioned here.
+  # Prepend your favorites with Configure -Dccflags=your_favorites
++ # msf: Check if the environment variable PERL_TGT_OS390_ASCII defined. If so, 
++ # compile with -qascii option
++ # msf: Check if the environment variable PERL_TGT_OS390_64 defined. If so,
++ # compile with -lp64 and link with -lp64
+  
+  # This overrides the name the compiler was called with.  'ext' is required for
+***************
+*** 46,58 ****
+  # xplink = eXtended Performance linking: "Uses a z/OS linkage specifically
+  # designed to increase performance."
+! def_os390_cflags="$def_os390_cflags -qxplink";
+! def_os390_cccdlflags="-qxplink"
+! def_os390_ldflags="-qxplink"
+! os390_Wc="$os390_Wc,XPLINK"
+! os390_Wl="$os390_Wl,XPLINK"
+  
+! # Without this, you get "IEW2689W 4C40 DEFINITION SIDE FILE IS NOT DEFINED."
+! os390_Wl="$os390_Wl,dll"
+  
+  # Exports all externally defined functions and variables in the compilation
+  # unit so that a DLL application can use them."
+--- 55,74 ----
+  # xplink = eXtended Performance linking: "Uses a z/OS linkage specifically
+  # designed to increase performance."
+! # msf: XPLink is not required to be specified for 64-bit
+  
+! #if [ -z "${PERL_TGT_OS390_64+x}" ]; then
+!   def_os390_cflags="$def_os390_cflags -qxplink"
+!   def_os390_cccdlflags="-qxplink"
+!   def_os390_ldflags="-qxplink"
+! #else
+!   def_os390_cflags="$def_os390_cflags -lp64"
+!   def_os390_cccdlflags="-lp64"
+!   def_os390_ldflags="-lp64"
+! #endif
+  
++ #if ! [ -z "${PERL_TGT_ASCII+x}" ]; then
++   def_os390_cflags="$def_os390_cflags -qascii"
++ #endif
++ 
+  # Exports all externally defined functions and variables in the compilation
+  # unit so that a DLL application can use them."
+***************
+*** 59,63 ****
+  def_os390_cflags="$def_os390_cflags -qexportall";
+  def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
+- os390_Wc="$os390_Wc,EXPORTALL"
+  
+  # 3296= #include file not found;
+--- 75,78 ----
+***************
+*** 72,78 ****
+  def_os390_cflags="$def_os390_cflags $os390_Wl";
+  
+- def_os390_cccdlflags="$def_os390_cccdlflags $os390_Wc";
+- def_os390_cccdlflags="$def_os390_cccdlflags $os390_Wl";
+- 
+  def_os390_defs='-DMAXSIG=39';               # maximum signal number; not furnished by IBM
+  def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
+--- 87,90 ----
+***************
+*** 133,143 ****
+  esac
+  
+! # Setting ldflags='-Wl,EDIT=NO' will get rid of the symbol
+! # information at the end of the executable (=> smaller binaries).
+! # Override this option with -Dldflags='whatever else you wanted'.
+! case "$optimize" in
+! *-g*) ;;
+! *)  ldflags="$ldflags -Wl,EDIT=NO"
+! esac
+  
+  # In order to build with dynamic be sure to specify:
+--- 145,151 ----
+  esac
+  
+! # msf symbol information is now in NOLOAD section and so, while on disk, 
+! # does not require time to load but is useful in problem determination if required,
+! # so it is no longer necessary to link with -Wl,EDIT=NO
+  
+  # In order to build with dynamic be sure to specify:
+***************
+*** 161,164 ****
+--- 169,173 ----
+     esac
+     # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
++    # msf v2.8 is ancient - we should be able to eliminate this check and just use .so
+     case "`uname -v`x`uname -r`" in
+     02x0[89].*|02x1[0-9].*|[0-9][3-9]x*)
+***************
+*** 265,268 ****
+--- 274,278 ----
+  # This trick ought to work even if your yacc is byacc.
+  #
++ # msf - need to check but I think /etc/yyparse.c is always around now
+  if test "X$byacc" = "Xbyacc" ; then
+     if test -e /etc/yyparse.c ; then

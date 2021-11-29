@@ -32,8 +32,7 @@ fi
 PERLPORT_ROOT="${PWD}"
 if ! [ -d "${PERL_VRM}/perl5" ]; then
 	mkdir -p "${PERL_VRM}"
-	cd "${PERL_VRM}"
-	${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
+	cd "${PERL_VRM}" ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1 
 	if [ $? -gt 0 ]; then
 		echo "Unable to clone PERL directory tree" >&2
 		exit 16
@@ -48,8 +47,7 @@ if ! [ -d "${PERL_VRM}/perl5" ]; then
 	fi
 fi
 
-
-./patches/managepatches.sh 
+./managepatches.sh 
 rc=$?
 if [ $rc -gt 0 ]; then
 	exit $rc
@@ -59,7 +57,13 @@ cd "${PERL_VRM}/perl5"
 #
 # Setup the configuration 
 #
-nohup sh Configure -de -Dusedl >/tmp/config.ascii.out 2>&1
+set -x
+if [ "${PERL_VRM}" = "blead" ]; then
+	ConfigOpts='-des -Dusedevel -Dusedl -Dprefix=/usr/local/perl/${PERL_VRM}'
+else
+	ConfigOpts='-de -Dusedl'
+fi
+nohup sh ./Configure ${ConfigOpts} >/tmp/config.ascii.out 2>&1
 if [ $? -gt 0 ]; then
 	echo "Configure of PERL tree failed." >&2
 	exit 16
