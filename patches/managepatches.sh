@@ -14,7 +14,6 @@ if [ $# -ne 0 ]; then
 	exit 8
 fi
 
-PERLPORT_ROOT="$1"
 mydir="$(dirname $0)"
 PERLPORT_ROOT=`cd $mydir/..; echo $PWD`
 
@@ -28,9 +27,9 @@ if [ "${PERL_VRM}" = '' ]; then
 fi
 
 if [ "${PERL_VRM}" = "maint-5.34" ]; then
-	CODE_ROOT="${PERLPORT_ROOT}/perl5"
-	PATCH_ROOT="${PERLPORT_ROOT}/patches"
-	patches=`cd ${PATCH_ROOT}; find . -name "*.patch"`
+	CODE_ROOT="${PERLPORT_ROOT}/${PERL_VRM}/perl5"
+	PATCH_ROOT="${PERLPORT_ROOT}/${PERL_VRM}/patches"
+	patches=`cd ${PATCH_ROOT} find . -name "*.patch"`
 	for patch in $patches; do
 		rp="${patch%*.patch}"
 		o="${CODE_ROOT}/${rp}.orig"

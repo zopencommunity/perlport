@@ -18,6 +18,7 @@ else
 	export LIBPATH=/lib:/usr/lib
 
 	export PERL_VRM="maint-5.34"
+	export PERL_VRM="blead"
 	export PERL_ROOT="${PWD}"
 	export GIT_ROOT=/rsusr/ported/bin
 fi
