@@ -8,7 +8,7 @@ set -x
 #  - ensure you have access to c99
 #  - network connectivity to pull git source from org
 #
-
+time
 if [ $# -ne 4 ]; then
 	if [ "${PERL_VRM}" = "" ] || [ "${PERL_OS390_TGT_AMODE}" = "" ] || [ "{PERL_OS390_TGT_LINK}" = "" ] || [ "{PERL_OS390_TGT_CODEPAGE}" = "" ]; then
 		echo "Either specify all 4 target build options on the command-line or with environment variables\n" >&2
@@ -108,12 +108,15 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
+time
+
 nohup make >/tmp/make.${perlbld}.out 2>&1
 if [ $? -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
 	exit 16
 fi
 
+time
 
 cd "${DELTA_ROOT}/tests"
 export PATH="${PERL_ROOT}/${PERL_VRM}/src:${PATH}"
@@ -128,4 +131,7 @@ if [ $? -gt 0 ]; then
 	echo "Example tests of Perl failed." >&2
 	exit 16
 fi
+
+time
+
 exit 0
