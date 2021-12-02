@@ -50,6 +50,7 @@ if [ $? -gt 0 ]; then
 fi
 
 PERLPORT_ROOT="${PWD}"
+
 perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 
 ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
@@ -77,14 +78,17 @@ esac
 if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
 	mkdir -p "${PERLPORT_ROOT}/${perlbld}"
 	(cd "${PERLPORT_ROOT}/${perlbld}" && ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1)
+
 	if [ $? -gt 0 ]; then
 		echo "Unable to clone Perl directory tree" >&2
 		exit 16
 	fi
 	# This is not meant to be something we can do any development on, so
 	# delete the git information
+
 	rm -rf "${PERLPORT_ROOT}/${perlbld}/perl5/git_version.h" "${PERLPORT_ROOT}/${PERL_VRM}/perl5/.git*"
 	chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/${perlbld}/perl5"
+
 	if [ $? -gt 0 ]; then
 		echo "Unable to tag Perl directory tree as ASCII" >&2
 		exit 16
