@@ -14,7 +14,7 @@
 ! '') ld='xlc' ;;
   esac
   
---- 15,33 ----
+--- 15,34 ----
   #  as well as the authors of the aix.sh file
   #
   # It is too late in Configure by the time this is called to change the
@@ -27,6 +27,7 @@
   # But it isn't too late to change 'ld', and the z/OS 390 ld command doesn't
   # understand some command line options like -W and -q that the loader needs to
 ! # know about.  c99 also acts like a loader and does understand them.
+! set -x
 ! case "$cc" in
 ! '') cc='c99' ;;
 ! esac
@@ -35,36 +36,21 @@
   esac
   
 ***************
-*** 31,39 ****
+*** 31,58 ****
   # IBM added the -q series of options to the compiler, which khw thinks should
   # be sufficient.  -Wl are for the loader, and may be required.
 ! os390_Wc="-Wc"
 ! os390_Wl="-Wl"
   
-  # -DEBCDIC should come from Configure and need not be mentioned here.
+- # -DEBCDIC should come from Configure and need not be mentioned here.
   # Prepend your favorites with Configure -Dccflags=your_favorites
   
   # This overrides the name the compiler was called with.  'ext' is required for
---- 36,48 ----
-  # IBM added the -q series of options to the compiler, which khw thinks should
-  # be sufficient.  -Wl are for the loader, and may be required.
-! # msf agrees - these options are supported, but -q options are preferred
+  # "unicode literals" to be enabled
+! def_os390_cflags='-qlanglvl=extc99';
   
-  # -DEBCDIC should come from Configure and need not be mentioned here.
-  # Prepend your favorites with Configure -Dccflags=your_favorites
-+ # msf: Check if the environment variable PERL_TGT_OS390_ASCII defined. If so, 
-+ # compile with -qascii option
-+ # msf: longname is not required with xplink or 64-bit
-+ # msf: Check if the environment variable PERL_TGT_OS390_64 defined. If so,
-+ # compile with -lp64 and link with -lp64
-  
-  # This overrides the name the compiler was called with.  'ext' is required for
-***************
-*** 41,58 ****
-  def_os390_cflags='-qlanglvl=extc99';
-  
-- def_os390_cflags="$def_os390_cflags -qlongname";    # khw thinks this is obsolete
-  def_os390_cflags="$def_os390_cflags -qfloat=ieee";  # khw thinks this is obsolete
+! def_os390_cflags="$def_os390_cflags -qlongname";    # khw thinks this is obsolete
+! def_os390_cflags="$def_os390_cflags -qfloat=ieee";  # khw thinks this is obsolete
   
   # xplink = eXtended Performance linking: "Uses a z/OS linkage specifically
   # designed to increase performance."
@@ -79,35 +65,47 @@
   
   # Exports all externally defined functions and variables in the compilation
   # unit so that a DLL application can use them."
---- 50,80 ----
-  def_os390_cflags='-qlanglvl=extc99';
+--- 37,79 ----
+  # IBM added the -q series of options to the compiler, which khw thinks should
+  # be sufficient.  -Wl are for the loader, and may be required.
+! # msf I think this is mostly true, although -Wc,lp64 and -Wl,lp64 seem to be the reliable way to specify 64-bit amode
   
-  def_os390_cflags="$def_os390_cflags -qfloat=ieee";  # khw thinks this is obsolete
+  # Prepend your favorites with Configure -Dccflags=your_favorites
++ # msf: longname is not required with xplink or 64-bit
   
-+ 
-+ # Turn on POSIX compatibility modes
-+ #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
-+ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
-+ 
+  # This overrides the name the compiler was called with.  'ext' is required for
+  # "unicode literals" to be enabled
+! def_os390_cflags='-qlanglvl=extc1x';
+  
+! # Turn on POSIX compatibility modes
+! #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
+! def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
+  
   # xplink = eXtended Performance linking: "Uses a z/OS linkage specifically
   # designed to increase performance."
 ! # msf: XPLink is not required to be specified for 64-bit
   
-! if [ "${PERL_TGT_OS390_64}" = "" ]; then
+! case "$USE_64_BIT_ALL" in
+! '') 
 !   def_os390_cflags="$def_os390_cflags -qxplink"
 !   def_os390_cccdlflags="-qxplink"
 !   def_os390_ldflags="-qxplink"
 ! # defines a BSD-like socket interface for the function prototypes and structures involved (not required with 64-bit)
 !   def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
-! else
-!   def_os390_cflags="$def_os390_cflags -qlp64"
-!   def_os390_cccdlflags="$def_os390_cflags -qlp64"
+!   ;;
+! *)  
+!   def_os390_cflags="$def_os390_cflags -Wc,lp64"
+!   def_os390_cccdlflags="$def_os390_cflags -Wc,lp64"
 !   def_os390_ldflags="-Wl,lp64"
-! fi
+! esac
   
-+ if [ "${PERL_TGT_ASCII}" != "" ]; then
++ case "$os390codepage" in
++ ascii) 
 +   def_os390_cflags="$def_os390_cflags -qascii"
-+ fi
++   ;;
++ ebcdic)
++   ;;
++ esac
 + 
   # Exports all externally defined functions and variables in the compilation
   # unit so that a DLL application can use them."
@@ -118,10 +116,12 @@
 - os390_Wc="$os390_Wc,EXPORTALL"
   
   # 3296= #include file not found;
---- 81,84 ----
+--- 80,83 ----
 ***************
-*** 68,88 ****
-  def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108"
+*** 66,88 ****
+  #       actually means it didn't do what we expected. e.g.,
+  #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
+! def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108"
   
 - # Combinte the -W flags with the rest
 - def_os390_cflags="$def_os390_cflags $os390_Wc";
@@ -142,7 +142,26 @@
 - 
   # ensure that the OS/390 yacc generated parser is reentrant.
   def_os390_defs="$def_os390_defs -DYYDYNAMIC";
---- 89,95 ----
+--- 86,94 ----
+  #       actually means it didn't do what we expected. e.g.,
+  #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
+! def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108 -qsuppress=CCN3159 -qfloat=ieee"
+  
+  def_os390_defs='-DMAXSIG=39';               # maximum signal number; not furnished by IBM
+  def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
+  
+  # ensure that the OS/390 yacc generated parser is reentrant.
+  def_os390_defs="$def_os390_defs -DYYDYNAMIC";
+***************
+*** 92,95 ****
+--- 98,104 ----
+  def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
+  
++ # Set up feature test macros     
++ def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -DNSIG=39 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED"
++ 
+  # Combine -D with cflags
+  case "$ccflags" in
 ***************
 *** 133,143 ****
   esac
@@ -156,7 +175,7 @@
 ! esac
   
   # In order to build with dynamic be sure to specify:
---- 140,146 ----
+--- 142,148 ----
   esac
   
 ! # msf symbol information is now in NOLOAD section and so, while on disk, 
@@ -166,7 +185,7 @@
   # In order to build with dynamic be sure to specify:
 ***************
 *** 161,164 ****
---- 164,168 ----
+--- 166,170 ----
      esac
      # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
 +    # msf v2.8 is ancient - we should be able to eliminate this check and just use .so
@@ -174,7 +193,7 @@
      02x0[89].*|02x1[0-9].*|[0-9][3-9]x*)
 ***************
 *** 265,268 ****
---- 269,273 ----
+--- 271,275 ----
   # This trick ought to work even if your yacc is byacc.
   #
 + # msf - need to check but I think /etc/yyparse.c is always around now

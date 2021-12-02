@@ -8,6 +8,26 @@ set -x
 #  - ensure you have access to c99
 #  - network connectivity to pull git source from org
 #
+
+if [ $# -ne 4 ]; then
+	if [ "${PERL_VRM}" = "" ] || [ "${PERL_OS390_TGT_AMODE}" = "" ] || [ "{PERL_OS390_TGT_LINK}" = "" ] || [ "{PERL_OS390_TGT_CODEPAGE}" = "" ]; then
+		echo "Either specify all 4 target build options on the command-line or with environment variables\n" >&2
+
+		echo "Syntax: $0 [<vrm> <amode> <link> <codepage>]\n" >&2
+		echo "  where:\n" >&2
+		echo "  <vrm> is one of maint-5.34 or blead\n" >&2
+		echo "  <amode> is one of 31 or 64\n" >&2
+		echo "  <link> is one of static or dynamic\n" >&2
+		echo "  <codepage> is one of ascii or ebcdic\n" >&2
+		exit 16
+	fi
+else
+	export PERL_VRM="$1"
+	export PERL_OS390_TGT_AMODE="$2"
+	export PERL_OS390_TGT_LINK="$3"
+	export PERL_OS390_TGT_CODEPAGE="$4"
+fi
+
 if [ "${PERL_ROOT}" = '' ]; then
 	echo "Need to set PERL_ROOT - source setenv.sh" >&2
 	exit 16
@@ -19,30 +39,54 @@ fi
 
 make --version >/dev/null 2>&1 
 if [ $? -gt 0 ]; then
-	echo "You need GNU Make on your PATH in order to build PERL" >&2
+	echo "You need GNU Make on your PATH in order to build Perl" >&2
 	exit 16
 fi
 
 whence c99 >/dev/null
 if [ $? -gt 0 ]; then
-	echo "c99 required to build PERL. " >&2
+	echo "c99 required to build Perl. " >&2
 	exit 16
 fi
 
 PERLPORT_ROOT="${PWD}"
-if ! [ -d "${PERL_VRM}/perl5" ]; then
-	mkdir -p "${PERLPORT_ROOT}/${PERL_VRM}"
-	(cd "${PERLPORT_ROOT}/${PERL_VRM}" && ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1)
+perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
+
+ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
+case "$PERL_VRM" in
+	maint*) ConfigOpts="${ConfigOpts} -de" ;;
+	blead) ConfigOpts="${ConfigOpts} -des -Dusedevel" ;;
+	*) echo "Invalid PERL_VRM of: ${PERL_VRM} specified. Valid Options: [maint*|blead]\n" >&2; exit 16;;
+esac
+case "$PERL_OS390_TGT_AMODE" in
+	31) ConfigOpts="${ConfigOpts}" ;;
+	64) ConfigOpts="${ConfigOpts} -DUSE_64_BIT_INT -DUSE_64_BIT_ALL" ;;
+	*) echo "Invalid PERL_OS390_TGT_AMODE of: ${PERL_OS390_TGT_AMODE} specified. Valid Options: [31|64]\n" >&2; exit 16;;
+esac
+case "$PERL_OS390_TGT_LINK" in
+	static) ConfigOpts="${ConfigOpts}" ;;
+	dynamic) ConfigOpts="${ConfigOpts} -Dusedl" ;;
+	*) echo "Invalid PERL_OS390_TGT_LINK of: ${PERL_OS390_TGT_LINK} specified. Valid Options: [static|dynamic]\n" >&2; exit 16;;
+esac
+case "$PERL_OS390_TGT_CODEPAGE" in
+	ascii) ConfigOpts="${ConfigOpts} -Dos390cp=ascii"; export os390cp='ascii' ;;
+	ebcdic) ConfigOpts="${ConfigOpts} -Dos390cp=ebcdic" export os390cp='ebcdic' ;;
+	*) echo "Invalid PERL_OS390_TGT_CODEPAGE of: ${PERL_OS390_TGT_CODEPAGE} specified. Valid Options: [ascii|ebcdic]\n" >&2; exit 16;;
+esac
+
+if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
+	mkdir -p "${PERLPORT_ROOT}/${perlbld}"
+	(cd "${PERLPORT_ROOT}/${perlbld}" && ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1)
 	if [ $? -gt 0 ]; then
-		echo "Unable to clone PERL directory tree" >&2
+		echo "Unable to clone Perl directory tree" >&2
 		exit 16
 	fi
 	# This is not meant to be something we can do any development on, so
 	# delete the git information
-	rm -rf "${PERLPORT_ROOT}/${PERL_VRM}/perl5/git_version.h" "${PERLPORT_ROOT}/${PERL_VRM}/perl5/.git*"
-	chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/${PERL_VRM}/perl5"
+	rm -rf "${PERLPORT_ROOT}/${perlbld}/perl5/git_version.h" "${PERLPORT_ROOT}/${PERL_VRM}/perl5/.git*"
+	chtag -R -h -t -cISO8859-1 "${PERLPORT_ROOT}/${perlbld}/perl5"
 	if [ $? -gt 0 ]; then
-		echo "Unable to tag PERL directory tree as ASCII" >&2
+		echo "Unable to tag Perl directory tree as ASCII" >&2
 		exit 16
 	fi
 fi
@@ -53,25 +97,20 @@ if [ $rc -gt 0 ]; then
 	exit $rc
 fi
 
-cd "${PERL_VRM}/perl5"
+cd "${perlbld}/perl5"
 #
 # Setup the configuration 
 #
 set -x
-if [ "${PERL_VRM}" = "blead" ]; then
-	ConfigOpts='-des -Dusedevel -Dusedl -Dprefix=/usr/local/perl/${PERL_VRM}'
-else
-	ConfigOpts='-de -Dusedl'
-fi
-nohup sh ./Configure ${ConfigOpts} >/tmp/config.ascii.out 2>&1
+nohup sh ./Configure ${ConfigOpts} >/tmp/config.${perlbld}.out 2>&1
 if [ $? -gt 0 ]; then
-	echo "Configure of PERL tree failed." >&2
+	echo "Configure of Perl tree failed." >&2
 	exit 16
 fi
 
-nohup make >/tmp/make.ascii.out 2>&1
+nohup make >/tmp/make.${perlbld}.out 2>&1
 if [ $? -gt 0 ]; then
-	echo "MAKE of PERL tree failed." >&2
+	echo "MAKE of Perl tree failed." >&2
 	exit 16
 fi
 
@@ -81,12 +120,12 @@ export PATH="${PERL_ROOT}/${PERL_VRM}/src:${PATH}"
 
 ./runbasic.sh
 if [ $? -gt 0 ]; then
-	echo "Basic test of PERL failed." >&2
+	echo "Basic test of Perl failed." >&2
 	exit 16
 fi
 ./runexamples.sh
 if [ $? -gt 0 ]; then
-	echo "Example tests of PERL failed." >&2
+	echo "Example tests of Perl failed." >&2
 	exit 16
 fi
 exit 0

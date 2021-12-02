@@ -17,10 +17,12 @@ else
 	fi  
 	export LIBPATH=/lib:/usr/lib
 
-	export PERL_VRM="maint-5.34"
+	# See perlbuild.sh for valid values of PERL_xxx variables
 	export PERL_VRM="blead"
-	export PERL_TGT_OS390_64=YES
-	export PERL_TGT_OS390_ASCII=YES
+	export PERL_OS390_TGT_AMODE="64" 
+	export PERL_OS390_TGT_LINK="dynamic" 
+	export PERL_OS390_TGT_CODEPAGE="ascii" 
+
 	export PERL_ROOT="${PWD}"
 	export GIT_ROOT=/rsusr/ported/bin
 fi

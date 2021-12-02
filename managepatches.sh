@@ -26,8 +26,11 @@ if [ "${PERL_VRM}" = '' ]; then
         exit 16
 fi
 
-CODE_ROOT="${PERLPORT_ROOT}/${PERL_VRM}/perl5"
-PATCH_ROOT="${PERLPORT_ROOT}/${PERL_VRM}/patches"
+perlpatch="${PERL_VRM}"
+perlcode="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
+
+CODE_ROOT="${PERLPORT_ROOT}/${perlcode}/perl5"
+PATCH_ROOT="${PERLPORT_ROOT}/${perlpatch}/patches"
 patches=`cd ${PATCH_ROOT} && find . -name "*.patch"`
 for patch in $patches; do
 	rp="${patch%*.patch}"
