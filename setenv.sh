@@ -10,6 +10,19 @@ else
 	export _TAG_REDIR_IN="txt"
 	export _TAG_REDIR_OUT="txt"
 
-	export PERL_VRM="maint-5.34"
+	if [ "$HOME" != '' ] && [ -d $HOME/bin ]; then
+		export PATH=$HOME/bin:/usr/local/bin:/bin:/usr/sbin
+	else
+		export PATH=/usr/local/bin:/bin:/usr/sbin
+	fi  
+	export LIBPATH=/lib:/usr/lib
+
+	# See perlbuild.sh for valid values of PERL_xxx variables
+	export PERL_VRM="blead"
+	export PERL_OS390_TGT_AMODE="64" 
+	export PERL_OS390_TGT_LINK="dynamic" 
+	export PERL_OS390_TGT_CODEPAGE="ascii" 
+
 	export PERL_ROOT="${PWD}"
+	export GIT_ROOT=/rsusr/ported/bin
 fi
