@@ -1,0 +1,75 @@
+***************
+*** 50,53 ****
+--- 50,54 ----
+  #endif
+  
++ 
+  #ifdef O_EXCL
+  #  define OPEN_EXCL O_EXCL
+***************
+*** 218,221 ****
+--- 219,282 ----
+  #endif
+  }
++ 
++ #if defined(OEMVS)
++   #if (__CHARSET_LIB == 1)
++     #include <stdio.h>
++     #include <stdlib.h>
++ 
++     static int setccsid(int fd, int ccsid) 
++     {
++       attrib_t attr;
++ 
++       memset(&attr, 0, sizeof(attr));
++       attr.att_filetagchg = 1;
++       attr.att_filetag.ft_ccsid = ccsid;
++       attr.att_filetag.ft_txtflag = 1;
++ 
++       return __fchattr(fd, &attr, sizeof(attr));
++     }
++     static int fdtagged(int fd) 
++     {
++       struct stat st;
++       int rc = fstat(fd, &st);
++       if (rc) {
++         return 1;
++       }
++       return st.st_tag.ft_txtflag || st.st_tag.ft_deferred;
++     }
++ 
++     int asciiopen(const char* path, int oflag) 
++     {
++       int fd = open(path, oflag);
++       if (fd == -1) { 
++         return fd;
++       }
++       if (oflag & O_CREAT) {
++         setccsid(fd, 819);
++       } else if (oflag & O_RDONLY) {
++         if (!fdtagged(fd)) {
++           setccsid(fd, 1047); 
++         }
++       }
++       return fd;
++     }
++ 
++     int asciiopen3(const char* path, int oflag, int perm) 
++     {
++       int fd = open(path, oflag, perm);
++       if (fd == -1) { 
++         return fd;
++       }
++       if (oflag & O_CREAT) {
++         setccsid(fd, 819);
++       } else if (oflag & O_RDONLY) {
++         if (!fdtagged(fd)) {
++           setccsid(fd, 1047); 
++         }
++       }
++       return fd;
++     } 
++   #endif
++ #endif
+  
+  int
