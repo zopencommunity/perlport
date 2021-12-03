@@ -1,6 +1,6 @@
 use File::Temp;
-$fh = tempfile()
-($fh, $filename) = tempfile
-print $fh
-print $filename
+$fh = tempfile();
+($fh, $filename) = tempfile;
+print $fh;
+print $filename;
 

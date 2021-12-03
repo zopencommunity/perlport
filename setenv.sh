@@ -20,11 +20,13 @@ else
 	# See perlbuild.sh for valid values of PERL_xxx variables
 	export PERL_VRM="blead" #maint-5.34
 	export PERL_OS390_TGT_AMODE="31" # 31
-	export PERL_OS390_TGT_LINK="static" # static
-	export PERL_OS390_TGT_CODEPAGE="ascii" # ebcdic
+	export PERL_OS390_TGT_LINK="dynamic" # static
+	export PERL_OS390_TGT_CODEPAGE="ebcdic" # ascii
 
 	export PERL_ROOT="${PWD}"
 	export GIT_ROOT=/rsusr/ported/bin
+
+	export PATH="${PERL_ROOT}/bin:$PATH"
 
 	echo "Environment set up for ${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 fi
