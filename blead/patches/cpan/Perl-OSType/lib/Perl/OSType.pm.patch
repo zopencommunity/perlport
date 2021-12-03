@@ -1,0 +1,13 @@
+***************
+*** 60,64 ****
+    MSWin32     Windows
+  
+!   os390       EBCDIC
+    os400       EBCDIC
+    posix-bc    EBCDIC
+--- 60,64 ----
+    MSWin32     Windows
+  
+!   os390       Unix
+    os400       EBCDIC
+    posix-bc    EBCDIC
