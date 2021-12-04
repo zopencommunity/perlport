@@ -95,7 +95,7 @@
 !   ;;
 ! *)  
 !   def_os390_cflags="$def_os390_cflags -Wc,lp64"
-!   def_os390_cccdlflags="$def_os390_cflags -Wc,lp64"
+!   def_os390_cccdlflags="$def_os390_cflags -Wl,lp64"
 !   def_os390_ldflags="-Wl,lp64"
 ! esac
   

@@ -95,7 +95,7 @@ if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
 	fi
 fi
 
-./managepatches.sh 
+managepatches.sh 
 rc=$?
 if [ $rc -gt 0 ]; then
 	exit $rc

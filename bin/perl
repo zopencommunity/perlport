@@ -9,5 +9,5 @@ fi
 export PERL_ROOT="${PERL_ROOT}/${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}/perl5"
 export PATH="${PERL_ROOT}:$PATH"
 export LIBPATH="${PERL_ROOT}:$LIBPATH"
-
+set -x
 perl -I"${PERL_ROOT}/lib" $*
