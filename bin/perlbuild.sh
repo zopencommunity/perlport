@@ -128,7 +128,7 @@ fi
 echo "Make Test Perl"
 date
 
-nohup make >/tmp/maketest.${perlbld}.out 2>&1
+nohup make test >/tmp/maketest.${perlbld}.out 2>&1
 if [ $? -gt 0 ]; then
 	echo "MAKE Test of Perl tree failed." >&2
 	exit 16
