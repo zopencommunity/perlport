@@ -1,0 +1,13 @@
+***************
+*** 19,23 ****
+  
+  $spitshell >runtests <<!GROK!THIS!
+! $startsh -e
+  # runtests.SH
+  # 
+--- 19,23 ----
+  
+  $spitshell >runtests <<!GROK!THIS!
+! $startsh 
+  # runtests.SH
+  # 
