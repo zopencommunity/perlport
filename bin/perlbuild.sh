@@ -8,7 +8,6 @@
 #  - ensure you have access to c99
 #  - network connectivity to pull git source from org
 #
-date
 if [ $# -ne 4 ]; then
 	if [ "${PERL_VRM}" = "" ] || [ "${PERL_OS390_TGT_AMODE}" = "" ] || [ "{PERL_OS390_TGT_LINK}" = "" ] || [ "{PERL_OS390_TGT_CODEPAGE}" = "" ]; then
 		echo "Either specify all 4 target build options on the command-line or with environment variables\n" >&2
@@ -77,6 +76,8 @@ esac
 
 if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
 	mkdir -p "${PERLPORT_ROOT}/${perlbld}"
+	echo "clone Perl"
+	date
 	(cd "${PERLPORT_ROOT}/${perlbld}" && ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1)
 
 	if [ $? -gt 0 ]; then
@@ -105,6 +106,8 @@ cd "${perlbld}/perl5"
 #
 # Setup the configuration 
 #
+echo "Configure Perl"
+date
 export PATH=$PWD:$PATH
 export LIBPATH=$PWD:$LIBPATH
 nohup sh ./Configure ${ConfigOpts} >/tmp/config.${perlbld}.out 2>&1
@@ -113,6 +116,7 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
+echo "Make Perl"
 date
 
 nohup make >/tmp/make.${perlbld}.out 2>&1
