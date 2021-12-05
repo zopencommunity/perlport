@@ -20,8 +20,8 @@ else
 	# See perlbuild.sh for valid values of PERL_xxx variables
 	export PERL_VRM="blead" #maint-5.34
 	export PERL_OS390_TGT_AMODE="64" # 31
-	export PERL_OS390_TGT_LINK="dynamic" # static
-	export PERL_OS390_TGT_CODEPAGE="ascii" # ascii
+	export PERL_OS390_TGT_LINK="static" # static
+	export PERL_OS390_TGT_CODEPAGE="ascii" # ebcdic
 
 	export PERL_ROOT="${PWD}"
 	export GIT_ROOT=/rsusr/ported/bin

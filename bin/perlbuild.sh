@@ -60,7 +60,7 @@ case "$PERL_VRM" in
 esac
 case "$PERL_OS390_TGT_AMODE" in
 	31) ConfigOpts="${ConfigOpts}" ;;
-	64) ConfigOpts="${ConfigOpts} -DUSE_64_BIT_INT -DUSE_64_BIT_ALL" ;;
+	64) ConfigOpts="${ConfigOpts} -DUSE_64_BIT_ALL" ;;
 	*) echo "Invalid PERL_OS390_TGT_AMODE of: ${PERL_OS390_TGT_AMODE} specified. Valid Options: [31|64]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_LINK" in
@@ -76,7 +76,7 @@ esac
 
 if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
 	mkdir -p "${PERLPORT_ROOT}/${perlbld}"
-	echo "clone Perl"
+	echo "Clone Perl"
 	date
 	(cd "${PERLPORT_ROOT}/${perlbld}" && ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1)
 
@@ -125,19 +125,12 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
+echo "Make Test Perl"
 date
 
-cd "${DELTA_ROOT}/tests"
-export PATH="${PERL_ROOT}/${PERL_VRM}/src:${PATH}"
-
-./runbasic.sh
+nohup make >/tmp/maketest.${perlbld}.out 2>&1
 if [ $? -gt 0 ]; then
-	echo "Basic test of Perl failed." >&2
-	exit 16
-fi
-./runexamples.sh
-if [ $? -gt 0 ]; then
-	echo "Example tests of Perl failed." >&2
+	echo "MAKE Test of Perl tree failed." >&2
 	exit 16
 fi
 
