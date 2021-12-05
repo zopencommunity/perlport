@@ -3,7 +3,9 @@
 
 # original perl git source
 blead.*/perl5
-maint-5.34.*/perl5/
+blead.*/perl5.local
+maint-5.34.*/perl5
+maint-5.34.*/perl5.local
 
 # generated binaries
 tests/itest

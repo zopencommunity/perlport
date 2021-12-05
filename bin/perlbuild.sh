@@ -74,7 +74,10 @@ case "$PERL_OS390_TGT_CODEPAGE" in
 	*) echo "Invalid PERL_OS390_TGT_CODEPAGE of: ${PERL_OS390_TGT_CODEPAGE} specified. Valid Options: [ascii|ebcdic]\n" >&2; exit 16;;
 esac
 
-if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
+if [ -d "${PERLPORT_ROOT}/${perlbld}/perl5.local" ]; then
+	rm -rf "${PERLPORT_ROOT}/${perlbld}/perl5"
+	cp -rpf "${PERLPORT_ROOT}/${perlbld}/perl5.local" "${PERLPORT_ROOT}/${perlbld}/perl5"
+elif ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
 	mkdir -p "${PERLPORT_ROOT}/${perlbld}"
 	echo "Clone Perl"
 	date
