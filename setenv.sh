@@ -18,10 +18,10 @@ else
 	export LIBPATH=/lib:/usr/lib
 
 	# See perlbuild.sh for valid values of PERL_xxx variables
-	export PERL_VRM="blead" #maint-5.34
-	export PERL_OS390_TGT_AMODE="64" # 31
-	export PERL_OS390_TGT_LINK="static" # static
-	export PERL_OS390_TGT_CODEPAGE="ascii" # ebcdic
+	export PERL_VRM="blead" #maint-5.34|blead
+	export PERL_OS390_TGT_AMODE="31" # 31|64
+	export PERL_OS390_TGT_LINK="dynamic" # static|dynamic
+	export PERL_OS390_TGT_CODEPAGE="ebcdic" # ebcdic|ascii
 
 	export PERL_ROOT="${PWD}"
 	export GIT_ROOT=/rsusr/ported/bin

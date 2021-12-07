@@ -60,7 +60,7 @@ case "$PERL_VRM" in
 esac
 case "$PERL_OS390_TGT_AMODE" in
 	31) ConfigOpts="${ConfigOpts}" ;;
-	64) ConfigOpts="${ConfigOpts} -DUSE_64_BIT_ALL" ;;
+	64) ConfigOpts="${ConfigOpts} -Duse64bitall" ;;
 	*) echo "Invalid PERL_OS390_TGT_AMODE of: ${PERL_OS390_TGT_AMODE} specified. Valid Options: [31|64]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_LINK" in
@@ -69,12 +69,14 @@ case "$PERL_OS390_TGT_LINK" in
 	*) echo "Invalid PERL_OS390_TGT_LINK of: ${PERL_OS390_TGT_LINK} specified. Valid Options: [static|dynamic]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_CODEPAGE" in
-	ascii) ConfigOpts="${ConfigOpts} -Dos390cp=ascii"; export os390cp='ascii' ;;
-	ebcdic) ConfigOpts="${ConfigOpts} -Dos390cp=ebcdic" export os390cp='ebcdic' ;;
+	ascii)  ;;
+	ebcdic) ;;
 	*) echo "Invalid PERL_OS390_TGT_CODEPAGE of: ${PERL_OS390_TGT_CODEPAGE} specified. Valid Options: [ascii|ebcdic]\n" >&2; exit 16;;
 esac
 
 if [ -d "${PERLPORT_ROOT}/${perlbld}/perl5.local" ]; then
+	echo "Copy Local Perl"
+	date
 	rm -rf "${PERLPORT_ROOT}/${perlbld}/perl5"
 	cp -rpf "${PERLPORT_ROOT}/${perlbld}/perl5.local" "${PERLPORT_ROOT}/${perlbld}/perl5"
 elif ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
