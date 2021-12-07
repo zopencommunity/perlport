@@ -1,6 +1,5 @@
 #!/bin/sh
 #set -x
-
 if ! [ -f ./setenv.sh ]; then
 	echo "Need to source from the setenv.sh directory" >&2
 else
