@@ -1,0 +1,13 @@
+#!/bin/sh
+#set -x
+# This perl routes to the currently active perl
+if [ "${PERL_ROOT}" = '' ] || [ "${PERL_VRM}" = '' ] || [ "${PERL_OS390_TGT_AMODE}" = '' ] || [ "${PERL_OS390_TGT_LINK}" = '' ] || [ "${PERL_OS390_TGT_CODEPAGE}" = '' ]; then 
+	echo "Set up environment to use this 'perl'" >&2
+	exit 16
+fi
+
+export PERL_ROOT="${PERL_ROOT}/${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}/perl5"
+export PATH="${PERL_ROOT}:$PATH"
+export LIBPATH="${PERL_ROOT}:$LIBPATH"
+set -x
+perl -I"${PERL_ROOT}/lib" $*

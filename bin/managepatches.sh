@@ -15,7 +15,6 @@ if [ $# -ne 0 ]; then
 fi
 
 mydir="$(dirname $0)"
-PERLPORT_ROOT=`cd $mydir; echo $PWD`
 
 if [ "${PERL_ROOT}" = '' ]; then
 	echo "Need to set PERL_ROOT - source setenv.sh" >&2
@@ -29,8 +28,8 @@ fi
 perlpatch="${PERL_VRM}"
 perlcode="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 
-CODE_ROOT="${PERLPORT_ROOT}/${perlcode}/perl5"
-PATCH_ROOT="${PERLPORT_ROOT}/${perlpatch}/patches"
+CODE_ROOT="${PERL_ROOT}/${perlcode}/perl5"
+PATCH_ROOT="${PERL_ROOT}/${perlpatch}/patches"
 patches=`cd ${PATCH_ROOT} && find . -name "*.patch"`
 for patch in $patches; do
 	rp="${patch%*.patch}"

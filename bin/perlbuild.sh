@@ -1,5 +1,5 @@
 #!/bin/sh 
-set -x
+#set -x
 #
 # Pre-requisites: 
 #  - cd to the directory of this script before running the script   
@@ -8,7 +8,6 @@ set -x
 #  - ensure you have access to c99
 #  - network connectivity to pull git source from org
 #
-date
 if [ $# -ne 4 ]; then
 	if [ "${PERL_VRM}" = "" ] || [ "${PERL_OS390_TGT_AMODE}" = "" ] || [ "{PERL_OS390_TGT_LINK}" = "" ] || [ "{PERL_OS390_TGT_CODEPAGE}" = "" ]; then
 		echo "Either specify all 4 target build options on the command-line or with environment variables\n" >&2
@@ -61,7 +60,7 @@ case "$PERL_VRM" in
 esac
 case "$PERL_OS390_TGT_AMODE" in
 	31) ConfigOpts="${ConfigOpts}" ;;
-	64) ConfigOpts="${ConfigOpts} -DUSE_64_BIT_INT -DUSE_64_BIT_ALL" ;;
+	64) ConfigOpts="${ConfigOpts} -Duse64bitall -Dptrsize=8" ;;
 	*) echo "Invalid PERL_OS390_TGT_AMODE of: ${PERL_OS390_TGT_AMODE} specified. Valid Options: [31|64]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_LINK" in
@@ -70,13 +69,20 @@ case "$PERL_OS390_TGT_LINK" in
 	*) echo "Invalid PERL_OS390_TGT_LINK of: ${PERL_OS390_TGT_LINK} specified. Valid Options: [static|dynamic]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_CODEPAGE" in
-	ascii) ConfigOpts="${ConfigOpts} -Dos390cp=ascii"; export os390cp='ascii' ;;
-	ebcdic) ConfigOpts="${ConfigOpts} -Dos390cp=ebcdic" export os390cp='ebcdic' ;;
+	ascii)  ;;
+	ebcdic) ;;
 	*) echo "Invalid PERL_OS390_TGT_CODEPAGE of: ${PERL_OS390_TGT_CODEPAGE} specified. Valid Options: [ascii|ebcdic]\n" >&2; exit 16;;
 esac
 
-if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
+if [ -d "${PERLPORT_ROOT}/${perlbld}/perl5.local" ]; then
+	echo "Copy Local Perl"
+	date
+	rm -rf "${PERLPORT_ROOT}/${perlbld}/perl5"
+	cp -rpf "${PERLPORT_ROOT}/${perlbld}/perl5.local" "${PERLPORT_ROOT}/${perlbld}/perl5"
+elif ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
 	mkdir -p "${PERLPORT_ROOT}/${perlbld}"
+	echo "Clone Perl"
+	date
 	(cd "${PERLPORT_ROOT}/${perlbld}" && ${GIT_ROOT}/git clone https://github.com/Perl/perl5.git --branch "${PERL_VRM}" --single-branch --depth 1)
 
 	if [ $? -gt 0 ]; then
@@ -95,7 +101,7 @@ if ! [ -d "${PERLPORT_ROOT}/${perlbld}/perl5" ]; then
 	fi
 fi
 
-./managepatches.sh 
+managepatches.sh 
 rc=$?
 if [ $rc -gt 0 ]; then
 	exit $rc
@@ -105,13 +111,17 @@ cd "${perlbld}/perl5"
 #
 # Setup the configuration 
 #
-set -x
+echo "Configure Perl"
+date
+export PATH=$PWD:$PATH
+export LIBPATH=$PWD:$LIBPATH
 nohup sh ./Configure ${ConfigOpts} >/tmp/config.${perlbld}.out 2>&1
 if [ $? -gt 0 ]; then
 	echo "Configure of Perl tree failed." >&2
 	exit 16
 fi
 
+echo "Make Perl"
 date
 
 nohup make >/tmp/make.${perlbld}.out 2>&1
@@ -120,19 +130,12 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
+echo "Make Test Perl"
 date
 
-cd "${DELTA_ROOT}/tests"
-export PATH="${PERL_ROOT}/${PERL_VRM}/src:${PATH}"
-
-./runbasic.sh
+nohup make test >/tmp/maketest.${perlbld}.out 2>&1
 if [ $? -gt 0 ]; then
-	echo "Basic test of Perl failed." >&2
-	exit 16
-fi
-./runexamples.sh
-if [ $? -gt 0 ]; then
-	echo "Example tests of Perl failed." >&2
+	echo "MAKE Test of Perl tree failed." >&2
 	exit 16
 fi
 
