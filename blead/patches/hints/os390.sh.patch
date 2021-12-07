@@ -38,7 +38,7 @@
   #
 ! # z/OS 2.4 Support added thanks to:
 ! #     Mike Fulton
-! #     Karl Wilson
+! #     Karl Williamson
   #
 ! # The z/OS 'cc' and 'ld' are insufficient for our needs, so we use c99 instead
 ! # c99 has compiler options specified via standard Unix-style options, but some

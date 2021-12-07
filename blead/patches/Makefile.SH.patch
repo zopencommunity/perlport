@@ -11,10 +11,10 @@
   		;;
   	os390*)
 !             case "$USE_64_BIT_ALL" in 
-!             '')  shrpldflags='-Wl,XPLINK,dll'
+!             '')    shrpldflags='-Wl,XPLINK,dll'
 ! 	           linklibperl='libperl.x'
 ! 	           ;;
-!             *)   shrpldflags='-Wl,LP64,dll'
+!             '')    shrpldflags='-Wl,LP64,dll'
 ! 	           linklibperl='libperl.x'
 ! 	           ;;
 !             esac
