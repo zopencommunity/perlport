@@ -10,9 +10,9 @@ export PERL_ROOT="${PERL_ROOT}/${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_
 export PATH="${PERL_ROOT}:$PATH"
 export LIBPATH="${PERL_ROOT}:$LIBPATH"
 
-if [ -x "${PERL_ROOT}/perl" ]; then
-	perl -I"${PERL_ROOT}/lib" $*
+if [ -x "${PERL_ROOT}/miniperl" ]; then
+	miniperl -I"${PERL_ROOT}/lib" $*
 else
-	echo "Perl not found at ${PERL_ROOT}" >&2
+	echo "MiniPerl not found at ${PERL_ROOT}" >&2
 	exit 16
 fi

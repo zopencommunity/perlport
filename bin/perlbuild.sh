@@ -60,7 +60,7 @@ case "$PERL_VRM" in
 esac
 case "$PERL_OS390_TGT_AMODE" in
 	31) ConfigOpts="${ConfigOpts}" ;;
-	64) ConfigOpts="${ConfigOpts} -Duse64bitall -Dptrsize=8" ;;
+	64) ConfigOpts="${ConfigOpts} -Duse64bitall" ;;
 	*) echo "Invalid PERL_OS390_TGT_AMODE of: ${PERL_OS390_TGT_AMODE} specified. Valid Options: [31|64]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_LINK" in
