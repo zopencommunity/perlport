@@ -1,23 +1,21 @@
 ***************
-*** 119,125 ****
+*** 119,127 ****
   		;;
   	os390*)
-!             shrpldflags='-Wl,XPLINK,dll'
-! 	    linklibperl='libperl.x'
-! 	    ;;
-  	esac
-  	case "$ldlibpthname" in
---- 119,131 ----
-  		;;
-  	os390*)
-!             case "$USE_64_BIT_ALL" in 
+!             case "$use64bitall" in
 !             '')    shrpldflags='-Wl,XPLINK,dll'
 ! 	           linklibperl='libperl.x'
 ! 	           ;;
-!             '')    shrpldflags='-Wl,LP64,dll'
-! 	           linklibperl='libperl.x'
-! 	           ;;
-!             esac
-!             ;;
-  	esac
-  	case "$ldlibpthname" in
+!             *)    shrpldflags='-Wl,LP64,dll'
+  	           linklibperl='libperl.x'
+  	           ;;
+--- 119,127 ----
+  		;;
+  	os390*)
+!             case "$use64bitall" in 
+!             define|true|[yY]*) shrpldflags='-Wl,LP64,dll'
+!                    linklibperl='libperl.x'
+!                    ;;
+!             *)     shrpldflags='-Wl,XPLINK,dll'
+  	           linklibperl='libperl.x'
+  	           ;;

@@ -1,6 +1,5 @@
 #!/bin/sh
 #set -x
-
 if ! [ -f ./setenv.sh ]; then
 	echo "Need to source from the setenv.sh directory" >&2
 else
@@ -28,5 +27,7 @@ else
 
 	export PATH="${PERL_ROOT}/bin:$PATH"
 
-	echo "Environment set up for ${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
+	export PERL_ENV="${PERL_ROOT}/${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}/perl5"
+
+	echo "Environment set up for ${PERL_ENV}"
 fi
