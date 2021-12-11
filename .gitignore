@@ -6,11 +6,15 @@ blead.*/perl5
 blead.*/perl5.local
 maint-5.34.*/perl5
 maint-5.34.*/perl5.local
+ebcdic/perl5.local
 
 # generated binaries
 tests/itest
 tests/otest
 tests/e2atest
+
+# files from nohup
+nohup.out
 
 # Object files
 *.o

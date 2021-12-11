@@ -1,16 +1,13 @@
 ***************
-*** 41,46 ****
-  # which itelf invokes make, the warnings ensue.
+*** 19,23 ****
   
-! unset MAKEFLAGS
-! 
+  $spitshell >runtests <<!GROK!THIS!
+! $startsh -e
+  # runtests.SH
+  # 
+--- 19,23 ----
   
-  case $# in
---- 41,47 ----
-  # which itelf invokes make, the warnings ensue.
-  
-! if ! [ -z ${MAKEFLAGS} ]; then
-! 	unset MAKEFLAGS
-! fi
-  
-  case $# in
+  $spitshell >runtests <<!GROK!THIS!
+! $startsh 
+  # runtests.SH
+  # 

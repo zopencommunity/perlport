@@ -1,0 +1,13 @@
+#!/bin/sh 
+if [ -z $PERL_ENV ]; then
+	echo "Need to set up environment first." >&2
+	exit 16
+fi
+cd $PERL_ENV
+cd t && (rm -f perl; /bin/ln -s ../miniperl perl)
+if [ $# -gt 0 ]; then
+	list=$1
+else 
+	list=base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t
+fi
+/bin/env LIBPATH=/app/temp/perlport/blead.64.dynamic.ascii/perl5:/app/temp/perlport/blead.64.dynamic.ascii/perl5:/lib:/usr/lib  ./perl -Ilib -I. TEST $list </dev/tty

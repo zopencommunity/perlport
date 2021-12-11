@@ -116,29 +116,40 @@ date
 export PATH=$PWD:$PATH
 export LIBPATH=$PWD:$LIBPATH
 nohup sh ./Configure ${ConfigOpts} >/tmp/config.${perlbld}.out 2>&1
-if [ $? -gt 0 ]; then
+rc=$?
+if [ $rc -gt 0 ]; then
 	echo "Configure of Perl tree failed." >&2
-	exit 16
+	exit $rc
 fi
 
 echo "Make Perl"
 date
 
 nohup make >/tmp/make.${perlbld}.out 2>&1
-if [ $? -gt 0 ]; then
+rc=$?
+if [ $rc -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
-	exit 16
+	echo "Perform make minitest." >&2
+	echo "Make minitest Perl"
+	date
+
+	nohup make minitest >/tmp/makeminitest.${perlbld}.out 2>&1
+	rc=$?
+	if [ $rc -gt 0 ]; then
+		echo "MAKE minitest of Perl tree failed." >&2
+		exit $rc
+	fi
+else
+	echo "Make Test Perl"
+	date
+
+	nohup make test >/tmp/maketest.${perlbld}.out 2>&1
+	rc=$?
+	if [ $rc -gt 0 ]; then
+		echo "MAKE test of Perl tree failed." >&2
+		exit $rc 
+	fi
 fi
-
-echo "Make Test Perl"
-date
-
-nohup make test >/tmp/maketest.${perlbld}.out 2>&1
-if [ $? -gt 0 ]; then
-	echo "MAKE Test of Perl tree failed." >&2
-	exit 16
-fi
-
 date
 
 exit 0

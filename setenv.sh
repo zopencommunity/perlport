@@ -20,12 +20,14 @@ else
 	export PERL_VRM="blead" #maint-5.34|blead
 	export PERL_OS390_TGT_AMODE="64" # 31|64
 	export PERL_OS390_TGT_LINK="dynamic" # static|dynamic
-	export PERL_OS390_TGT_CODEPAGE="ebcdic" # ebcdic|ascii
+	export PERL_OS390_TGT_CODEPAGE="ascii" # ebcdic|ascii
 
 	export PERL_ROOT="${PWD}"
 	export GIT_ROOT=/rsusr/ported/bin
 
 	export PATH="${PERL_ROOT}/bin:$PATH"
 
-	echo "Environment set up for ${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
+	export PERL_ENV="${PERL_ROOT}/${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}/perl5"
+
+	echo "Environment set up for ${PERL_ENV}"
 fi
