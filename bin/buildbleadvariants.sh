@@ -5,6 +5,7 @@
 . ./setenv.sh
 export PERL_VRM="blead" 
 cps="ascii ebcdic"
+cps="ascii"
 amodes="31 64"
 links="static dynamic"
 for cp in $cps; do
@@ -13,7 +14,7 @@ for cp in $cps; do
 		export PERL_OS390_TGT_AMODE="$amode" 
 		for link in $links; do
 			export PERL_OS390_TGT_LINK="$link"
-			build="$PERL_VRM.$PERL_OS390_TGT_LINK.$PERL_OS390_TGT_AMODE.$PERL_OS390_TGT_CODEPAGE"
+			build="$PERL_VRM.$PERL_OS390_TGT_AMODE.$PERL_OS390_TGT_LINK.$PERL_OS390_TGT_CODEPAGE"
 			echo "Build $build"
 			perlbuild.sh
 			rc=$?
