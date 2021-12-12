@@ -5,7 +5,6 @@
 . ./setenv.sh
 export PERL_VRM="blead" 
 cps="ascii ebcdic"
-cps="ascii"
 amodes="31 64"
 links="static dynamic"
 for cp in $cps; do

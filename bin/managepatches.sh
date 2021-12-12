@@ -30,12 +30,14 @@ perlcode="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS39
 
 CODE_ROOT="${PERL_ROOT}/${perlcode}/perl5"
 PATCH_ROOT="${PERL_ROOT}/${perlpatch}/patches"
-patches=`cd ${PATCH_ROOT} && find . -name "*.patch"`
+commonpatches=`cd ${PATCH_ROOT} && find . -name "*.patch"`
+specificpatches=`cd ${PATCH_ROOT} && find . -name "*.patch${PERL_OS390_TGT_CODEPAGE}"`
+patches="$patches $specificpatches"
 for patch in $patches; do
-	rp="${patch%*.patch}"
+	rp="${patch%*.patch*}"
 	o="${CODE_ROOT}/${rp}.orig"
 	f="${CODE_ROOT}/${rp}"
-	p="${PATCH_ROOT}/${rp}.patch"
+	p="${PATCH_ROOT}/${patch}"
 
 	if [ -f "${o}" ]; then
 		# Original file exists. Regenerate patch, then replace file with original version 
