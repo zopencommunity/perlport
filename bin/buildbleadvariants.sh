@@ -4,9 +4,9 @@
 #
 . ./setenv.sh
 export PERL_VRM="blead" 
-cps="ascii ebcdic"
-amodes="31 64"
-links="static dynamic" 
+cps="ebcdic ascii"
+amodes="64 31"
+links="dynamic static" 
 
 for amode in $amodes; do
 	export PERL_OS390_TGT_AMODE="$amode" 
