@@ -8,7 +8,7 @@
 --- 60,66 ----
   if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
     unset ebcdic
-!   def_os390_cflags="$def_os390_cflags -qascii -g"
+!   def_os390_cflags="$def_os390_cflags -qascii"
 !   # ensure that 'safe' putenv is used and avoid direct environ manipulation
 !   def_os390_defs="$def_os390_defs -DPERL_USE_SAFE_PUTENV";
   else
