@@ -2,7 +2,6 @@
 #set -x
 #
 # Pre-requisites: 
-#  - cd to the directory of this script before running the script   
 #  - ensure you have sourced setenv.sh, e.g. . ./setenv.sh
 #  - ensure you have GNU make installed (4.1 or later)
 #  - ensure you have access to c99

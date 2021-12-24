@@ -32,7 +32,7 @@ CODE_ROOT="${PERL_ROOT}/${perlcode}/perl5"
 PATCH_ROOT="${PERL_ROOT}/${perlpatch}/patches"
 commonpatches=`cd ${PATCH_ROOT} && find . -name "*.patch"`
 specificpatches=`cd ${PATCH_ROOT} && find . -name "*.patch${PERL_OS390_TGT_CODEPAGE}"`
-patches="$patches $specificpatches"
+patches="$commonpatches $specificpatches"
 for patch in $patches; do
 	rp="${patch%*.patch*}"
 	o="${CODE_ROOT}/${rp}.orig"
