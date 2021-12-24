@@ -22,8 +22,21 @@
   PerlIO *
   Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 ***************
+*** 2694,2697 ****
+--- 2710,2719 ----
+          if (did_pipes)
+              PerlLIO_close(pp[0]);
++ #if defined(OEMVS)
++   #if (__CHARSET_LIB == 1)
++         chgfdccsid(p[THIS], 819);
++         chgfdccsid(p[THAT], 819);
++   #endif
++ #endif
+          /* Now dup our end of _the_ pipe to right position */
+          if (p[THIS] != (*mode == 'r')) {
+***************
 *** 2769,2774 ****
---- 2785,2803 ----
+--- 2791,2809 ----
       if (did_pipes)
            PerlLIO_close(pp[0]);
 + #if defined(OEMVS)
@@ -44,8 +57,21 @@
   #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
       return my_syspopen4(aTHX_ NULL, mode, n, args);
 ***************
+*** 2836,2839 ****
+--- 2871,2880 ----
+          if (did_pipes)
+              PerlLIO_close(pp[0]);
++ #if defined(OEMVS)
++   #if (__CHARSET_LIB == 1)
++         chgfdccsid(p[THIS], 819);
++         chgfdccsid(p[THAT], 819);
++   #endif
++ #endif
+          if (p[THIS] != (*mode == 'r')) {
+              PerlLIO_dup2(p[THIS], *mode == 'r');
+***************
 *** 2922,2926 ****
---- 2951,2967 ----
+--- 2963,2979 ----
       if (did_pipes)
            PerlLIO_close(pp[0]);
 + #if defined(OEMVS)

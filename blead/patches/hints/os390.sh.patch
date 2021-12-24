@@ -1,0 +1,13 @@
+***************
+*** 60,64 ****
+  if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
+    unset ebcdic
+!   def_os390_cflags="$def_os390_cflags -qascii"
+  else
+    ebcdic=true
+--- 60,64 ----
+  if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
+    unset ebcdic
+!   def_os390_cflags="$def_os390_cflags -qascii -g"
+  else
+    ebcdic=true
