@@ -1,0 +1,5 @@
+#!/bin/sh
+set -x
+export LIBPATH=/usr/local/perl/blead.64.dynamic.ascii/lib/5.35.8/os390/CORE:$LIBPATH
+export PATH=/usr/local/perl/blead.64.dynamic.ascii/bin:$PATH
+/usr/local/perl/*/bin/perl5.35.8 $*

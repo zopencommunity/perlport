@@ -1,0 +1,21 @@
+***************
+*** 857,861 ****
+  
+  
+! open(CONFIG_POD, '>:raw', $Config_POD) or die "Can't open $Config_POD: $!";
+  print CONFIG_POD <<'ENDOFTAIL';
+  =head1 NAME
+--- 857,861 ----
+  
+  
+! open(CONFIG_POD, '>', $Config_POD) or die "Can't open $Config_POD: $!";
+  print CONFIG_POD <<'ENDOFTAIL';
+  =head1 NAME
+***************
+*** 1129,1132 ****
+--- 1129,1133 ----
+  
+  if ($orig_config_txt ne $config_txt or $orig_heavy_txt ne $heavy_txt) {
++ print "came into update path";
+      open CONFIG, ">", $Config_PM or die "Can't open $Config_PM: $!\n";
+      open CONFIG_HEAVY, ">", $Config_heavy or die "Can't open $Config_heavy: $!\n";

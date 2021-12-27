@@ -10,7 +10,7 @@
   #  define OPEN_EXCL O_EXCL
 ***************
 *** 218,221 ****
---- 221,281 ----
+--- 221,304 ----
   #endif
   }
 + 
@@ -32,40 +32,63 @@
 +       struct stat st;
 +       int rc = fstat(fd, &st);
 +       if (rc) {
-+         return 1;
++         return -1;
++       }
++       if (!S_ISREG(st.st_mode)) {
++          return -1;
 +       }
 +       return st.st_tag.ft_txtflag || st.st_tag.ft_deferred;
 +     }
 + 
++     static void dump(int fd, int rc, const char* path, int oflag, int perm) 
++     {
++        char buffer[256];
++        sprintf(buffer, "echo 'dump: fd:%d rc:%d path:%s oflag:0x%X perm:0x%X\n' >>/tmp/dump.out", fd, rc, path, oflag, perm);
++        system(buffer);
++     }
++ 
++     static void updateccsid(int fd, const char* path, int oflag, int perm) 
++     { 
++       int rc;
++       int isconfig=0;
++       /* MSF - clearly this can not stay here. Keeping this in until I figure out what scenario causes lib/Config.pm to 
++        * have ASCII text written to it but tagged as EBCDIC
++        */
++       if (!strcmp(path, "lib/Config.pm")) {
++           isconfig=1;
++       }
++       if (oflag & O_CREAT) {
++         setccsid(fd, 819);
++       } else if (oflag & O_RDONLY) {
++         if (fdtagged(fd) == 0) {
++           if (isconfig) {
++             rc = setccsid(fd, 819); 
++           } else {
++             rc = setccsid(fd, 1047); 
++           } 
++         }
++       }
++     }
++ 
 +     int asciiopen(const char* path, int oflag) 
 +     {
++       int rc;
 +       int fd = open(path, oflag);
 +       if (fd == -1) { 
 +         return fd;
 +       }
-+       if (oflag & O_CREAT) {
-+         setccsid(fd, 819);
-+       } else if (oflag & O_RDONLY) {
-+         if (!fdtagged(fd)) {
-+           setccsid(fd, 1047); 
-+         }
-+       }
-+       return fd;
++       updateccsid(fd, path, oflag, -1);
++       return fd; 
 +     }
 + 
 +     int asciiopen3(const char* path, int oflag, int perm) 
 +     {
++       int rc;
 +       int fd = open(path, oflag, perm);
 +       if (fd == -1) { 
 +         return fd;
 +       }
-+       if (oflag & O_CREAT) {
-+         setccsid(fd, 819);
-+       } else if (oflag & O_RDONLY) {
-+         if (!fdtagged(fd)) {
-+           setccsid(fd, 1047); 
-+         }
-+       }
++       updateccsid(fd, path, oflag, perm);
 +       return fd;
 +     } 
 +   #endif
