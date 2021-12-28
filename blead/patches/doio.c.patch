@@ -9,23 +9,24 @@
   #ifdef O_EXCL
   #  define OPEN_EXCL O_EXCL
 ***************
-*** 218,221 ****
---- 221,304 ----
-  #endif
+*** 219,222 ****
+--- 222,310 ----
   }
-+ 
+  
 + #if defined(OEMVS)
 +   #if (__CHARSET_LIB == 1)
 +     static int setccsid(int fd, int ccsid) 
 +     {
 +       attrib_t attr;
++       int rc;
 + 
 +       memset(&attr, 0, sizeof(attr));
 +       attr.att_filetagchg = 1;
 +       attr.att_filetag.ft_ccsid = ccsid;
 +       attr.att_filetag.ft_txtflag = 1;
 + 
-+       return __fchattr(fd, &attr, sizeof(attr));
++       rc = __fchattr(fd, &attr, sizeof(attr));
++       return rc;
 +     }
 +     static int fdtagged(int fd) 
 +     {
@@ -39,26 +40,29 @@
 +       }
 +       return st.st_tag.ft_txtflag || st.st_tag.ft_deferred;
 +     }
-+ 
++ #if 0
 +     static void dump(int fd, int rc, const char* path, int oflag, int perm) 
 +     {
 +        char buffer[256];
 +        sprintf(buffer, "echo 'dump: fd:%d rc:%d path:%s oflag:0x%X perm:0x%X\n' >>/tmp/dump.out", fd, rc, path, oflag, perm);
 +        system(buffer);
 +     }
++ #endif
 + 
 +     static void updateccsid(int fd, const char* path, int oflag, int perm) 
 +     { 
-+       int rc;
++       int rc = -7;
 +       int isconfig=0;
++ #if 0
 +       /* MSF - clearly this can not stay here. Keeping this in until I figure out what scenario causes lib/Config.pm to 
 +        * have ASCII text written to it but tagged as EBCDIC
 +        */
 +       if (!strcmp(path, "lib/Config.pm")) {
 +           isconfig=1;
 +       }
++ #endif
 +       if (oflag & O_CREAT) {
-+         setccsid(fd, 819);
++         rc = setccsid(fd, 819);
 +       } else if (oflag & O_RDONLY) {
 +         if (fdtagged(fd) == 0) {
 +           if (isconfig) {
@@ -92,6 +96,58 @@
 +       return fd;
 +     } 
 +   #endif
++ #endif
++ 
+  int
+  Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
+***************
+*** 247,253 ****
+  }
+  
+  int
+! Perl_my_mkstemp_cloexec(char *templte)
+  {
+      PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
+  #if defined(O_CLOEXEC)
+--- 335,367 ----
+  }
+  
++ #if defined(OEMVS)
++   #if (__CHARSET_LIB == 1)
++     #define TEMP_CCSID 819
++   #else
++     #define TEMP_CCSID 1047
++   #endif
++ static int Internal_Perl_my_mkstemp_cloexec(char *templte)
++ {     
++     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
++ #if defined(O_CLOEXEC)
++     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
++ 	PL_strategy_mkstemp,
++    	Perl_my_mkostemp(templte, O_CLOEXEC),
++         Perl_my_mkstemp(templte));
++ #else
++     DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkstemp(templte));
++ #endif
++ }
+  int
+! Perl_my_mkstemp_cloexec(char *templte) 
+  {
++     int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
++     setccsid(tempfd, TEMP_CCSID);
++     return tempfd;
++ }
++ 
++ #else /* OEMVS */
++ Perl_my_mkstemp_cloexec(char *templte) 
++ {
+      PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
+  #if defined(O_CLOEXEC)
+***************
+*** 260,263 ****
+--- 374,378 ----
+  #endif
+  }
 + #endif
   
   int
