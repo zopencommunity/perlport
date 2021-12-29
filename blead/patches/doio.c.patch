@@ -10,7 +10,7 @@
   #  define OPEN_EXCL O_EXCL
 ***************
 *** 219,222 ****
---- 222,310 ----
+--- 222,285 ----
   }
   
 + #if defined(OEMVS)
@@ -40,37 +40,12 @@
 +       }
 +       return st.st_tag.ft_txtflag || st.st_tag.ft_deferred;
 +     }
-+ #if 0
-+     static void dump(int fd, int rc, const char* path, int oflag, int perm) 
-+     {
-+        char buffer[256];
-+        sprintf(buffer, "echo 'dump: fd:%d rc:%d path:%s oflag:0x%X perm:0x%X\n' >>/tmp/dump.out", fd, rc, path, oflag, perm);
-+        system(buffer);
-+     }
-+ #endif
 + 
 +     static void updateccsid(int fd, const char* path, int oflag, int perm) 
 +     { 
-+       int rc = -7;
-+       int isconfig=0;
-+ #if 0
-+       /* MSF - clearly this can not stay here. Keeping this in until I figure out what scenario causes lib/Config.pm to 
-+        * have ASCII text written to it but tagged as EBCDIC
-+        */
-+       if (!strcmp(path, "lib/Config.pm")) {
-+           isconfig=1;
-+       }
-+ #endif
++       int rc;
 +       if (oflag & O_CREAT) {
 +         rc = setccsid(fd, 819);
-+       } else if (oflag & O_RDONLY) {
-+         if (fdtagged(fd) == 0) {
-+           if (isconfig) {
-+             rc = setccsid(fd, 819); 
-+           } else {
-+             rc = setccsid(fd, 1047); 
-+           } 
-+         }
 +       }
 +     }
 + 
@@ -109,14 +84,12 @@
   {
       PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
   #if defined(O_CLOEXEC)
---- 335,367 ----
+--- 310,342 ----
   }
   
 + #if defined(OEMVS)
 +   #if (__CHARSET_LIB == 1)
 +     #define TEMP_CCSID 819
-+   #else
-+     #define TEMP_CCSID 1047
 +   #endif
 + static int Internal_Perl_my_mkstemp_cloexec(char *templte)
 + {     
@@ -134,7 +107,9 @@
 ! Perl_my_mkstemp_cloexec(char *templte) 
   {
 +     int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
++ #if defined(TEMP_CCSID)
 +     setccsid(tempfd, TEMP_CCSID);
++ #endif
 +     return tempfd;
 + }
 + 
@@ -145,7 +120,7 @@
   #if defined(O_CLOEXEC)
 ***************
 *** 260,263 ****
---- 374,378 ----
+--- 349,353 ----
   #endif
   }
 + #endif

@@ -4,7 +4,7 @@
 #
 . ./setenv.sh
 export PERL_VRM="blead" 
-cps="ebcdic ascii"
+cps="ascii ebcdic"
 amodes="64 31"
 links="dynamic static" 
 
@@ -22,11 +22,11 @@ for amode in $amodes; do
 			if [ $rc -gt 0 ]; then
 				echo "Failed to build $build" >&2
 			fi
-			testout="/tmp/maketest.$build.out" 
+			testout="/tmp/maketest.${USER}.$build.out" 
 			summary=`grep 'Failed' $testout  | grep 'tests out of'` 2>/dev/null
 			if [ $? -gt 0 ]; then
 				echo "Did not run full tests. Checking minitest" >&2
-				testout="/tmp/makeminitest.$build.out"
+				testout="/tmp/makeminitest.${USER}.$build.out"
 				summary=`grep 'Failed' $testout  | grep 'tests out of'`
 			fi
 			echo "$build Summary: $summary"
