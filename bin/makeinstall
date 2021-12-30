@@ -1,0 +1,5 @@
+#!/bin/sh
+# keystroke saver
+export LIBPATH=$PERL_ENV:$LIBPATH
+export PATH=$PERL_ENV:$PATH
+make install

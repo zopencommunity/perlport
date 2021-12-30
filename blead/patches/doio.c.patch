@@ -44,7 +44,7 @@
 +     static void updateccsid(int fd, const char* path, int oflag, int perm) 
 +     { 
 +       int rc;
-+       if (oflag & O_CREAT) {
++       if ((oflag & O_CREAT) && !(oflag & O_APPEND)) {
 +         rc = setccsid(fd, 819);
 +       }
 +     }
