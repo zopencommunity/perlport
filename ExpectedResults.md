@@ -31,8 +31,8 @@ and then update this file with your dated results
 
 ## December 30th, 2021 Results: 
 ```
-blead.64.dynamic.ascii Summary: Failed 33 tests out of 2479, 98.67% okay.
-blead.64.dynamic.ebcdic Summary: Failed 99 tests out of 1949, 94.92% okay.
+blead.64.dynamic.ascii Summary: Failed 32 tests out of 2480, 98.71% okay.
+blead.64.dynamic.ebcdic Summary: Failed 98 tests out of 1949, 94.97% okay.
 blead.64.static.ascii Summary: Failed 44 tests out of 2357, 98.13% okay.
 blead.64.static.ebcdic Summary: Failed 98 tests out of 1829, 94.64% okay.
 blead.31.dynamic.ascii Summary: Failed 35 tests out of 2475, 98.59% okay.
