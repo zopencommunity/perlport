@@ -124,17 +124,17 @@
   
 !     cp /samples/startup.mk /etc
   
-! and be sure to also set the environment variable _C89_CCMODE=1 (exporting
-! _C89_CCMODE=1 is also a good idea for users of GNU make).
-  
-! You might also want to have GNU groff for OS/390 installed before
-! running the "make install" step for Perl.
-  
-! There is a syntax error in the /usr/include/sys/socket.h header file
-! that IBM supplies with USS V2R7, V2R8, and possibly V2R9.  The problem with
-! the header file is that near the definition of the SO_REUSEPORT constant
-! there is a spurious extra '/' character outside of a comment like so:
-  
+- and be sure to also set the environment variable _C89_CCMODE=1 (exporting
+- _C89_CCMODE=1 is also a good idea for users of GNU make).
+- 
+- You might also want to have GNU groff for OS/390 installed before
+- running the "make install" step for Perl.
+- 
+- There is a syntax error in the /usr/include/sys/socket.h header file
+- that IBM supplies with USS V2R7, V2R8, and possibly V2R9.  The problem with
+- the header file is that near the definition of the SO_REUSEPORT constant
+- there is a spurious extra '/' character outside of a comment like so:
+- 
 -  #define SO_REUSEPORT    0x0200    /* allow local address & port
 -                                       reuse */                    /
 - 
@@ -155,7 +155,7 @@
 ! to watch out for include:
   
   =head3 Shell
---- 25,131 ----
+--- 25,119 ----
   running the Configure script for Perl.
   
   =head2 Tools
@@ -187,7 +187,7 @@
 ! Run GNU make to build Perl   
 !   make
   
-! Run tests to ensure Perl is working correctly. Currently, there are 37 failing tests out of 2479
+! Run tests to ensure Perl is working correctly. Currently, there are 33 failing tests out of 2479
 !   make tests
   
 ! Install Perl into /usr/local/perl/ascii:
@@ -221,27 +221,15 @@
 ! You now have the source code for the EBCDIC Perl on z/OS and can proceed to build it. This is analagous to how you 
 ! would build the code for ASCII, but note: you _should not_ tag the code but instead leave it untagged. 
   
-! Configure the build environment as 64-bit, Dynamic, EBCDIC, development, deploying it to /usr/local/perl/ebcdic:
+! Configure the build environment as 64-bit, Dynamic, ASCII, development, deploying it to /usr/local/perl/ebcdic:
+!   export PATH=$PWD:$PATH
+!   export LIBPATH=$PWD:$PATH
 !   ./Configure -Dprefix=/usr/local/perl/ebcdic -des -Dusedevel -Duse64bitall -Dusedl
   
 ! Run GNU make to build Perl	
 !   make
   
-! Run tests to ensure Perl is working correctly. Currently, there	are 37 failing tests out of 2479
-!   make tests
-  
-! Install Perl into /usr/local/perl/ascii:
-!   make install
-!   
-! Configure the build environment as 64-bit, Dynamic, ASCII, development, deploying it to /usr/local/perl/ascii:
-!   export PATH=$PWD:$PATH
-!   export LIBPATH=$PWD:$PATH
-!   ./Configure -Dprefix=/usr/local/perl/ascii -des -Dusedevel -Duse64bitall -Dusedl
-  
-! Run GNU make to build Perl	
-!   make
-  
-! Run tests to ensure Perl is working correctly. Currently, there	are 96 tests failing out of 1949
+! Run tests to ensure Perl is working correctly. Currently, there	are 99 tests failing out of 1949
 !   make tests
   
 ! Install Perl into /usr/local/perl/ebcdic:
@@ -281,7 +269,7 @@
 - 
   =head3 Dynamic loading
   
---- 138,141 ----
+--- 126,129 ----
 ***************
 *** 148,214 ****
   binary.
@@ -351,7 +339,7 @@
 - 
   =head2 Build Anomalies with Perl on OS/390
   
---- 145,157 ----
+--- 133,145 ----
   binary.
   
 ! The instructions above will create a dynamic Perl. If you do not want to 
@@ -381,7 +369,7 @@
 - 
   Within USS your /etc/profile or $HOME/.profile may limit your ulimit
   settings.  Check that the following command returns reasonable values:
---- 159,162 ----
+--- 147,150 ----
 ***************
 *** 231,241 ****
       ulimit -a
@@ -395,7 +383,7 @@
 - 
   =head2 Testing Anomalies with Perl on OS/390
   
---- 164,167 ----
+--- 152,155 ----
 ***************
 *** 245,286 ****
   anomalies:
@@ -440,7 +428,7 @@
 ! The C code asks for:
   
    #pragma runopts(HEAP(2M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
---- 171,187 ----
+--- 159,175 ----
   anomalies:
   
 ! =head3 Out of Memory (31-bit only)
@@ -473,7 +461,7 @@
 ! When using perl on OS/390 please keep in mind that the EBCDIC and ASCII
   character sets are different.  See perlebcdic.pod for more on such character
   set issues.  Perl builtin functions that may behave differently under
---- 202,208 ----
+--- 190,196 ----
   is needed to get through the test suite.
   
 ! =head2 Usage Hints for Perl on z/OS
@@ -498,7 +486,7 @@
 - 
   If you are having trouble with square brackets then consider switching your
   rlogin or telnet client.  Try to avoid older 3270 emulators and ISHELL for
---- 209,212 ----
+--- 197,200 ----
 ***************
 *** 329,368 ****
   working with Perl on USS.
@@ -541,7 +529,7 @@
 - 
   Pure Perl (that is non XS) modules may be installed via the usual:
   
---- 213,218 ----
+--- 201,206 ----
   working with Perl on USS.
   
 ! =head2 Modules and Extensions for Perl on z/OS (Static Only)
@@ -555,31 +543,56 @@
 ! the default static linking you can still build XS based extensions for OS/390
   but you will need to follow the instructions in ExtUtils::MakeMaker for
   building statically linked perl binaries.  In the simplest configurations
---- 224,228 ----
+--- 212,216 ----
   If you built perl with dynamic loading capability then that would also
   be the way to build XS based extensions.  However, if you built perl with
 ! static linking you can still build XS based extensions for z/OS
   but you will need to follow the instructions in ExtUtils::MakeMaker for
   building statically linked perl binaries.  In the simplest configurations
 ***************
-*** 386,401 ****
+*** 386,400 ****
       make -f Makefile.aperl inst_perl MAP_TARGET=perl
   
-- In most cases people have reported better results with GNU make rather
-- than the system's /bin/make program, whether for plain modules or for
-- XS based extensions.
-- 
-- If the make process encounters trouble with either compilation or
-- linking then try setting the _C89_CCMODE to 1.  Assuming sh is your
-- login shell then run:
-- 
--     export _C89_CCMODE=1
-- 
-- If tcsh is your login shell then use the setenv command.
-- 
-  =head1 AUTHORS
+! In most cases people have reported better results with GNU make rather
+! than the system's /bin/make program, whether for plain modules or for
+! XS based extensions.
   
---- 236,239 ----
+! If the make process encounters trouble with either compilation or
+! linking then try setting the _C89_CCMODE to 1.  Assuming sh is your
+! login shell then run:
+  
+!     export _C89_CCMODE=1
+  
+! If tcsh is your login shell then use the setenv command.
+  
+  =head1 AUTHORS
+--- 224,249 ----
+      make -f Makefile.aperl inst_perl MAP_TARGET=perl
+  
+! =head2 Running Perl on z/OS
+  
+! To run the 64-bit Dynamic Perl environment, update your PATH and LIBPATH
+! to include the location you installed Perl into, and then run the perl you
+! installed as perlV.R.M where V/R/M is the Version/Release/Modification level 
+! of the current development level. 
+! If you are running the ASCII/EBCDIC Bi-Modal Perl environment, you also need to set up
+! your ASCII/EBCDIC Bi-Modal environment variables, and ensure
+! any Perl source code you run is tagged appropriately as ASCII or EBCDIC
+! using chtag -t -c<CCSID>:
+  
+! =head3 For ASCII Only:
+!     export _BPXK_AUTOCVT=ON
+!     export _CEE_RUNOPTS="FILETAG(AUTOCVT,AUTOTAG),POSIX(ON)"
+!     export _TAG_REDIR_ERR="txt"
+!     export _TAG_REDIR_IN="txt"
+!     export _TAG_REDIR_OUT="txt"
+  
+! =head3 For ASCII or EBCDIC:
+!     export PATH=/usr/local/perl/ascii:$PATH
+!     export LIBPATH=/usr/local/perl/ascii/lib:$LIBPATH
+!     perlV.R.M args
+  
+  =head1 AUTHORS
 ***************
 *** 406,458 ****
   Thanks to John Goodyear for dynamic loading help.
@@ -635,10 +648,10 @@
   
   =cut
   
---- 244,275 ----
+--- 255,286 ----
   Thanks to John Goodyear for dynamic loading help.
   
-! Mike Fulton and Karl Williamson have provided updates for UTF8, DLL, 64-bit and ASCII support
+! Mike Fulton and Karl Williamson have provided updates for UTF8, DLL, 64-bit and ASCII/EBCDIC Bi-Modal support
   
 ! =head2 Other sites
   
