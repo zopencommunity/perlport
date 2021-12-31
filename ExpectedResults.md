@@ -29,14 +29,14 @@ grep 'Summary' nohup.out
 
 and then update this file with your dated results
 
-## December 29th, 2021 Results: 
+## December 30th, 2021 Results: 
 ```
 blead.64.dynamic.ascii Summary: Failed 33 tests out of 2479, 98.67% okay.
-blead.64.dynamic.ebcdic Summary: Failed 98 tests out of 1949, 94.97% okay.
+blead.64.dynamic.ebcdic Summary: Failed 99 tests out of 1949, 94.92% okay.
 blead.64.static.ascii Summary: Failed 44 tests out of 2357, 98.13% okay.
 blead.64.static.ebcdic Summary: Failed 98 tests out of 1829, 94.64% okay.
-blead.31.dynamic.ascii Summary: Failed 36 tests out of 2475, 98.55% okay.
+blead.31.dynamic.ascii Summary: Failed 35 tests out of 2475, 98.59% okay.
 blead.31.dynamic.ebcdic Summary: Failed 98 tests out of 1945, 94.96% okay.
 blead.31.static.ascii Summary: Failed 47 tests out of 2353, 98.00% okay.
-blead.31.static.ebcdic Summary: Failed 100 tests out of 1825, 94.52% okay.
+blead.31.static.ebcdic Summary: Failed 99 tests out of 1825, 94.58% okay.
 ```

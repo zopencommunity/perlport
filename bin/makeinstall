@@ -2,4 +2,5 @@
 # keystroke saver
 export LIBPATH=$PERL_ENV:$LIBPATH
 export PATH=$PERL_ENV:$PATH
+cd $PERL_ENV
 make install
