@@ -6,16 +6,17 @@ Port of perl to z/OS
 This port is designed in such a way to:
  - make it clear what needs to be patched from the mainline perl code
  - work in ASCII wherever possible, for consistency with other modern language ports (e.g. Node.js, Golang)
+ - alternately, support a _traditional_ mode of operation in EBCDIC with no file tagging
  - enable everyone to improve the code by doing development completely in the open
 
 ## How to build from source
 
-To build the code:
+To build and test the code:
  - Log on to z/OS
  - git clone this repo
  - cd into the root directory
  - source setenv.sh: `. ./setenv.sh`
- - build: `./perlbuild.sh`
+ - build and test: `./perlbuild.sh`
 
 Start by using `miniperl` from the `perl5` directory to run simple tests
 
@@ -25,6 +26,7 @@ The code is built by:
  - applying the patches to the mainline perl code from the `patches` directory
  - running Configure
  - running make
+ - running make test
 
 ## How to add an update
 
