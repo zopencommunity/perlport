@@ -8,12 +8,13 @@
 !     unless ( defined $handle->{'blacklist'} ) {
           no strict 'refs';
   
---- 137,144 ----
+--- 137,145 ----
   #--------------------------------------------------------------------------
   
-! sub denylist {
-!     my ( $name, $handle, @methods  ) = @_;
+! sub _exclude {
+!     my ( $caller, $handle, @methods  ) = @_;
   
+!     my $name='denylist';
 !     unless ( defined $handle->{$name} ) {
           no strict 'refs';
   
@@ -27,7 +28,7 @@
                     blacklist
                     encoding
                     fail_with
---- 146,154 ----
+--- 147,155 ----
           # Explicitly exclude all methods in this package that start with an
           # underscore on principle.
 !         $handle->{$name} = {
@@ -39,7 +40,7 @@
                     fail_with
 ***************
 *** 161,164 ****
---- 162,166 ----
+--- 163,167 ----
                     new
                     whitelist
 +                   allowlist
@@ -52,7 +53,7 @@
 !         $handle->{'blacklist'} = { %{ $handle->{'blacklist'} }, map { $_ => 1 } @methods };
       }
   
---- 169,173 ----
+--- 170,174 ----
   
       if ( scalar @methods ) {
 !         $handle->{$name} = { %{ $handle->{$name} }, map { $_ => 1 } @methods };
@@ -69,23 +70,24 @@
 !         $handle->{'whitelist'} = { %{ $handle->{'whitelist'} }, map { $_ => 1 } @methods };
       }
   
---- 176,196 ----
+--- 177,198 ----
   }
   
 ! sub blacklist {
 !     my ( $handle, @methods  ) = @_; 
-!     exclude ( "blacklist", $handle, @methods );
+!     _exclude ( "blacklist", $handle, @methods );
 !     return;
 ! }
 ! 
 ! sub denylist {
 !     my ( $handle, @methods  ) = @_; 
-!     exclude ( "denylist", $handle, @methods );
+!     _exclude ( "denylist", $handle, @methods );
 !     return;
 ! }
 ! 
-! sub include {
-!     my ( $name, $handle, @methods ) = @_;
+! sub _include {
+!     my ( $caller, $handle, @methods ) = @_;
+!     my $name='allowlist';
       if ( scalar @methods ) {
 !         $handle->{$name} = {} unless defined $handle->{$name};
 !         $handle->{$name} = { %{ $handle->{$name} }, map { $_ => 1 } @methods };
@@ -93,18 +95,18 @@
   
 ***************
 *** 185,188 ****
---- 199,214 ----
+--- 201,216 ----
   }
   
 + sub whitelist {
 +     my ( $handle, @methods  ) = @_; 
-+     include ( "whitelist", $handle, @methods );
++     _include ( "whitelist", $handle, @methods );
 +     return;
 + }
 + 
 + sub allowlist {
 +     my ( $handle, @methods  ) = @_; 
-+     include ( "allowlist", $handle, @methods );
++     _include ( "allowlist", $handle, @methods );
 +     return;
 + }
 + 
@@ -112,7 +114,7 @@
   
 ***************
 *** 229,232 ****
---- 255,259 ----
+--- 257,261 ----
       my $handle = bless {}, $class;
       $handle->blacklist;
 +     $handle->denylist;
@@ -126,7 +128,7 @@
 !                         # exclude anything fancy and restrict to the whitelist/blacklist.
                       ) {
                           push @code, ' $_[0]->' . $m . '(';
---- 707,714 ----
+--- 709,716 ----
                       elsif($m =~ /^\w+$/s
                           && !$handle->{'blacklist'}{$m}
 +                         && !$handle->{'denylist'}{$m}

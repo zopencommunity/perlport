@@ -1,5 +1,21 @@
 #!/bin/sh
-set -x
-export LIBPATH=/usr/local/perl/blead.64.dynamic.ascii/lib/5.35.8/os390/CORE:$LIBPATH
-export PATH=/usr/local/perl/blead.64.dynamic.ascii/bin:$PATH
-/usr/local/perl/*/bin/perl5.35.8 $*
+#
+# This perl routes to the active perl (from a previous setenv) in development
+#
+#set -x
+# This perl routes to the currently active perl
+if [ "${PERL_ROOT}" = '' ] || [ "${PERL_VRM}" = '' ] || [ "${PERL_OS390_TGT_AMODE}" = '' ] || [ "${PERL_OS390_TGT_LINK}" = '' ] || [ "${PERL_OS390_TGT_CODEPAGE}" = '' ]; then 
+	echo "Set up environment to use this 'perl'" >&2
+	exit 16
+fi
+
+export PERL_ROOT="${PERL_ROOT}/${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}/perl5"
+export PATH="${PERL_ROOT}:$PATH"
+export LIBPATH="${PERL_ROOT}:$LIBPATH"
+
+if [ -x "${PERL_ROOT}/perl" ]; then
+	perl -I"${PERL_ROOT}/lib" $*
+else
+	echo "Perl not found at ${PERL_ROOT}" >&2
+	exit 16
+fi

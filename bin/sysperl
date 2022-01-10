@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Run the version of perl installed into /usr/local on this system
+#
+set -x
+if [ "${PERL_ROOT}" = '' ] || [ "${PERL_VRM}" = '' ] || [ "${PERL_OS390_TGT_AMODE}" = '' ] || [ "${PERL_OS390_TGT_LINK}" = '' ] || [ "${PERL_OS390_TGT_CODEPAGE}" = '' ]; then
+       	echo "Set up environment to use this 'sysperl'" >&2
+	exit 16
+fi
+PERL_DIR="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
+PERL_VER="5.35.8"
+export LIBPATH=/usr/local/perl/${PERL_DIR}/lib/${PERL_VER}/os390/CORE:$LIBPATH
+export PATH=/usr/local/perl/${PERL_DIR}/bin:$PATH
+perl${PERL_VER} $*
