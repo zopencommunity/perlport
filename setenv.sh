@@ -9,12 +9,16 @@ else
 	export _TAG_REDIR_IN="txt"
 	export _TAG_REDIR_OUT="txt"
 
-	if [ "$HOME" != '' ] && [ -d $HOME/bin ]; then
-		export PATH=$HOME/bin:/usr/local/bin:/bin:/usr/sbin
-	else
-		export PATH=/usr/local/bin:/bin:/usr/sbin
+	if [ -z "$GIT_ROOT" ]; then
+		export GIT_ROOT=/rsusr/ported/bin
 	fi  
-	export LIBPATH=/lib:/usr/lib
+
+	if [ "$HOME" != '' ] && [ -d $HOME/bin ]; then
+		export PATH=$HOME/bin:/usr/local/bin:/bin:/usr/sbin:$PATH
+	else
+		export PATH=/usr/local/bin:/bin:/usr/sbin:$PATH
+	fi  
+	export LIBPATH=/lib:/usr/lib:$LIBPATH
 
 	# See perlbuild.sh for valid values of PERL_xxx variables
 	export PERL_VRM="blead" #maint-5.34|blead
@@ -23,7 +27,6 @@ else
 	export PERL_OS390_TGT_CODEPAGE="ascii" # ebcdic|ascii
 
 	export PERL_ROOT="${PWD}"
-	export GIT_ROOT=/rsusr/ported/bin
 
 	export PATH="${PERL_ROOT}/bin:$PATH"
 
