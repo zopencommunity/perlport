@@ -51,7 +51,12 @@ PERLPORT_ROOT="${PWD}"
 
 perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 
-ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
+if [ ! -z "${CONFIG_OPTS}" ]; then
+  ConfigOpts="$CONFIG_OPTS"
+else
+  ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
+fi
+echo $ConfigOpts
 case "$PERL_VRM" in
 	maint*) ConfigOpts="${ConfigOpts} -de" ;;
 	blead) ConfigOpts="${ConfigOpts} -des -Dusedevel" ;;
