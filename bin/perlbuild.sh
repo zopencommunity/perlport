@@ -4,7 +4,7 @@
 # Pre-requisites: 
 #  - ensure you have sourced setenv.sh, e.g. . ./setenv.sh
 #  - ensure you have GNU make installed (4.1 or later)
-#  - ensure you have access to c99
+#  - ensure you have access to xlclang/c99
 #  - network connectivity to pull git source from org
 #
 if [ $# -ne 4 ]; then
@@ -41,12 +41,6 @@ if [ $? -gt 0 ]; then
 	exit 16
 fi
 
-whence c99 >/dev/null
-if [ $? -gt 0 ]; then
-	echo "c99 required to build Perl. " >&2
-	exit 16
-fi
-
 PERLPORT_ROOT="${PWD}"
 
 perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
@@ -63,8 +57,20 @@ case "$PERL_VRM" in
 	*) echo "Invalid PERL_VRM of: ${PERL_VRM} specified. Valid Options: [maint*|blead]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_AMODE" in
-	31) ConfigOpts="${ConfigOpts}" ;;
-	64) ConfigOpts="${ConfigOpts} -Duse64bitall" ;;
+	31) ConfigOpts="${ConfigOpts}"
+      whence c99 >/dev/null
+      if [ $? -gt 0 ]; then
+        echo "c99 required to build Perl. " >&2
+        exit 16
+      fi
+      ;;
+	64) ConfigOpts="${ConfigOpts} -Duse64bitall"
+      whence xlclang >/dev/null
+      if [ $? -gt 0 ]; then
+        echo "xlclang required to build Perl. " >&2
+        exit 16
+      fi
+      ;;
 	*) echo "Invalid PERL_OS390_TGT_AMODE of: ${PERL_OS390_TGT_AMODE} specified. Valid Options: [31|64]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_LINK" in
@@ -119,7 +125,10 @@ echo "Configure Perl"
 date
 export PATH=$PWD:$PATH
 export LIBPATH=$PWD:$LIBPATH
+set -x
 nohup sh ./Configure ${ConfigOpts} >/tmp/config.${USER}.${perlbld}.out 2>&1
+
+set +x
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "Configure of Perl tree failed." >&2
@@ -129,7 +138,7 @@ fi
 echo "Make Perl"
 date
 
-nohup make >/tmp/make.${USER}.${perlbld}.out 2>&1
+nohup make -j6 >/tmp/make.${USER}.${perlbld}.out 2>&1
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
