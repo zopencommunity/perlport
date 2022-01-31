@@ -1,5 +1,5 @@
 diff --git a/Configure b/Configure
-index 4d5c3ed..4c17c36 100755
+index 4d5c3ed..bc4779a 100755
 --- a/Configure
 +++ b/Configure
 @@ -4566,7 +4566,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
@@ -11,22 +11,6 @@ index 4d5c3ed..4c17c36 100755
  #ifdef __VERSION__
  	printf("%s\n", __VERSION__);
  #else
-@@ -4767,6 +4767,7 @@ y)	fn=d/
- 	;;
- esac
- 
-+set -x
- : see how we invoke the C preprocessor
- echo " "
- echo "Now, how can we feed standard input to your C preprocessor..." >&4
-@@ -4926,6 +4927,7 @@ esac
- # If using gcc or clang, we can get better values for libpth, incpth
- # and usrinc directly from the compiler.
- # Note that ccname for clang is also gcc.
-+echo "CCNAME: $ccname"
- case "$ccname" in
-     gcc)
- 	realpath=`which realpath 2>/dev/null | sed 's/no realpath in.*//'`
 diff --git a/cpan/Encode/Makefile.PL b/cpan/Encode/Makefile.PL
 index 632d736..266bb7c 100644
 --- a/cpan/Encode/Makefile.PL
@@ -153,7 +137,7 @@ index e90b4ae..2fddf74 100644
  #define PERL_IN_MINIPERLMAIN_C
  
 diff --git a/hints/os390.sh b/hints/os390.sh
-index 6d1538f..1c23d30 100644
+index 6d1538f..bf05207 100644
 --- a/hints/os390.sh
 +++ b/hints/os390.sh
 @@ -22,19 +22,9 @@
@@ -176,7 +160,7 @@ index 6d1538f..1c23d30 100644
  # Turn on POSIX compatibility modes
  #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
  def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
-@@ -44,6 +34,12 @@ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
+@@ -44,6 +34,13 @@ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
  
  case "$use64bitall" in
  '')
@@ -186,10 +170,11 @@ index 6d1538f..1c23d30 100644
 +  case "$ld" in
 +  '') ld='c99' ;;
 +  esac
++  def_os390_cflags='-qlanglvl=extc1x';
    def_os390_cflags="$def_os390_cflags -qxplink"
    def_os390_cccdlflags="-qxplink"
    def_os390_ldflags="-qxplink"
-@@ -51,9 +47,15 @@ case "$use64bitall" in
+@@ -51,9 +48,15 @@ case "$use64bitall" in
    def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
    ;;
  *)
@@ -202,13 +187,13 @@ index 6d1538f..1c23d30 100644
 +  case "$ld" in
 +  '') ld='xlclang' ;;
 +  esac
-+  def_os390_cflags="$def_os390_cflags -q64"
-+  def_os390_cccdlflags="$def_os390_cflags -q64"
++  def_os390_cflags="-q64"
++  def_os390_cccdlflags="$def_os390_cflags"
 +  def_os390_ldflags="-q64"
  esac
  
  myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
-@@ -78,7 +80,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
+@@ -78,7 +81,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
  #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
  # 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
  #       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
@@ -217,7 +202,7 @@ index 6d1538f..1c23d30 100644
  
  def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
  def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
-@@ -231,10 +233,10 @@ esac
+@@ -231,10 +234,10 @@ esac
  # NOLOC says to use the 1047 code page, and no locale
  case "$usedl" in
  define)
