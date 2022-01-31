@@ -1,0 +1,357 @@
+diff --git a/Configure b/Configure
+index 4d5c3ed..4c17c36 100755
+--- a/Configure
++++ b/Configure
+@@ -4566,7 +4566,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
+ $cat >try.c <<EOM
+ #include <stdio.h>
+ int main() {
+-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
++#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__MVS__)
+ #ifdef __VERSION__
+ 	printf("%s\n", __VERSION__);
+ #else
+@@ -4767,6 +4767,7 @@ y)	fn=d/
+ 	;;
+ esac
+ 
++set -x
+ : see how we invoke the C preprocessor
+ echo " "
+ echo "Now, how can we feed standard input to your C preprocessor..." >&4
+@@ -4926,6 +4927,7 @@ esac
+ # If using gcc or clang, we can get better values for libpth, incpth
+ # and usrinc directly from the compiler.
+ # Note that ccname for clang is also gcc.
++echo "CCNAME: $ccname"
+ case "$ccname" in
+     gcc)
+ 	realpath=`which realpath 2>/dev/null | sed 's/no realpath in.*//'`
+diff --git a/cpan/Encode/Makefile.PL b/cpan/Encode/Makefile.PL
+index 632d736..266bb7c 100644
+--- a/cpan/Encode/Makefile.PL
++++ b/cpan/Encode/Makefile.PL
+@@ -133,7 +133,7 @@ WriteMakefile(
+             'MORIYAMA Masayuki <msyk@mtg.biglobe.ne.jp>',
+             'Nick Ing-Simmons <nick@ing-simmons.net>',
+             'Nicholas Clark <nick@ccl4.org>',
+-            'Olivier Mengué <dolmen@cpan.org>',
++            'Olivier Mengue <dolmen@cpan.org>',
+             'otsune',
+             'Pali <pali@cpan.org>',
+             'Paul Marquess <paul_marquess@yahoo.co.uk>',
+@@ -159,7 +159,7 @@ WriteMakefile(
+             'Tony Cook <tony@develop-help.com>',
+             'Vadim Konovalov <vkonovalov@peterstar.ru>',
+             'Victor <victor@vsespb.ru>',
+-            'Ville Skyttä <ville.skytta@iki.fi>',
++            'Ville Skytta <ville.skytta@iki.fi>',
+             'Vincent van Dam <vvandam@sandvine.com>',
+             'Yitzchak Scott-Thoennes <sthoenna@efn.org>',
+         ],
+diff --git a/doio.c b/doio.c
+index 87790da..5d0a4c8 100644
+--- a/doio.c
++++ b/doio.c
+@@ -218,57 +218,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
+ #endif
+ }
+ 
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-#   include <stdio.h>
+-#   include <stdlib.h>
+-
+-    static int setccsid(int fd, int ccsid) 
+-    {
+-      attrib_t attr;
+-      int rc;
+-
+-      memset(&attr, 0, sizeof(attr));
+-      attr.att_filetagchg = 1;
+-      attr.att_filetag.ft_ccsid = ccsid;
+-      attr.att_filetag.ft_txtflag = 1;
+-
+-      rc = __fchattr(fd, &attr, sizeof(attr));
+-      return rc;
+-    }
+-
+-    static void updateccsid(int fd, const char* path, int oflag, int perm) 
+-    { 
+-      int rc;
+-      if (oflag & O_CREAT) {
+-        rc = setccsid(fd, 819);
+-      }
+-    }
+-
+-    int asciiopen(const char* path, int oflag) 
+-    {
+-      int rc;
+-      int fd = open(path, oflag);
+-      if (fd == -1) { 
+-        return fd;
+-      }
+-      updateccsid(fd, path, oflag, -1);
+-      return fd; 
+-    }
+-
+-    int asciiopen3(const char* path, int oflag, int perm) 
+-    {
+-      int rc;
+-      int fd = open(path, oflag, perm);
+-      if (fd == -1) { 
+-        return fd;
+-      }
+-      updateccsid(fd, path, oflag, perm);
+-      return fd;
+-    } 
+-  #endif
+-#endif
+-
+ int
+ Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
+ {
+@@ -318,7 +267,7 @@ Perl_my_mkstemp_cloexec(char *templte)
+ {
+     int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
+ #  if defined(TEMP_CCSID)
+-    setccsid(tempfd, TEMP_CCSID);
++    __setccsid(tempfd, TEMP_CCSID);
+ #  endif
+     return tempfd;
+ }
+@@ -2504,6 +2453,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
+             }
+           doshell:
+             PERL_FPU_PRE_EXEC
++#if defined(OEMVS)
++  #if (__CHARSET_LIB == 1)
++            unsetenv("_TAG_REDIR_ERR");
++  #endif
++#endif
+             PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
+             PERL_FPU_POST_EXEC
+             S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
+diff --git a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
+index e90b4ae..2fddf74 100644
+--- a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
++++ b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
+@@ -68,6 +68,7 @@ sub writemain{
+  */
+ 
+ #ifdef OEMVS
++#ifndef __LP64__
+ #ifdef MYMALLOC
+ /* sbrk is limited to first heap segment so make it big */
+ #pragma runopts(HEAP(8M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
+@@ -75,6 +76,7 @@ sub writemain{
+ #pragma runopts(HEAP(2M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
+ #endif
+ #endif
++#endif
+ 
+ #define PERL_IN_MINIPERLMAIN_C
+ 
+diff --git a/hints/os390.sh b/hints/os390.sh
+index 6d1538f..1c23d30 100644
+--- a/hints/os390.sh
++++ b/hints/os390.sh
+@@ -22,19 +22,9 @@
+ # c99 has compiler options specified via standard Unix-style options, but some
+ # options need to be specified using -Wc,<compiler-option> or -Wl,<link-option>
+ me=$0
+-case "$cc" in
+-'') cc='c99' ;;
+-esac
+-case "$ld" in
+-'') ld='c99' ;;
+-esac
+ 
+ # Prepend your favorites with Configure -Dccflags=your_favorites
+ 
+-# This overrides the name the compiler was called with.  'ext' is required for
+-# "unicode literals" to be enabled
+-def_os390_cflags='-qlanglvl=extc1x';
+-
+ # Turn on POSIX compatibility modes
+ #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
+ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
+@@ -44,6 +34,12 @@ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
+ 
+ case "$use64bitall" in
+ '')
++  case "$cc" in
++  '') cc='c99' ;;
++  esac
++  case "$ld" in
++  '') ld='c99' ;;
++  esac
+   def_os390_cflags="$def_os390_cflags -qxplink"
+   def_os390_cccdlflags="-qxplink"
+   def_os390_ldflags="-qxplink"
+@@ -51,9 +47,15 @@ case "$use64bitall" in
+   def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
+   ;;
+ *)
+-  def_os390_cflags="$def_os390_cflags -Wc,lp64"
+-  def_os390_cccdlflags="$def_os390_cflags -Wl,lp64"
+-  def_os390_ldflags="-Wl,lp64"
++  case "$cc" in
++  '') cc='xlclang' ;;
++  esac
++  case "$ld" in
++  '') ld='xlclang' ;;
++  esac
++  def_os390_cflags="$def_os390_cflags -q64"
++  def_os390_cccdlflags="$def_os390_cflags -q64"
++  def_os390_ldflags="-q64"
+ esac
+ 
+ myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
+@@ -78,7 +80,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
+ #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
+ # 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
+ #       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
+-def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108 -qsuppress=CCN3159 -qfloat=ieee"
++def_os390_cflags="$def_os390_cflags -qfloat=ieee"
+ 
+ def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
+ def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
+@@ -231,10 +233,10 @@ esac
+ # NOLOC says to use the 1047 code page, and no locale
+ case "$usedl" in
+ define)
+-echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -D_SHR_ENVIRON -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
++echo 'cat >.$$.c; '"$cc"' -D_ALL_SOURCE -D_SHR_ENVIRON -E -qdollar ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
+    ;;
+ *)
+-echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
++echo 'cat >.$$.c; '"$cc"' -D_ALL_SOURCE -E -qdollar ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
+    ;;
+ esac
+ 
+diff --git a/iperlsys.h b/iperlsys.h
+index b277645..786b109 100644
+--- a/iperlsys.h
++++ b/iperlsys.h
+@@ -777,21 +777,8 @@ struct IPerlLIOInfo
+ #  define PerlLIO_lstat(name, buf)	PerlLIO_stat((name), (buf))
+ #endif
+ #define PerlLIO_mktemp(file)		mktemp((file))
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    int asciiopen(const char* path, int oflag);
+-    int asciiopen3(const char* path, int oflag, int perm);
+-
+-    #define PerlLIO_open(file, flag)		asciiopen((file), (flag))
+-    #define PerlLIO_open3(file, flag, perm)	asciiopen3((file), (flag), (perm))
+-  #else
+-    #define PerlLIO_open(file, flag)		open((file), (flag))
+-    #define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+-  #endif
+-#else
+-#  define PerlLIO_open(file, flag)		open((file), (flag))
+-#  define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+-#endif
++#define PerlLIO_open(file, flag)		open((file), (flag))
++#define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+ #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
+ #define PerlLIO_rename(old, new)	rename((old), (new))
+ #define PerlLIO_setmode(fd, mode)	setmode((fd), (mode))
+diff --git a/perl.h b/perl.h
+index d05cc29..e9b0aea 100644
+--- a/perl.h
++++ b/perl.h
+@@ -22,6 +22,10 @@
+ #define USE_STDIO
+ #endif /* PERL_FOR_X2P */
+ 
++#if defined(__MVS__)
++#   include "os390/os390.h"
++#endif
++
+ #ifdef PERL_MICRO
+ #   include "uconfig.h"
+ #else
+diff --git a/util.c b/util.c
+index b1da8e3..9fe743e 100644
+--- a/util.c
++++ b/util.c
+@@ -2646,22 +2646,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
+ }
+ #endif
+ 
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-  static int chgfdccsid(int fd, unsigned short ccsid) 
+-  {
+-    attrib_t attr;
+-    memset(&attr, 0, sizeof(attr));
+-    attr.att_filetagchg = 1;
+-    attr.att_filetag.ft_ccsid = ccsid;
+-    if (ccsid != FT_BINARY) {
+-      attr.att_filetag.ft_txtflag = 1;
+-    }
+-    return __fchattr(fd, &attr, sizeof(attr));
+-  }
+-  #endif
+-#endif
+-
+ PerlIO *
+ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+ {
+@@ -2709,12 +2693,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+         /* Close parent's end of error status pipe (if any) */
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         /* Now dup our end of _the_ pipe to right position */
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+@@ -2790,19 +2768,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+     }
+     if (did_pipes)
+          PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    PerlIO* io = PerlIO_fdopen(p[This], mode);
+-    if (io) {
+-      chgfdccsid(p[This], 819);
+-    }
+-    return io;
+-  #else
+-    return PerlIO_fdopen(p[This], mode);
+-  #endif
+-#else
+     return PerlIO_fdopen(p[This], mode);
+-#endif
+ 
+ #else
+ #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
+@@ -2870,12 +2836,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+ #define THAT This
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+             PerlLIO_close(p[THIS]);
+@@ -2966,7 +2926,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+   #if (__CHARSET_LIB == 1)
+     PerlIO* io = PerlIO_fdopen(p[This],	mode);
+     if (io) {
+-      chgfdccsid(p[This], 819);
++      __chgfdccsid(p[This], 819);
+     }
+     return io;
+   #else
