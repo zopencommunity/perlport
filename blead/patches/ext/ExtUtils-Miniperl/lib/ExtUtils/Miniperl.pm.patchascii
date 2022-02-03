@@ -1,0 +1,69 @@
+***************
+*** 69,72 ****
+--- 69,76 ----
+  
+  #ifdef OEMVS
++ #include <_Nascii.h>
++ #include <sys/stat.h>
++ #include <fcntl.h>
++ #ifndef __LP64__
+  #ifdef MYMALLOC
+  /* sbrk is limited to first heap segment so make it big */
+***************
+*** 76,80 ****
+--- 80,114 ----
+  #endif
+  #endif
++ int __getfdccsid(int fd) {
++   struct stat st;
++   int rc;
++   rc = fstat(fd, &st);
++   if (rc != 0)
++     return -1;
++   unsigned short ccsid = st.st_tag.ft_ccsid;
++   if (st.st_tag.ft_txtflag) {
++     return 65536 + ccsid;
++   }
++   return ccsid;
++ }
+  
++ void __set_autocvt_on_fd_stream(int fd, unsigned short ccsid,
++                                 unsigned char txtflag, int on_untagged_only) {
++   struct file_tag tag;
++ 
++   tag.ft_ccsid = ccsid;
++   tag.ft_txtflag = txtflag;
++   tag.ft_deferred = 0;
++   tag.ft_rsvflags = 0;
++ 
++   struct f_cnvrt req = {SETCVTON, 0, (short)ccsid};
++ 
++   if (!on_untagged_only || (!isatty(fd) && 0 == __getfdccsid(fd))) {
++     fcntl(fd, F_CONTROL_CVT, &req);
++     fcntl(fd, F_SETTAG, &tag);
++   }
++ }
++ #endif
++ 
+  #define PERL_IN_MINIPERLMAIN_C
+  
+***************
+*** 103,106 ****
+--- 137,153 ----
+      PL_use_safe_putenv = FALSE;
+  #endif /* PERL_USE_SAFE_PUTENV */
++ 
++ #ifdef OEMVS
++ #if (__CHARSET_LIB == 1)
++   __ae_thread_swapmode(__AE_ASCII_MODE);
++   __ae_autoconvert_state(_CVTSTATE_ON);
++   setenv("_TAG_REDIR_IN", "txt", 0);
++   setenv("_TAG_REDIR_OUT", "txt", 0);
++   setenv("_TAG_REDIR_ERR", "txt", 0);
++   __set_autocvt_on_fd_stream(STDIN_FILENO, 1047, 1, true);
++   __set_autocvt_on_fd_stream(STDERR_FILENO, 1047, 1, true);
++   __set_autocvt_on_fd_stream(STDOUT_FILENO, 1047, 1, true);
++ #endif
++ #endif
+  
+      /* if user wants control of gprof profiling off by default */

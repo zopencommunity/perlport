@@ -51,7 +51,12 @@ PERLPORT_ROOT="${PWD}"
 
 perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 
-ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
+if [ ! -z "${CONFIG_OPTS}" ]; then
+  ConfigOpts="$CONFIG_OPTS"
+else
+  ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
+fi
+echo $ConfigOpts
 case "$PERL_VRM" in
 	maint*) ConfigOpts="${ConfigOpts} -de" ;;
 	blead) ConfigOpts="${ConfigOpts} -des -Dusedevel" ;;
@@ -124,7 +129,7 @@ fi
 echo "Make Perl"
 date
 
-nohup make >/tmp/make.${USER}.${perlbld}.out 2>&1
+nohup make -j6 >/tmp/make.${USER}.${perlbld}.out 2>&1
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
@@ -142,7 +147,7 @@ else
 	echo "Make Test Perl"
 	date
 
-	nohup make test >/tmp/maketest.${USER}.${perlbld}.out 2>&1
+	nohup make -j6 test >/tmp/maketest.${USER}.${perlbld}.out 2>&1
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE test of Perl tree failed." >&2
