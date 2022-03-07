@@ -11,7 +11,7 @@ index 309de23..1d0c3d8 100644
  *.so
  *.i
 diff --git a/Configure b/Configure
-index 4d5c3ed..bc4779a 100755
+index bd96249..2c81e93 100755
 --- a/Configure
 +++ b/Configure
 @@ -4566,7 +4566,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
@@ -45,8 +45,30 @@ index 632d736..266bb7c 100644
              'Vincent van Dam <vvandam@sandvine.com>',
              'Yitzchak Scott-Thoennes <sthoenna@efn.org>',
          ],
+diff --git a/cpan/libnet/lib/Net/Cmd.pm b/cpan/libnet/lib/Net/Cmd.pm
+index 41df8a2..bf751d6 100644
+--- a/cpan/libnet/lib/Net/Cmd.pm
++++ b/cpan/libnet/lib/Net/Cmd.pm
+@@ -19,7 +19,7 @@ use Symbol 'gensym';
+ use Errno 'EINTR';
+ 
+ BEGIN {
+-  if ($^O eq 'os390') {
++  if (ord "A" == 193) {
+     require Convert::EBCDIC;
+ 
+     #    Convert::EBCDIC->import;
+@@ -41,7 +41,7 @@ use constant DEF_REPLY_CODE => 421;
+ 
+ my %debug = ();
+ 
+-my $tr = $^O eq 'os390' ? Convert::EBCDIC->new() : undef;
++my $tr = ord "A" == 193 ? Convert::EBCDIC->new() : undef;
+ 
+ sub toebcdic {
+   my $cmd = shift;
 diff --git a/doio.c b/doio.c
-index 87790da..5d0a4c8 100644
+index 4009545..3d5dc99 100644
 --- a/doio.c
 +++ b/doio.c
 @@ -218,57 +218,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
@@ -116,7 +138,7 @@ index 87790da..5d0a4c8 100644
  #  endif
      return tempfd;
  }
-@@ -2504,6 +2453,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
+@@ -2514,6 +2463,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
              }
            doshell:
              PERL_FPU_PRE_EXEC
@@ -129,7 +151,7 @@ index 87790da..5d0a4c8 100644
              PERL_FPU_POST_EXEC
              S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
 diff --git a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
-index e90b4ae..2fddf74 100644
+index e90b4ae..281172c 100644
 --- a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
 +++ b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
 @@ -68,6 +68,7 @@ sub writemain{
@@ -148,8 +170,18 @@ index e90b4ae..2fddf74 100644
  
  #define PERL_IN_MINIPERLMAIN_C
  
+@@ -95,6 +97,9 @@ int
+ main(int argc, char **argv, char **env)
+ #endif
+ {
++#ifdef OEMVS && !defined(__clang__)
++    __init();
++#endif
+     int exitstatus, i;
+ #ifndef NO_ENV_ARRAY_IN_MAIN
+     PERL_UNUSED_ARG(env);
 diff --git a/hints/os390.sh b/hints/os390.sh
-index 6d1538f..bf05207 100644
+index 6d1538f..36d260f 100644
 --- a/hints/os390.sh
 +++ b/hints/os390.sh
 @@ -22,19 +22,9 @@
@@ -186,7 +218,7 @@ index 6d1538f..bf05207 100644
    def_os390_cflags="$def_os390_cflags -qxplink"
    def_os390_cccdlflags="-qxplink"
    def_os390_ldflags="-qxplink"
-@@ -51,9 +48,15 @@ case "$use64bitall" in
+@@ -51,11 +48,22 @@ case "$use64bitall" in
    def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
    ;;
  *)
@@ -204,8 +236,15 @@ index 6d1538f..bf05207 100644
 +  def_os390_ldflags="-q64"
  esac
  
++archobjs="os390.o"
++
++# Help make find os390.c
++test -h os390.c || ln -s os390/os390.c os390.c
++
  myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
-@@ -78,7 +81,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
+ if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
+   unset ebcdic
+@@ -78,7 +86,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
  #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
  # 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
  #       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
@@ -214,7 +253,7 @@ index 6d1538f..bf05207 100644
  
  def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
  def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
-@@ -231,10 +234,10 @@ esac
+@@ -231,10 +239,10 @@ esac
  # NOLOC says to use the 1047 code page, and no locale
  case "$usedl" in
  define)
@@ -255,286 +294,8 @@ index b277645..786b109 100644
  #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
  #define PerlLIO_rename(old, new)	rename((old), (new))
  #define PerlLIO_setmode(fd, mode)	setmode((fd), (mode))
-diff --git a/os390/os390.c b/os390/os390.c
-new file mode 100644
-index 0000000..6d4e6c2
---- /dev/null
-+++ b/os390/os390.c
-@@ -0,0 +1,231 @@
-+#include "os390/os390.h"
-+#include <string.h>
-+#include <sys/stat.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <sys/ps.h>
-+#include <unistd.h>
-+#include <stdarg.h>
-+#include <varargs.h>
-+#include <limits.h>
-+#include <_Nascii.h>
-+#include <fcntl.h>
-+#include <libgen.h>
-+
-+int __setccsid(int fd, int ccsid) 
-+{
-+  attrib_t attr;
-+  int rc;
-+
-+  memset(&attr, 0, sizeof(attr));
-+  attr.att_filetagchg = 1;
-+  attr.att_filetag.ft_ccsid = ccsid;
-+  attr.att_filetag.ft_txtflag = 1;
-+
-+  rc = __fchattr(fd, &attr, sizeof(attr));
-+  return rc;
-+}
-+
-+void __updateccsid(int fd, const char* path, int oflag, int perm) 
-+{ 
-+  int rc;
-+  if (oflag & O_CREAT) {
-+    rc = __setccsid(fd, 819);
-+  }
-+}
-+
-+int __pipe(int [2]) asm("pipe");
-+int __open(const char *filename, int opts, ...) asm("@@A00144");
-+
-+int __open_ascii(const char *filename, int opts, ...) {
-+  va_list ap;
-+  va_start(ap, opts);
-+  int perms = va_arg(ap, int);
-+  struct stat sb;
-+  int is_new_file = stat(filename, &sb) != 0;
-+  int fd = __open(filename, opts, perms);
-+  // Tag new files as 819
-+  if (fd >= 0 && is_new_file)
-+    __chgfdccsid(fd, 819);
-+  va_end(ap);
-+  return fd;
-+}
-+
-+int __pipe_ascii(int fd[2]) {
-+  int ret = __pipe(fd);
-+  if (ret < 0)
-+    return ret;
-+
-+  // Default ccsid for new pipes should be 819
-+  __chgfdccsid(fd[0], 819);
-+  __chgfdccsid(fd[1], 819);
-+  return ret;
-+}
-+
-+int __getfdccsid(int fd) {
-+  struct stat st;
-+  int rc;
-+  rc = fstat(fd, &st);
-+  if (rc != 0)
-+    return -1;
-+  unsigned short ccsid = st.st_tag.ft_ccsid;
-+  if (st.st_tag.ft_txtflag) {
-+    return 65536 + ccsid;
-+  }
-+  return ccsid;
-+}
-+
-+int __chgfdccsid(int fd, unsigned short ccsid) 
-+{
-+  attrib_t attr;
-+  memset(&attr, 0, sizeof(attr));
-+  attr.att_filetagchg = 1;
-+  attr.att_filetag.ft_ccsid = ccsid;
-+  if (ccsid != FT_BINARY) {
-+    attr.att_filetag.ft_txtflag = 1;
-+  }
-+  return __fchattr(fd, &attr, sizeof(attr));
-+}
-+
-+void init_stdio_streams() {
-+    // If stdout is not a TTY and is untagged, tag it as 1047
-+    if (0 == __getfdccsid(fileno(stdout))) {
-+        struct file_tag tag;
-+        tag.ft_ccsid = 1047;
-+        tag.ft_txtflag = 1;
-+        fcntl(fileno(stdout), F_SETTAG, &tag);
-+
-+        struct f_cnvrt req = {SETCVTON, 0, 1047};
-+        fcntl(fileno(stdout), F_CONTROL_CVT, &req);
-+    }
-+
-+    // If stderr is not a TTY is untagged, tag as 1047
-+    if (0 == __getfdccsid(fileno(stderr))) {
-+        struct file_tag tag;
-+        tag.ft_ccsid = 1047;
-+        tag.ft_txtflag = 1;
-+        fcntl(fileno(stderr), F_SETTAG, &tag);
-+
-+        struct f_cnvrt req = {SETCVTON, 0, 1047};
-+        fcntl(fileno(stderr), F_CONTROL_CVT, &req);
-+    }
-+
-+    // If stdin not a TTY is untagged, tag as 1047
-+    if (0 == __getfdccsid(fileno(stdin))) {
-+        struct file_tag tag;
-+        tag.ft_ccsid = 1047;
-+        tag.ft_txtflag = 1;
-+        fcntl(fileno(stdin), F_SETTAG, &tag);
-+
-+        // Below is needed for /bin/sh STDIN
-+        struct f_cnvrt req = {SETCVTON, 0, 1047};
-+        fcntl(fileno(stdin), F_CONTROL_CVT, &req);
-+    }
-+}
-+
-+int orig_mode;
-+int orig_cvstate;
-+
-+__attribute__((constructor))
-+static void
-+__init()
-+{
-+    // With "_EDC_SIG_DFLT" set to '0', a process closing with SIGINT send output both to stderr and stdout. 
-+    // Setting "_EDC_SIG_DFLT" default action of the following signals is abnormal termination of the process with no message output: SIGALRM, SIGHUP, SIGINT, SIGPIPE, SIGPOLL, SIGPROF, SIGSYS, SIGTERM, SIGUSR1, SIGUSR2, and SIGVTALRM
-+    setenv("_EDC_SIG_DFLT", "1", 1);
-+
-+    // Setting _EDC_SUSV3 can be used to control the behavior of setenv() with respect to setting EINVAL when var_name is a null pointer, points to an empty string or points to a string containing an '=' character. By default, setenv() will not set EINVAL for these conditions. 
-+    // When _EDC_SUSV3 is set to 1, setenv() will set errno to EINVAL if one of these conditions is true. 
-+    setenv("_EDC_SUSV3", "1", 1);
-+
-+    // Sets the _TAG_REDIR state to txt
-+    setenv("_TAG_REDIR_ERR", "txt", 1);
-+    setenv("_TAG_REDIR_IN", "txt", 1);
-+    setenv("_TAG_REDIR_OUT", "txt", 1);
-+
-+    // Force to ASCII mode and AUTOCVT to ON
-+#if (__CHARSET_LIB == 1)
-+    orig_mode = __ae_thread_swapmode(__AE_ASCII_MODE);
-+#else
-+    orig_mode = __ae_thread_swapmode(__AE_EBCDIC_MODE);
-+#endif
-+    orig_cvstate = __ae_autoconvert_state(_CVTSTATE_QUERY);
-+    if (_CVTSTATE_OFF == orig_cvstate)
-+        __ae_autoconvert_state(_CVTSTATE_ON);
-+
-+    // Sets the LIBPATH relative to the perl executable
-+    char path[_XOPEN_PATH_MAX];
-+    char parent[_XOPEN_PATH_MAX];
-+
-+    W_PSPROC buf;
-+    int token = 0;
-+    pid_t mypid = getpid();
-+    memset(&buf, 0, sizeof(buf));
-+    buf.ps_pathlen = _XOPEN_PATH_MAX;
-+    buf.ps_pathptr = path;
-+
-+    while ((token = w_getpsent(token, &buf, sizeof(buf))) > 0) {
-+      // Found our process.
-+      if (buf.ps_pid == mypid) {
-+
-+        // Resolve path to find true location of executable.
-+        if (realpath(buf.ps_pathptr, parent) == NULL)
-+          break;
-+
-+        // Get parent directory.
-+        dirname(parent);
-+
-+        // Get parent's parent directory.
-+        char* parent2 = strdup(parent);
-+        dirname(parent2);
-+
-+        // Append new paths to libpath.
-+        char* libpath_env = getenv("LIBPATH");
-+
-+        unsigned int size_parent = strlen(parent);
-+        unsigned int size_parent2 = strlen(parent2);
-+        unsigned int size_libpath_env = strlen(libpath_env);
-+        unsigned int size_colon = sizeof(":");
-+        unsigned int size_lib = sizeof("/lib");
-+        unsigned int total_size = size_parent + size_parent2 + size_libpath_env + size_colon * 2 + size_lib + 1; 
-+
-+        char* libpath = (char*)malloc(total_size);
-+        memset(libpath, 0, total_size);
-+
-+        strncpy(libpath, parent, total_size);
-+        total_size -= size_parent;
-+
-+        strncat(libpath, ":", total_size);
-+        total_size -= size_colon;
-+ 
-+        strncat(libpath, parent2, total_size);
-+        total_size -= size_parent2;
-+
-+        strncat(libpath, "/lib", total_size);
-+        total_size -= size_lib;
-+
-+        strncat(libpath, ":", total_size);
-+        total_size -= size_colon;
-+
-+        strncat(libpath, libpath_env, total_size);
-+        total_size -= size_libpath_env;
-+
-+        setenv("LIBPATH", libpath, 1);
-+
-+        free(libpath);
-+        free(parent2);
-+
-+        break;
-+      }
-+    }
-+    
-+    init_stdio_streams();
-+}
-+
-+__attribute__((destructor))
-+static void
-+__deinit()
-+{
-+    __ae_thread_swapmode(orig_mode);
-+    __ae_autoconvert_state(orig_cvstate);
-+}
-diff --git a/os390/os390.h b/os390/os390.h
-new file mode 100644
-index 0000000..e55d64f
---- /dev/null
-+++ b/os390/os390.h
-@@ -0,0 +1,35 @@
-+#ifndef H_OS390
-+#define H_OS390 1
-+
-+#if (__CHARSET_LIB == 1)
-+#undef open
-+#define open __open_replaced
-+#include <fcntl.h>
-+#undef open
-+
-+#undef pipe 
-+#define pipe __pipe_replaced
-+#include <unistd.h>
-+#undef pipe
-+
-+int __open_ascii(const char *filename, int opts, ...);
-+int __pipe_ascii(int [2]);
-+
-+int open(const char* path, int oflag, ...) asm("__open_ascii");
-+int pipe(int [2]) asm("__pipe_ascii");
-+#endif
-+
-+#include <string.h>
-+#include <sys/ps.h>
-+#include <unistd.h>
-+#include <limits.h>
-+#include <_Nascii.h>
-+#include <fcntl.h>
-+#include <libgen.h>
-+
-+int __getfdccsid(int fd);
-+int __setccsid(int fd, int ccsid);
-+int __chgfdccsid(int fd, unsigned short ccsid);
-+void __updateccsid(int fd, const char* path, int oflag, int perm);
-+
-+#endif
 diff --git a/perl.h b/perl.h
-index d05cc29..e9b0aea 100644
+index 552a106..a72a7c8 100644
 --- a/perl.h
 +++ b/perl.h
 @@ -22,6 +22,10 @@

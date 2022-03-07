@@ -1,3 +1,1 @@
 - Change to configure to allow xlclang to successfully configure
-- Consolidates most ASCII changes into os390/os390.c platform source file
-- This file sets the TAG_REDIR* defaults, sets the default LIBPATH, and also turns on auto conversion. It also overrides pipe and open when -qASCII is turned on.

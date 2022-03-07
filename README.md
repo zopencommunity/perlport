@@ -28,13 +28,6 @@ The code is built by:
  - running make
  - running make test
 
-## How to add an update
-
-When a problem is uncovered, do the following:
- - Before changing the code, copy the original: `cp <file> <file>.orig`
- - Create an empty patch file in the `patches` directory following the same tree structure, e.g. if the file you updated was `hints/os390.sh`, then you would create a patch file called `hints/os390.sh.patch` in the patches directory
- - After your change is complete, generate a patch: `patches/managepatches.sh`
-
 ## How to push changes
 
 To propose a fix to the mainline to the perlport repo:

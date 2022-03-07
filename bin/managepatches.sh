@@ -42,7 +42,6 @@ for patch in $patches; do
 		if [ $? -gt 0 ]; then
 			echo "Patch of perl tree failed (${f})." >&2
 			echo "${out}" >&2
-			exit 16
 		fi
 	fi
 done

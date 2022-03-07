@@ -18,6 +18,7 @@ else
 	else
 		export PATH=/usr/local/bin:/bin:/usr/sbin:$PATH
 	fi  
+	export PATH=$PWD/bin:$PATH
 	export LIBPATH=/lib:/usr/lib:$LIBPATH
 
 	# See perlbuild.sh for valid values of PERL_xxx variables

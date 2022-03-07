@@ -138,6 +138,9 @@ fi
 echo "Make Perl"
 date
 
+#FIXME: workaround make error:
+touch Makefile
+
 nohup make -j6 >/tmp/make.${USER}.${perlbld}.out 2>&1
 rc=$?
 if [ $rc -gt 0 ]; then
