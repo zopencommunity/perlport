@@ -58,14 +58,14 @@ case "$PERL_VRM" in
 esac
 case "$PERL_OS390_TGT_AMODE" in
 	31) ConfigOpts="${ConfigOpts}"
-      whence c99 >/dev/null
+      type c99 >/dev/null
       if [ $? -gt 0 ]; then
         echo "c99 required to build Perl. " >&2
         exit 16
       fi
       ;;
 	64) ConfigOpts="${ConfigOpts} -Duse64bitall"
-      whence xlclang >/dev/null
+      type xlclang >/dev/null
       if [ $? -gt 0 ]; then
         echo "xlclang required to build Perl. " >&2
         exit 16
@@ -139,8 +139,6 @@ echo "Make Perl"
 date
 
 #FIXME: workaround make error:
-touch Makefile
-
 nohup make -j6 >/tmp/make.${USER}.${perlbld}.out 2>&1
 rc=$?
 if [ $rc -gt 0 ]; then
