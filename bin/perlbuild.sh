@@ -26,6 +26,10 @@ else
 	export PERL_OS390_TGT_CODEPAGE="$4"
 fi
 
+if [ -z "${PERL_LOG_DIR}" ]; then
+  PERL_LOG_DIR=/tmp
+fi
+
 if [ "${PERL_ROOT}" = '' ]; then
 	echo "Need to set PERL_ROOT - source setenv.sh" >&2
 	exit 16
@@ -126,7 +130,7 @@ date
 export PATH=$PWD:$PATH
 export LIBPATH=$PWD:$LIBPATH
 set -x
-nohup sh ./Configure ${ConfigOpts} >/tmp/config.${USER}.${perlbld}.out 2>&1
+nohup sh ./Configure ${ConfigOpts} > ${PERL_LOG_DIR}/config.${USER}.${perlbld}.out 2>&1
 
 set +x
 rc=$?
@@ -139,7 +143,7 @@ echo "Make Perl"
 date
 
 #FIXME: workaround make error:
-nohup make -j6 >/tmp/make.${USER}.${perlbld}.out 2>&1
+nohup make -j6 >${PERL_LOG_DIR}/make.${USER}.${perlbld}.out 2>&1
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
@@ -147,7 +151,7 @@ if [ $rc -gt 0 ]; then
 	echo "Make minitest Perl"
 	date
 
-	nohup make minitest >/tmp/makeminitest.${USER}.${perlbld}.out 2>&1
+	nohup make minitest >${PERL_LOG_DIR}/makeminitest.${USER}.${perlbld}.out 2>&1
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE minitest of Perl tree failed." >&2
@@ -157,7 +161,7 @@ else
 	echo "Make Test Perl"
 	date
 
-	nohup make test >/tmp/maketest.${USER}.${perlbld}.out 2>&1
+	nohup make test >${PERL_LOG_DIR}/maketest.${USER}.${perlbld}.out 2>&1
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE test of Perl tree failed." >&2
