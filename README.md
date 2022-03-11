@@ -13,10 +13,13 @@ This port is designed in such a way to:
 
 To build and test the code:
  - Log on to z/OS
+ - It is recommended that you use git 2.14.4_zos_b09.  Specify envar GIT_ROOT before cloning
+ - Make sure that you have GNU Make installed on your system
  - git clone this repo
  - cd into the root directory
  - source setenv.sh: `. ./setenv.sh`
  - build and test: `./perlbuild.sh`
+ - To install: cd to the cloned perl5 directory and type make install
 
 Start by using `miniperl` from the `perl5` directory to run simple tests
 

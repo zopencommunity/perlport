@@ -26,10 +26,6 @@ else
 	export PERL_OS390_TGT_CODEPAGE="$4"
 fi
 
-if [ -z "${PERL_LOG_DIR}" ]; then
-  PERL_LOG_DIR=/tmp
-fi
-
 if [ "${PERL_ROOT}" = '' ]; then
 	echo "Need to set PERL_ROOT - source setenv.sh" >&2
 	exit 16
@@ -37,6 +33,10 @@ fi
 if [ "${PERL_VRM}" = '' ]; then
 	echo "Need to set PERL_VRM - source setenv.sh" >&2
 	exit 16
+fi
+
+if [ -z "${PERL_OS390_TGT_LOG_DIR}" ]; then
+  PERL_OS390_TGT_LOG_DIR=/tmp
 fi
 
 make --version >/dev/null 2>&1 
@@ -49,11 +49,15 @@ PERLPORT_ROOT="${PWD}"
 
 perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 
-if [ ! -z "${PERL_CONFIG_OPTS}" ]; then
-  ConfigOpts="$PERL_CONFIG_OPTS"
+echo "Logs will be stored to ${PERL_OS390_TGT_LOG_DIR}"
+
+if [ ! -z "${PERL_OS390_TGT_CONFIG_OPTS}" ]; then
+  ConfigOpts="$PERL_OS390_TGT_CONFIG_OPTS"
 else
-  ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
+	echo "You need to specify envar PERL_OS390_TGT_CONFIG_OPTS." >&2
+	exit 16
 fi
+
 echo $ConfigOpts
 case "$PERL_VRM" in
 	maint*) ConfigOpts="${ConfigOpts} -de" ;;
@@ -130,7 +134,7 @@ date
 export PATH=$PWD:$PATH
 export LIBPATH=$PWD:$LIBPATH
 set -x
-nohup sh ./Configure ${ConfigOpts} > ${PERL_LOG_DIR}/config.${USER}.${perlbld}.out 2>&1
+nohup sh ./Configure ${ConfigOpts} > ${PERL_OS390_TGT_LOG_DIR}/config.${USER}.${perlbld}.out 2>&1
 
 set +x
 rc=$?
@@ -142,8 +146,7 @@ fi
 echo "Make Perl"
 date
 
-#FIXME: workaround make error:
-nohup make -j6 >${PERL_LOG_DIR}/make.${USER}.${perlbld}.out 2>&1
+nohup make -j4 >${PERL_OS390_TGT_LOG_DIR}/make.${USER}.${perlbld}.out 2>&1
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
@@ -151,7 +154,7 @@ if [ $rc -gt 0 ]; then
 	echo "Make minitest Perl"
 	date
 
-	nohup make minitest >${PERL_LOG_DIR}/makeminitest.${USER}.${perlbld}.out 2>&1
+	nohup make minitest >${PERL_OS390_TGT_LOG_DIR}/makeminitest.${USER}.${perlbld}.out 2>&1
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE minitest of Perl tree failed." >&2
@@ -161,11 +164,12 @@ else
 	echo "Make Test Perl"
 	date
 
-	nohup make test >${PERL_LOG_DIR}/maketest.${USER}.${perlbld}.out 2>&1
+	nohup make test >${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out 2>&1
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE test of Perl tree failed." >&2
-		exit $rc 
+    FAILURES=`grep "Failed.*tests out of" ${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out | cut -f2 -d' '`
+    echo "Perl test failures: $FAILURES";
 	fi
 fi
 date
