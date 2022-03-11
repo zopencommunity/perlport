@@ -49,8 +49,8 @@ PERLPORT_ROOT="${PWD}"
 
 perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 
-if [ ! -z "${CONFIG_OPTS}" ]; then
-  ConfigOpts="$CONFIG_OPTS"
+if [ ! -z "${PERL_CONFIG_OPTS}" ]; then
+  ConfigOpts="$PERL_CONFIG_OPTS"
 else
   ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
 fi
