@@ -13,13 +13,7 @@ else
 		export GIT_ROOT=/rsusr/ported/bin
 	fi  
 
-	if [ "$HOME" != '' ] && [ -d $HOME/bin ]; then
-		export PATH=$HOME/bin:/usr/local/bin:/bin:/usr/sbin:$PATH
-	else
-		export PATH=/usr/local/bin:/bin:/usr/sbin:$PATH
-	fi  
 	export PATH=$PWD/bin:$PATH
-	export LIBPATH=/lib:/usr/lib:$LIBPATH
 
 	# See perlbuild.sh for valid values of PERL_xxx variables
 	export PERL_VRM="blead" #maint-5.34|blead
