@@ -4,7 +4,7 @@
 # Pre-requisites: 
 #  - ensure you have sourced setenv.sh, e.g. . ./setenv.sh
 #  - ensure you have GNU make installed (4.1 or later)
-#  - ensure you have access to c99
+#  - ensure you have access to xlclang/c99
 #  - network connectivity to pull git source from org
 #
 if [ $# -ne 4 ]; then
@@ -35,15 +35,13 @@ if [ "${PERL_VRM}" = '' ]; then
 	exit 16
 fi
 
+if [ -z "${PERL_OS390_TGT_LOG_DIR}" ]; then
+  PERL_OS390_TGT_LOG_DIR=/tmp
+fi
+
 make --version >/dev/null 2>&1 
 if [ $? -gt 0 ]; then
 	echo "You need GNU Make on your PATH in order to build Perl" >&2
-	exit 16
-fi
-
-whence c99 >/dev/null
-if [ $? -gt 0 ]; then
-	echo "c99 required to build Perl. " >&2
 	exit 16
 fi
 
@@ -51,11 +49,15 @@ PERLPORT_ROOT="${PWD}"
 
 perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390_TGT_CODEPAGE}"
 
-if [ ! -z "${CONFIG_OPTS}" ]; then
-  ConfigOpts="$CONFIG_OPTS"
+echo "Logs will be stored to ${PERL_OS390_TGT_LOG_DIR}"
+
+if [ ! -z "${PERL_OS390_TGT_CONFIG_OPTS}" ]; then
+  ConfigOpts="$PERL_OS390_TGT_CONFIG_OPTS"
 else
-  ConfigOpts="-Dprefix=/usr/local/perl/${perlbld}"
+	echo "You need to specify envar PERL_OS390_TGT_CONFIG_OPTS." >&2
+	exit 16
 fi
+
 echo $ConfigOpts
 case "$PERL_VRM" in
 	maint*) ConfigOpts="${ConfigOpts} -de" ;;
@@ -63,8 +65,20 @@ case "$PERL_VRM" in
 	*) echo "Invalid PERL_VRM of: ${PERL_VRM} specified. Valid Options: [maint*|blead]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_AMODE" in
-	31) ConfigOpts="${ConfigOpts}" ;;
-	64) ConfigOpts="${ConfigOpts} -Duse64bitall" ;;
+	31) ConfigOpts="${ConfigOpts}"
+      type c99 >/dev/null
+      if [ $? -gt 0 ]; then
+        echo "c99 required to build Perl. " >&2
+        exit 16
+      fi
+      ;;
+	64) ConfigOpts="${ConfigOpts} -Duse64bitall"
+      type xlclang >/dev/null
+      if [ $? -gt 0 ]; then
+        echo "xlclang required to build Perl. " >&2
+        exit 16
+      fi
+      ;;
 	*) echo "Invalid PERL_OS390_TGT_AMODE of: ${PERL_OS390_TGT_AMODE} specified. Valid Options: [31|64]\n" >&2; exit 16;;
 esac
 case "$PERL_OS390_TGT_LINK" in
@@ -119,7 +133,10 @@ echo "Configure Perl"
 date
 export PATH=$PWD:$PATH
 export LIBPATH=$PWD:$LIBPATH
-nohup sh ./Configure ${ConfigOpts} >/tmp/config.${USER}.${perlbld}.out 2>&1
+set -x
+nohup sh ./Configure ${ConfigOpts} > ${PERL_OS390_TGT_LOG_DIR}/config.${USER}.${perlbld}.out 2>&1
+
+set +x
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "Configure of Perl tree failed." >&2
@@ -129,7 +146,9 @@ fi
 echo "Make Perl"
 date
 
-nohup make -j6 >/tmp/make.${USER}.${perlbld}.out 2>&1
+
+nohup make -j4 >${PERL_OS390_TGT_LOG_DIR}/make.${USER}.${perlbld}.out 2>&1
+
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
@@ -137,7 +156,7 @@ if [ $rc -gt 0 ]; then
 	echo "Make minitest Perl"
 	date
 
-	nohup make minitest >/tmp/makeminitest.${USER}.${perlbld}.out 2>&1
+	nohup make minitest >${PERL_OS390_TGT_LOG_DIR}/makeminitest.${USER}.${perlbld}.out 2>&1
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE minitest of Perl tree failed." >&2
@@ -147,11 +166,14 @@ else
 	echo "Make Test Perl"
 	date
 
-	nohup make -j6 test >/tmp/maketest.${USER}.${perlbld}.out 2>&1
+
+	nohup make test >${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out 2>&1
+
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE test of Perl tree failed." >&2
-		exit $rc 
+    FAILURES=`grep "Failed.*tests out of" ${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out | cut -f2 -d' '`
+    echo "Perl test failures: $FAILURES";
 	fi
 fi
 date
