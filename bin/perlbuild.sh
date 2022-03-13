@@ -146,7 +146,9 @@ fi
 echo "Make Perl"
 date
 
+
 nohup make -j4 >${PERL_OS390_TGT_LOG_DIR}/make.${USER}.${perlbld}.out 2>&1
+
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "MAKE of Perl tree failed." >&2
@@ -164,7 +166,9 @@ else
 	echo "Make Test Perl"
 	date
 
+
 	nohup make test >${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out 2>&1
+
 	rc=$?
 	if [ $rc -gt 0 ]; then
 		echo "MAKE test of Perl tree failed." >&2

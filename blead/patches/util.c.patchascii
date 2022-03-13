@@ -1,0 +1,46 @@
+***************
+*** 2710,2719 ****
+          if (did_pipes)
+              PerlLIO_close(pp[0]);
+- #if defined(OEMVS)
+-   #if (__CHARSET_LIB == 1)
+-         chgfdccsid(p[THIS], 819);
+-         chgfdccsid(p[THAT], 819);
+-   #endif
+- #endif
+          /* Now dup our end of _the_ pipe to right position */
+          if (p[THIS] != (*mode == 'r')) {
+--- 2710,2713 ----
+***************
+*** 2791,2807 ****
+      if (did_pipes)
+           PerlLIO_close(pp[0]);
+- #if defined(OEMVS)
+-   #if (__CHARSET_LIB == 1)
+-     PerlIO* io = PerlIO_fdopen(p[This], mode);
+-     if (io) {
+-       chgfdccsid(p[This], 819);
+-     }
+-     return io;
+-   #else
+      return PerlIO_fdopen(p[This], mode);
+-   #endif
+- #else
+-     return PerlIO_fdopen(p[This], mode);
+- #endif
+  
+  #else
+--- 2785,2789 ----
+***************
+*** 2871,2880 ****
+          if (did_pipes)
+              PerlLIO_close(pp[0]);
+- #if defined(OEMVS)
+-   #if (__CHARSET_LIB == 1)
+-         chgfdccsid(p[THIS], 819);
+-         chgfdccsid(p[THAT], 819);
+-   #endif
+- #endif
+          if (p[THIS] != (*mode == 'r')) {
+              PerlLIO_dup2(p[THIS], *mode == 'r');
+--- 2853,2856 ----
