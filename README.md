@@ -14,6 +14,7 @@ This port is designed in such a way to:
 Pre-requisites:
  - Git - It is recommended that you use git v2.14.4_zos_b09 from [Rocket Software](https://www.rocketsoftware.com/zos-open-source)'s 
  - GNU Make - It is recommended that you use [IBM Make for z/OS](https://www-01.ibm.com/marketing/iwm/platform/mrs/assets?source=swg-dmzos)
+ - C compiler - It is recommended that you use either xlclang or c99 to build perl.  xlclang can be downloaded from https://www.ibm.com/products/z-and-cloud-modernization-stack
 
 To build and test the code:
  - Log on to z/OS UNIX
