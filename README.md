@@ -13,12 +13,17 @@ This port is designed in such a way to:
 
 Pre-requisites:
  - Git - It is recommended that you use git v2.14.4_zos_b09 from [Rocket Software](https://www.rocketsoftware.com/zos-open-source)'s 
+   - perlport's scripts utilize the HTTPS protocol to clone git repos.  To use the HTTPS protocol, make sure that the following environment
+     variables are set:
+      - GIT_SSL_CAINFO=/path/to/cacerts.pem
+      - GIT_TEMPLATE_DIR=/path/to/share/git-core/templates
+      - GIT_EXEC_PATH=/path/to/libexec/git-core
  - GNU Make - It is recommended that you use [IBM Make for z/OS](https://www-01.ibm.com/marketing/iwm/platform/mrs/assets?source=swg-dmzos)
  - C compiler - It is recommended that you use either xlclang or c99 to build perl.  xlclang can be downloaded from https://www.ibm.com/products/z-and-cloud-modernization-stack
 
 To build and test the code:
  - Log on to z/OS UNIX
- - Make sure that Git and GNU Make path's are in your PATH environment variable.  Also, set environment variable GIT_ROOT to the bin directory of your git installation: `export GIT_ROOT=/rsusr/ported/bin`
+ - Make sure that Git and GNU Make path's are in your PATH environment variable and configured appropriately.  Additionally, set the environment variable GIT_ROOT to the bin directory of your git installation: `export GIT_ROOT=/rsusr/ported/bin`
  - Clone perlport: `git clone https://github.com/ZOSOpenTools/perlport.git && cd perlport`
  - Source the perlport environment variables via setenv.sh: `. ./setenv.sh`
  - Set the perl install location to your preferred location.  `export PERL_OS390_TGT_CONFIG_OPTS="-Dprefix=$HOME/local"`
