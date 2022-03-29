@@ -1,0 +1,26 @@
+diff --git a/cpan/libnet/lib/Net/FTP.pm b/cpan/libnet/lib/Net/FTP.pm
+index 37836bf..4f9201c 100644
+--- a/cpan/libnet/lib/Net/FTP.pm
++++ b/cpan/libnet/lib/Net/FTP.pm
+@@ -66,7 +66,7 @@ use constant TELNET_IAC => 255;
+ use constant TELNET_IP  => 244;
+ use constant TELNET_DM  => 242;
+ 
+-use constant EBCDIC => $^O eq 'os390';
++use constant EBCDIC => ord 'A' == 193;
+ 
+ sub new {
+   my $pkg = shift;
+diff --git a/cpan/podlators/t/general/basic.t b/cpan/podlators/t/general/basic.t
+index d4978bc..a1b7369 100644
+--- a/cpan/podlators/t/general/basic.t
++++ b/cpan/podlators/t/general/basic.t
+@@ -82,7 +82,7 @@ for my $module (sort keys %OUTPUT) {
+ 
+     # OS/390 is EBCDIC, which apparently uses a different character for ESC.
+     # Try to convert so that the test still works.
+-    if ($^O eq 'os390' && $module eq 'Pod::Text::Termcap') {
++    if (ord "A" == 193 && $module eq 'Pod::Text::Termcap') {
+         $got =~ tr{\033}{\047};
+     }
+ 
