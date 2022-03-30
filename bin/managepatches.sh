@@ -30,7 +30,10 @@ PATCH_ROOT="${PERL_ROOT}/${perlpatch}/patches"
 commonpatches=`cd ${PATCH_ROOT} && find . -name "*.patch"`
 specificpatches=`cd ${PATCH_ROOT} && find . -name "*.patch${PERL_OS390_TGT_CODEPAGE}"`
 patches="$commonpatches $specificpatches"
-set -x
+if [[ `(cd ${CODE_ROOT} && ${GIT_ROOT}/git status --porcelain --untracked-files=no 2>&1)` ]]; then
+  echo "Existing Changes are active in ${CODE_ROOT}. To re-apply patches, perform a git reset on ${CODE_ROOT} prior to running managepatches again."
+  exit 0	
+fi
 for patch in $patches; do
 	p="${PATCH_ROOT}/${patch}"
 
