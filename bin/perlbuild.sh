@@ -8,7 +8,7 @@
 #  - network connectivity to pull git source from org
 #
 if [ $# -ne 4 ]; then
-	if [ "${PERL_VRM}" = "" ] || [ "${PERL_OS390_TGT_AMODE}" = "" ] || [ "{PERL_OS390_TGT_LINK}" = "" ] || [ "{PERL_OS390_TGT_CODEPAGE}" = "" ]; then
+	if [ "${PERL_VRM}" = "" ] || [ "${PERL_OS390_TGT_AMODE}" = "" ] || [ "${PERL_OS390_TGT_LINK}" = "" ] || [ "${PERL_OS390_TGT_CODEPAGE}" = "" ]; then
 		echo "Either specify all 4 target build options on the command-line or with environment variables\n" >&2
 
 		echo "Syntax: $0 [<vrm> <amode> <link> <codepage>]\n" >&2
@@ -125,7 +125,7 @@ if [ $rc -gt 0 ]; then
 	exit $rc
 fi
 
-cd "${perlbld}/perl5"
+cd "${perlbld}/perl5" || exit 8
 #
 # Setup the configuration 
 #
