@@ -1,9 +1,9 @@
 diff --git a/os390/os390.c b/os390/os390.c
 new file mode 100644
-index 0000000..5d8f7dc
+index 0000000..5b16031
 --- /dev/null
 +++ b/os390/os390.c
-@@ -0,0 +1,242 @@
+@@ -0,0 +1,244 @@
 +#include "os390/os390.h"
 +#include <string.h>
 +#include <sys/stat.h>
@@ -196,8 +196,8 @@ index 0000000..5d8f7dc
 +        unsigned int size_libpath_env = strlen(libpath_env);
 +        unsigned int size_colon = sizeof(":");
 +        unsigned int size_lib = sizeof("/lib");
-+        unsigned int size_install_lib = sizeof("/lib/perl5/" PERL_VERSION_STRING "/os390/CORE");
-+        unsigned int total_size = size_parent + size_parent2*2 + size_libpath_env + size_colon * 3 + size_lib + 1 + size_install_lib + 1; 
++        unsigned int size_install_lib = sizeof("/lib/" PERL_VERSION_STRING "/os390/CORE");
++        unsigned int total_size = size_parent + size_parent2*2 + size_libpath_env + size_colon * 4 + size_lib + 1 + size_install_lib + 1; 
 +
 +        char* libpath = (char*)malloc(total_size);
 +        memset(libpath, 0, total_size);
@@ -223,10 +223,12 @@ index 0000000..5d8f7dc
 +        strncat(libpath, "/lib/perl5/" PERL_VERSION_STRING "/os390/CORE", total_size);
 +        total_size -= size_install_lib;
 +
++        strncat(libpath, ":", total_size);
++        total_size -= size_colon;
++
 +        strncat(libpath, libpath_env, total_size);
 +        total_size -= size_libpath_env;
 +
-+        fprintf(stderr, "Libpath: |%s|\n", libpath);
 +        setenv("LIBPATH", libpath, 1);
 +
 +        free(libpath);
