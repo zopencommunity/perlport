@@ -147,7 +147,22 @@ echo "Make Perl"
 date
 
 
-nohup make -j4 >${PERL_OS390_TGT_LOG_DIR}/make.${USER}.${perlbld}.out 2>&1
+numcpus=`numcpus.rexx`
+numjobs=1;
+if [ $? -eq 0 ]; then
+  numjobs="${numcpus}"
+fi
+
+# cap to 8 to avoid impacting others on a large system
+if [ $numjobs -gt 8 ]; then
+  numjobs=8
+fi
+
+if [ ! -z "${PERL_NUM_JOBS}" ]; then
+  numjobs=${PERL_NUM_JOBS}
+fi
+
+nohup make -j"${numjobs}" >${PERL_OS390_TGT_LOG_DIR}/make.${USER}.${perlbld}.out 2>&1
 
 rc=$?
 if [ $rc -gt 0 ]; then
@@ -167,7 +182,7 @@ else
 	date
 
 
-	nohup make test >${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out 2>&1
+	TEST_JOBS="${numjobs}" nohup make test >${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out 2>&1
 
 	rc=$?
 	if [ $rc -gt 0 ]; then
