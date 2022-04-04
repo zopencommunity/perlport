@@ -7,9 +7,13 @@
 
 # How to use:
 - Set environment variables
-  - Source the `/path/to/perl/.env` file
-- Run `perl --version`
-- Run a Perl Hello world program:
+  - Set PERL_INSTALL_DIR to the perl install directory
+  - Then, source the `.env` file: 
+```sh
+. $PERL_INSTALL_DIR/.env
+```
+- Run `perl --version` to verify that the correct version is installed
+- Run a Perl "Hello World" program:
 - Create a `hello.perl` file with the following contents:
 ```perl
 print("Hello, World!\n");
