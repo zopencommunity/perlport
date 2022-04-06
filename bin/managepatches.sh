@@ -35,6 +35,8 @@ if [ "${results}" != '' ]; then
   echo "Existing Changes are active in ${CODE_ROOT}. To re-apply patches, perform a git reset on ${CODE_ROOT} prior to running managepatches again."
   exit 0	
 fi 
+
+failedcount=0
 for patch in $patches; do
 	p="${PATCH_ROOT}/${patch}"
 
@@ -42,12 +44,14 @@ for patch in $patches; do
 	if [ $patchsize -eq 0 ]; then
 		echo "Warning: patch file ${p} is empty - nothing to be done" >&2 
 	else 
+		echo "Applying ${p}"
 		out=`(cd ${CODE_ROOT} && ${GIT_ROOT}/git apply "${p}" 2>&1)`
 		if [ $? -gt 0 ]; then
 			echo "Patch of perl tree failed (${p})." >&2
 			echo "${out}" >&2
+			failedcount=$((failedcount+1))
 		fi
 	fi
 done
 
-exit 0	
+exit $failedcount

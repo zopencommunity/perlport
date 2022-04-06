@@ -58,7 +58,7 @@ else
 	exit 16
 fi
 
-echo $ConfigOpts
+echo "Extra configure options: $ConfigOpts"
 case "$PERL_VRM" in
 	maint*) ConfigOpts="${ConfigOpts} -de" ;;
 	blead) ConfigOpts="${ConfigOpts} -des -Dusedevel" ;;
@@ -133,10 +133,7 @@ echo "Configure Perl"
 date
 export PATH=$PWD:$PATH
 export LIBPATH=$PWD:$LIBPATH
-set -x
 nohup sh ./Configure ${ConfigOpts} > ${PERL_OS390_TGT_LOG_DIR}/config.${USER}.${perlbld}.out 2>&1
-
-set +x
 rc=$?
 if [ $rc -gt 0 ]; then
 	echo "Configure of Perl tree failed." >&2
