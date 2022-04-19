@@ -51,13 +51,18 @@ perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390
 
 echo "Logs will be stored to ${PERL_OS390_TGT_LOG_DIR}"
 
-if [ ! -z "${PERL_OS390_TGT_CONFIG_OPTS}" ]; then
-  ConfigOpts="$PERL_OS390_TGT_CONFIG_OPTS"
+if [ ! -z "${PERL_INSTALL_DIR}" ]; then
+  install_dir=${PERL_INSTALL_DIR}
 else
   install_dir="${HOME}/local/perl"
-  mkdir -p $install_dir
-  ConfigOpts="-Dprefix=$install_dir"
 fi
+
+mkdir -p $install_dir
+if [ $? -gt 0 ]; then
+  echo "Install directory $install_dir cannot be created"
+  exit 16
+fi
+ConfigOpts="-Dprefix=$install_dir"
 
 echo "Extra configure options: $ConfigOpts"
 case "$PERL_VRM" in
