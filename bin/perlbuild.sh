@@ -54,8 +54,9 @@ echo "Logs will be stored to ${PERL_OS390_TGT_LOG_DIR}"
 if [ ! -z "${PERL_OS390_TGT_CONFIG_OPTS}" ]; then
   ConfigOpts="$PERL_OS390_TGT_CONFIG_OPTS"
 else
-	echo "You need to specify envar PERL_OS390_TGT_CONFIG_OPTS." >&2
-	exit 16
+  install_dir="${HOME}/local/perl"
+  mkdir -p $install_dir
+  ConfigOpts="-Dprefix=$install_dir"
 fi
 
 echo "Extra configure options: $ConfigOpts"
@@ -186,6 +187,13 @@ else
 		echo "MAKE test of Perl tree failed." >&2
     FAILURES=`grep "Failed.*tests out of" ${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out | cut -f2 -d' '`
     echo "Perl test failures: $FAILURES";
+	fi
+
+	echo "Make Install Perl"
+	INSTALLFLAGS="+v" nohup make install >${PERL_OS390_TGT_LOG_DIR}/makeinstall.${USER}.${perlbld}.out 2>&1
+	rc=$?
+	if [ $rc -gt 0 ]; then
+		echo "MAKE install of Perl tree failed." >&2
 	fi
 fi
 date
