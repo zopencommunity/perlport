@@ -1,0 +1,288 @@
+diff --git a/os390/os390.c b/os390/os390.c
+new file mode 100644
+index 0000000..7d32b07
+--- /dev/null
++++ b/os390/os390.c
+@@ -0,0 +1,88 @@
++#include "os390/os390.h"
++#include <string.h>
++#include <sys/stat.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/ps.h>
++#include <unistd.h>
++#include <stdarg.h>
++#include <varargs.h>
++#include <limits.h>
++#include <_Nascii.h>
++#include <fcntl.h>
++#include <libgen.h>
++
++int __setccsid(int fd, int ccsid) 
++{
++  attrib_t attr;
++  int rc;
++
++  memset(&attr, 0, sizeof(attr));
++  attr.att_filetagchg = 1;
++  attr.att_filetag.ft_ccsid = ccsid;
++  attr.att_filetag.ft_txtflag = 1;
++
++  rc = __fchattr(fd, &attr, sizeof(attr));
++  return rc;
++}
++
++void __updateccsid(int fd, const char* path, int oflag, int perm) 
++{ 
++  int rc;
++  if (oflag & O_CREAT) {
++    rc = __setccsid(fd, 819);
++  }
++}
++
++int __pipe(int [2]) asm("pipe");
++int __open(const char *filename, int opts, ...) asm("@@A00144");
++
++int __open_ascii(const char *filename, int opts, ...) {
++  va_list ap;
++  va_start(ap, opts);
++  int perms = va_arg(ap, int);
++  struct stat sb;
++  int is_new_file = stat(filename, &sb) != 0;
++  int fd = __open(filename, opts, perms);
++  // Tag new files as 819
++  if (fd >= 0 && is_new_file)
++    __chgfdccsid(fd, 819);
++  va_end(ap);
++  return fd;
++}
++
++int __pipe_ascii(int fd[2]) {
++  int ret = __pipe(fd);
++  if (ret < 0)
++    return ret;
++
++  // Default ccsid for new pipes should be 819
++  __chgfdccsid(fd[0], 819);
++  __chgfdccsid(fd[1], 819);
++  return ret;
++}
++
++int __getfdccsid(int fd) {
++  struct stat st;
++  int rc;
++  rc = fstat(fd, &st);
++  if (rc != 0)
++    return -1;
++  unsigned short ccsid = st.st_tag.ft_ccsid;
++  if (st.st_tag.ft_txtflag) {
++    return 65536 + ccsid;
++  }
++  return ccsid;
++}
++
++int __chgfdccsid(int fd, unsigned short ccsid) 
++{
++  attrib_t attr;
++  memset(&attr, 0, sizeof(attr));
++  attr.att_filetagchg = 1;
++  attr.att_filetag.ft_ccsid = ccsid;
++  if (ccsid != FT_BINARY) {
++    attr.att_filetag.ft_txtflag = 1;
++  }
++  return __fchattr(fd, &attr, sizeof(attr));
++}
+diff --git a/os390/os390.h b/os390/os390.h
+new file mode 100644
+index 0000000..e55d64f
+--- /dev/null
++++ b/os390/os390.h
+@@ -0,0 +1,35 @@
++#ifndef H_OS390
++#define H_OS390 1
++
++#if (__CHARSET_LIB == 1)
++#undef open
++#define open __open_replaced
++#include <fcntl.h>
++#undef open
++
++#undef pipe 
++#define pipe __pipe_replaced
++#include <unistd.h>
++#undef pipe
++
++int __open_ascii(const char *filename, int opts, ...);
++int __pipe_ascii(int [2]);
++
++int open(const char* path, int oflag, ...) asm("__open_ascii");
++int pipe(int [2]) asm("__pipe_ascii");
++#endif
++
++#include <string.h>
++#include <sys/ps.h>
++#include <unistd.h>
++#include <limits.h>
++#include <_Nascii.h>
++#include <fcntl.h>
++#include <libgen.h>
++
++int __getfdccsid(int fd);
++int __setccsid(int fd, int ccsid);
++int __chgfdccsid(int fd, unsigned short ccsid);
++void __updateccsid(int fd, const char* path, int oflag, int perm);
++
++#endif
+diff --git a/os390/os390_init.c b/os390/os390_init.c
+new file mode 100644
+index 0000000..7854cae
+--- /dev/null
++++ b/os390/os390_init.c
+@@ -0,0 +1,147 @@
++#include "os390/os390.h"
++#include <string.h>
++#include <sys/stat.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/ps.h>
++#include <unistd.h>
++#include <stdarg.h>
++#include <varargs.h>
++#include <limits.h>
++#include <_Nascii.h>
++#include <fcntl.h>
++#include <libgen.h>
++
++void init_stdio_streams() {
++    // If stdout is not a TTY and is untagged, tag it as 1047
++    if (0 == __getfdccsid(fileno(stdout))) {
++        struct file_tag tag;
++        tag.ft_ccsid = 1047;
++        tag.ft_txtflag = 1;
++        fcntl(fileno(stdout), F_SETTAG, &tag);
++
++        struct f_cnvrt req = {SETCVTON, 0, 1047};
++        fcntl(fileno(stdout), F_CONTROL_CVT, &req);
++    }
++
++    // If stderr is not a TTY is untagged, tag as 1047
++    if (0 == __getfdccsid(fileno(stderr))) {
++        struct file_tag tag;
++        tag.ft_ccsid = 1047;
++        tag.ft_txtflag = 1;
++        fcntl(fileno(stderr), F_SETTAG, &tag);
++
++        struct f_cnvrt req = {SETCVTON, 0, 1047};
++        fcntl(fileno(stderr), F_CONTROL_CVT, &req);
++    }
++
++    // If stdin not a TTY is untagged, tag as 1047
++    if (0 == __getfdccsid(fileno(stdin))) {
++        struct file_tag tag;
++        tag.ft_ccsid = 1047;
++        tag.ft_txtflag = 1;
++        fcntl(fileno(stdin), F_SETTAG, &tag);
++
++        // Below is needed for /bin/sh STDIN
++        struct f_cnvrt req = {SETCVTON, 0, 1047};
++        fcntl(fileno(stdin), F_CONTROL_CVT, &req);
++    }
++}
++
++int orig_mode;
++int orig_cvstate;
++
++#include "EXTERN.h"
++#include "perl.h"
++
++__attribute__((constructor))
++static void
++__init()
++{
++    // With "_EDC_SIG_DFLT" set to '0', a process closing with SIGINT send output both to stderr and stdout. 
++    // Setting "_EDC_SIG_DFLT" default action of the following signals is abnormal termination of the process with no message output: SIGALRM, SIGHUP, SIGINT, SIGPIPE, SIGPOLL, SIGPROF, SIGSYS, SIGTERM, SIGUSR1, SIGUSR2, and SIGVTALRM
++    setenv("_EDC_SIG_DFLT", "1", 1);
++
++    // Setting _EDC_SUSV3 can be used to control the behavior of setenv() with respect to setting EINVAL when var_name is a null pointer, points to an empty string or points to a string containing an '=' character. By default, setenv() will not set EINVAL for these conditions. 
++    // When _EDC_SUSV3 is set to 1, setenv() will set errno to EINVAL if one of these conditions is true. 
++    setenv("_EDC_SUSV3", "1", 1);
++
++    // Sets the _TAG_REDIR state to txt
++    setenv("_TAG_REDIR_ERR", "txt", 1);
++    setenv("_TAG_REDIR_IN", "txt", 1);
++    setenv("_TAG_REDIR_OUT", "txt", 1);
++
++    // Force to ASCII mode and AUTOCVT to ON
++#if (__CHARSET_LIB == 1)
++    orig_mode = __ae_thread_swapmode(__AE_ASCII_MODE);
++#else
++    orig_mode = __ae_thread_swapmode(__AE_EBCDIC_MODE);
++#endif
++    orig_cvstate = __ae_autoconvert_state(_CVTSTATE_QUERY);
++    if (_CVTSTATE_OFF == orig_cvstate)
++        __ae_autoconvert_state(_CVTSTATE_ON);
++
++    // Sets the LIBPATH relative to the perl executable
++    char path[_XOPEN_PATH_MAX];
++    char parent[_XOPEN_PATH_MAX];
++
++    W_PSPROC buf;
++    int token = 0;
++    pid_t mypid = getpid();
++    memset(&buf, 0, sizeof(buf));
++    buf.ps_pathlen = _XOPEN_PATH_MAX;
++    buf.ps_pathptr = path;
++
++    while ((token = w_getpsent(token, &buf, sizeof(buf))) > 0) {
++      // Found our process.
++      if (buf.ps_pid == mypid) {
++
++        // Resolve path to find true location of executable.
++        if (realpath(buf.ps_pathptr, parent) == NULL)
++          break;
++
++        // Get parent directory.
++        dirname(parent);
++
++        // Get parent's parent directory.
++        char* parent2 = strdup(parent);
++        dirname(parent2);
++
++        // Append new paths to libpath.
++        char* libpath_env = getenv("LIBPATH");
++
++        unsigned int size_parent = strlen(parent);
++        unsigned int size_parent2 = strlen(parent2);
++        unsigned int size_libpath_env = strlen(libpath_env);
++        unsigned int size_colon = sizeof(":");
++        unsigned int size_lib = sizeof("/lib");
++        const char* install_lib = "/lib/perl5/" PERL_VERSION_STRING "/os390/CORE";
++        const char* install_lib2 = "/lib/" PERL_VERSION_STRING "/os390/CORE";
++        unsigned int total_size = size_parent + size_parent2*3 + size_libpath_env + size_colon * 4 + size_lib + strlen(install_lib) + strlen(install_lib2) +  1; 
++
++        char buffer[4096] = {0};
++        sprintf(buffer, "%s", parent);
++        sprintf(buffer, "%s:%s%s", buffer, parent2, "/lib");
++        sprintf(buffer, "%s:%s%s", buffer, parent2, install_lib);
++        sprintf(buffer, "%s:%s%s", buffer, parent2, install_lib2);
++        sprintf(buffer, "%s:%s", buffer, libpath_env);
++
++        fprintf(stderr, "LIBPATH: %s\n", buffer);
++        setenv("LIBPATH", buffer, 1);
++    
++        free(parent2);
++
++        break;
++      }
++    }
++    
++    init_stdio_streams();
++}
++
++__attribute__((destructor))
++static void
++__deinit()
++{
++    __ae_thread_swapmode(orig_mode);
++    __ae_autoconvert_state(orig_cvstate);
++}

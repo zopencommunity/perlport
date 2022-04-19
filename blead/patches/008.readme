@@ -1,0 +1,1 @@
+- Remove tag on perl library files only if in ebcdic mode

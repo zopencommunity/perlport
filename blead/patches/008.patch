@@ -1,0 +1,13 @@
+diff --git a/installperl b/installperl
+index 3c8af53..c7d0825 100755
+--- a/installperl
++++ b/installperl
+@@ -719,7 +719,7 @@ sub copy_if_diff {
+ 	    my ($atime, $mtime) = (stat $from)[8,9];
+ 	    utime $atime, $mtime, $to;
+ 	}
+-        `chtag -r "$to"` if ($^O eq "os390");
++        `chtag -r "$to"` if (ord "A" == 193);
+ 	1;
+     }
+ }
