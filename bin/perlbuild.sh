@@ -200,6 +200,9 @@ else
 	if [ $rc -gt 0 ]; then
 		echo "MAKE install of Perl tree failed." >&2
 	fi
+  echo "Copying z/OS install files to $install_dir"
+  cp ../../.env ${install_dir}/
+  cp ../../README_ZOS.md ${install_dir}/
 fi
 date
 
