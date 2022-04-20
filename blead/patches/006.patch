@@ -1,9 +1,9 @@
 diff --git a/os390/os390.c b/os390/os390.c
 new file mode 100644
-index 0000000..7d32b07
+index 0000000..b4b2d73
 --- /dev/null
 +++ b/os390/os390.c
-@@ -0,0 +1,88 @@
+@@ -0,0 +1,169 @@
 +#include "os390/os390.h"
 +#include <string.h>
 +#include <sys/stat.h>
@@ -92,6 +92,87 @@ index 0000000..7d32b07
 +  }
 +  return __fchattr(fd, &attr, sizeof(attr));
 +}
++
++void init_stdio_streams() {
++    // If stdout is not a TTY and is untagged, tag it as 1047
++    if (0 == __getfdccsid(fileno(stdout))) {
++        struct file_tag tag;
++        tag.ft_ccsid = 1047;
++        tag.ft_txtflag = 1;
++        fcntl(fileno(stdout), F_SETTAG, &tag);
++
++        struct f_cnvrt req = {SETCVTON, 0, 1047};
++        fcntl(fileno(stdout), F_CONTROL_CVT, &req);
++    }
++
++    // If stderr is not a TTY is untagged, tag as 1047
++    if (0 == __getfdccsid(fileno(stderr))) {
++        struct file_tag tag;
++        tag.ft_ccsid = 1047;
++        tag.ft_txtflag = 1;
++        fcntl(fileno(stderr), F_SETTAG, &tag);
++
++        struct f_cnvrt req = {SETCVTON, 0, 1047};
++        fcntl(fileno(stderr), F_CONTROL_CVT, &req);
++    }
++
++    // If stdin not a TTY is untagged, tag as 1047
++    if (0 == __getfdccsid(fileno(stdin))) {
++        struct file_tag tag;
++        tag.ft_ccsid = 1047;
++        tag.ft_txtflag = 1;
++        fcntl(fileno(stdin), F_SETTAG, &tag);
++
++        // Below is needed for /bin/sh STDIN
++        struct f_cnvrt req = {SETCVTON, 0, 1047};
++        fcntl(fileno(stdin), F_CONTROL_CVT, &req);
++    }
++}
++
++int orig_mode;
++int orig_cvstate;
++
++#include "EXTERN.h"
++#include "perl.h"
++
++__attribute__((constructor))
++static void
++__init()
++{
++    // With "_EDC_SIG_DFLT" set to '0', a process closing with SIGINT send output both to stderr and stdout. 
++    // Setting "_EDC_SIG_DFLT" default action of the following signals is abnormal termination of the process with no message output: SIGALRM, SIGHUP, SIGINT, SIGPIPE, SIGPOLL, SIGPROF, SIGSYS, SIGTERM, SIGUSR1, SIGUSR2, and SIGVTALRM
++    setenv("_EDC_SIG_DFLT", "1", 1);
++
++    // Setting _EDC_SUSV3 can be used to control the behavior of setenv() with respect to setting EINVAL when var_name is a null pointer, points to an empty string or points to a string containing an '=' character. By default, setenv() will not set EINVAL for these conditions. 
++    // When _EDC_SUSV3 is set to 1, setenv() will set errno to EINVAL if one of these conditions is true. 
++    setenv("_EDC_SUSV3", "1", 1);
++
++    // Sets the _TAG_REDIR state to txt
++    setenv("_TAG_REDIR_ERR", "txt", 1);
++    setenv("_TAG_REDIR_IN", "txt", 1);
++    setenv("_TAG_REDIR_OUT", "txt", 1);
++
++    // Force to ASCII mode and AUTOCVT to ON
++#if (__CHARSET_LIB == 1)
++    orig_mode = __ae_thread_swapmode(__AE_ASCII_MODE);
++#else
++    orig_mode = __ae_thread_swapmode(__AE_EBCDIC_MODE);
++#endif
++    orig_cvstate = __ae_autoconvert_state(_CVTSTATE_QUERY);
++    if (_CVTSTATE_OFF == orig_cvstate)
++        __ae_autoconvert_state(_CVTSTATE_ON);
++
++    
++    init_stdio_streams();
++}
++
++__attribute__((destructor))
++static void
++__deinit()
++{
++    __ae_thread_swapmode(orig_mode);
++    __ae_autoconvert_state(orig_cvstate);
++}
 diff --git a/os390/os390.h b/os390/os390.h
 new file mode 100644
 index 0000000..e55d64f
@@ -135,10 +216,10 @@ index 0000000..e55d64f
 +#endif
 diff --git a/os390/os390_init.c b/os390/os390_init.c
 new file mode 100644
-index 0000000..7854cae
+index 0000000..e4eb2c2
 --- /dev/null
 +++ b/os390/os390_init.c
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,146 @@
 +#include "os390/os390.h"
 +#include <string.h>
 +#include <sys/stat.h>
@@ -267,7 +348,6 @@ index 0000000..7854cae
 +        sprintf(buffer, "%s:%s%s", buffer, parent2, install_lib2);
 +        sprintf(buffer, "%s:%s", buffer, libpath_env);
 +
-+        fprintf(stderr, "LIBPATH: %s\n", buffer);
 +        setenv("LIBPATH", buffer, 1);
 +    
 +        free(parent2);
