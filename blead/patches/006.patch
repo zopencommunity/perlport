@@ -1,9 +1,9 @@
 diff --git a/os390/os390.c b/os390/os390.c
 new file mode 100644
-index 0000000..7d32b07
+index 0000000..96bd8d6
 --- /dev/null
 +++ b/os390/os390.c
-@@ -0,0 +1,88 @@
+@@ -0,0 +1,123 @@
 +#include "os390/os390.h"
 +#include <string.h>
 +#include <sys/stat.h>
@@ -92,47 +92,41 @@ index 0000000..7d32b07
 +  }
 +  return __fchattr(fd, &attr, sizeof(attr));
 +}
-diff --git a/os390/os390.h b/os390/os390.h
-new file mode 100644
-index 0000000..e55d64f
---- /dev/null
-+++ b/os390/os390.h
-@@ -0,0 +1,35 @@
-+#ifndef H_OS390
-+#define H_OS390 1
 +
-+#if (__CHARSET_LIB == 1)
-+#undef open
-+#define open __open_replaced
-+#include <fcntl.h>
-+#undef open
++#include "EXTERN.h"
++#include "perl.h"
++#include "XSUB.h"
 +
-+#undef pipe 
-+#define pipe __pipe_replaced
-+#include <unistd.h>
-+#undef pipe
++void
++zos_copytags(pTHX_ CV *cv)
++{
++  dXSARGS;
++  STRLEN n_a;
++  int ret = 0;
 +
-+int __open_ascii(const char *filename, int opts, ...);
-+int __pipe_ascii(int [2]);
++  if (items != 2)
++    Perl_croak(aTHX_ "Usage: ZOS::Filespec::copytags(f1, f2])");
 +
-+int open(const char* path, int oflag, ...) asm("__open_ascii");
-+int pipe(int [2]) asm("__pipe_ascii");
-+#endif
++  int from_fd = (int)SvIV(ST(0));
++  int to_fd = (int)SvIV(ST(1));
++  int rc = __getfdccsid(from_fd);
++  if (rc != -1)
++    rc = __chgfdccsid(to_fd, rc);
 +
-+#include <string.h>
-+#include <sys/ps.h>
-+#include <unistd.h>
-+#include <limits.h>
-+#include <_Nascii.h>
-+#include <fcntl.h>
-+#include <libgen.h>
++  XSRETURN(rc);
++}
 +
-+int __getfdccsid(int fd);
-+int __setccsid(int fd, int ccsid);
-+int __chgfdccsid(int fd, unsigned short ccsid);
-+void __updateccsid(int fd, const char* path, int oflag, int perm);
 +
-+#endif
++void
++init_os_extras(void)
++{
++  dTHX;
++  char* file = __FILE__;
++
++  newXSproto("ZOS::Filespec::copytags",zos_copytags,file,"$;$");
++
++  return;
++}
 diff --git a/os390/os390_init.c b/os390/os390_init.c
 new file mode 100644
 index 0000000..376a3aa
@@ -286,3 +280,16 @@ index 0000000..376a3aa
 +    __ae_thread_swapmode(orig_mode);
 +    __ae_autoconvert_state(orig_cvstate);
 +}
+diff --git a/perl.c b/perl.c
+index 057cd0e..75453d2 100644
+--- a/perl.c
++++ b/perl.c
+@@ -2428,7 +2428,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
+     if (xsinit)
+         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
+ #ifndef PERL_MICRO
+-#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
++#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__) || defined(__MVS__)
+     init_os_extras();
+ #endif
+ #endif
