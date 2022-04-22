@@ -19,19 +19,19 @@ Pre-requisites:
       - GIT_TEMPLATE_DIR=/path/to/share/git-core/templates
       - GIT_EXEC_PATH=/path/to/libexec/git-core
  - GNU Make - It is recommended that you use [IBM Make for z/OS](https://www-01.ibm.com/marketing/iwm/platform/mrs/assets?source=swg-dmzos)
- - C compiler - It is recommended that you use either xlclang or c99 to build perl.  xlclang can be downloaded from https://www.ibm.com/products/z-and-cloud-modernization-stack
+ - C compiler - It is recommended that you use either xlclang or c99 to build perl.  xlclang can be installed via [IBM Z and Cloud Modernization Stack](https://www.ibm.com/products/z-and-cloud-modernization-stack)
 
 To build and test the code:
  - Log on to z/OS UNIX
  - Make sure that Git and GNU Make path's are in your PATH environment variable and configured appropriately.  Additionally, set the environment variable GIT_ROOT to the bin directory of your git installation: `export GIT_ROOT=/rsusr/ported/bin`
  - Clone perlport: `git clone https://github.com/ZOSOpenTools/perlport.git && cd perlport`
  - Source the perlport environment variables via setenv.sh: `. ./setenv.sh`
- - Set the perl install location to your preferred location.  `export PERL_OS390_TGT_CONFIG_OPTS="-Dprefix=$HOME/local"`
- - Now build, test and install perl: `perlbuild.sh`
+ - Set the perl install location to your preferred location.  `export PERL_INSTALL_DIR="$HOME/local"`
+ - Now build, test and install perl using `./bin/perlbuild.sh`
 
-The code is built by `perlbuild.sh`, which performs the following tasks:
- - cloning perl5 from the perl repo
- - setting the code page of the files to ISO8859-1 (ASCII)
+`./bin/perlbuild.sh` performs the following tasks:
+ - clones the latest perl from the perl git repo
+ - sets the code page of the files to ISO8859-1 (ASCII)
  - applying the patches to the mainline perl code from the `patches` directory
  - running Configure
  - running make
@@ -42,7 +42,7 @@ The code is built by `perlbuild.sh`, which performs the following tasks:
 
 When a problem is uncovered, do the following:
  - Modify the code and then generate a `git diff`
- - Redirect the output of `git diff` to a uniquely named patch file under `patches/perl5` directory.  
+ - Redirect the output of `git diff <pathtofile(s)>` to a uniquely named patch file under `patches/perl5` directory.  
 
 ## How to push changes
 
