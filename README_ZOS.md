@@ -7,7 +7,7 @@
 
 # How to use:
 - Set environment variables
-  - Set PERL_INSTALL_DIR to the perl install directory
+  - Run the install.sh script to generate `.env` file.
   - Then, source the `.env` file: 
 ```sh
 . $PERL_INSTALL_DIR/.env

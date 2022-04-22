@@ -293,3 +293,44 @@ index 057cd0e..75453d2 100644
      init_os_extras();
  #endif
  #endif
+diff --git a/os390/os390.h b/os390/os390.h
+new file mode 100644
+index 0000000..e55d64f
+--- /dev/null
++++ b/os390/os390.h
+@@ -0,0 +1,35 @@
++#ifndef H_OS390
++#define H_OS390 1
++
++#if (__CHARSET_LIB == 1)
++#undef open
++#define open __open_replaced
++#include <fcntl.h>
++#undef open
++
++#undef pipe 
++#define pipe __pipe_replaced
++#include <unistd.h>
++#undef pipe
++
++int __open_ascii(const char *filename, int opts, ...);
++int __pipe_ascii(int [2]);
++
++int open(const char* path, int oflag, ...) asm("__open_ascii");
++int pipe(int [2]) asm("__pipe_ascii");
++#endif
++
++#include <string.h>
++#include <sys/ps.h>
++#include <unistd.h>
++#include <limits.h>
++#include <_Nascii.h>
++#include <fcntl.h>
++#include <libgen.h>
++
++int __getfdccsid(int fd);
++int __setccsid(int fd, int ccsid);
++int __chgfdccsid(int fd, unsigned short ccsid);
++void __updateccsid(int fd, const char* path, int oflag, int perm);
++
++#endif
