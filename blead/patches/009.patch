@@ -1,5 +1,21 @@
+diff --git a/lib/File/Copy.pm b/lib/File/Copy.pm
+index ce659a0..ebde82d 100644
+--- a/lib/File/Copy.pm
++++ b/lib/File/Copy.pm
+@@ -180,6 +180,11 @@ sub copy {
+ 	}
+     }
+ 
++    # Copy file tags on os390
++    if ($^O eq 'os390') {
++      ZOS::Filespec::copytags(fileno($from_h), fileno($to_h));
++    }
++
+     close($to_h) || goto fail_open2 if $closeto;
+     close($from_h) || goto fail_open1 if $closefrom;
+ 
 diff --git a/installperl b/installperl
-index 3c8af53..cd2c709 100755
+index 3c8af53..e2006c5 100755
 --- a/installperl
 +++ b/installperl
 @@ -284,7 +284,6 @@ else {
@@ -26,19 +42,7 @@ index 3c8af53..cd2c709 100755
  
  	$mainperl_is_instperl = 1;
      }
-@@ -713,13 +710,17 @@ sub copy_if_diff {
- 	if ($perlpodbadsymlink && $from =~ m!^pod/perl(.+)\.pod$!) {
- 	    $from = "README.$1";
- 	}
--	copy($from, $to);
-+  #FIXME: use cp temporarily to copy file tags on z/Os
-+  if ($^O eq 'os390') {
-+	  `cp $from $to`
-+  } else {
-+	  copy($from, $to);
-+  }
- 	# Restore timestamps if it's a .a library or for OS/2.
- 	if (!$opts{notify} && ($Is_OS2 || $to =~ /\.a$/)) {
+@@ -719,7 +716,6 @@ sub copy_if_diff {
  	    my ($atime, $mtime) = (stat $from)[8,9];
  	    utime $atime, $mtime, $to;
  	}
@@ -46,19 +50,3 @@ index 3c8af53..cd2c709 100755
  	1;
      }
  }
-diff --git a/lib/File/Copy.pm b/lib/File/Copy.pm
-index ce659a0..ebde82d 100644
---- a/lib/File/Copy.pm
-+++ b/lib/File/Copy.pm
-@@ -180,6 +180,11 @@ sub copy {
- 	}
-     }
- 
-+    # Copy file tags on os390
-+    if ($^O eq 'os390') {
-+      ZOS::Filespec::copytags(fileno($from_h), fileno($to_h));
-+    }
-+
-     close($to_h) || goto fail_open2 if $closeto;
-     close($from_h) || goto fail_open1 if $closefrom;
- 
