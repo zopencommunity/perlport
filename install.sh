@@ -13,8 +13,8 @@ export _TAG_REDIR_ERR=txt
 export _TAG_REDIR_OUT=txt
 export PATH="${INSTALL_DIR}/bin:$PATH"
 export PERL5LIB="${INSTALL_DIR}/lib"
-for libperl in `find ${INSTALL_DIR}. -name "libperl.so"`; do
-  libperl=\$(dirname "$\{libperl}")
+for libperl in \$(find ${INSTALL_DIR} -name "libperl.so"); do
+  libperl=\$(dirname "\${libperl}")
   export LIBPATH="\${libperl}:\$LIBPATH"
 done
 EOF
