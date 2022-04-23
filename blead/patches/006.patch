@@ -183,12 +183,25 @@ index 0000000..e55d64f
 +void __updateccsid(int fd, const char* path, int oflag, int perm);
 +
 +#endif
+diff --git a/perl.c b/perl.c
+index 057cd0e..75453d2 100644
+--- a/perl.c
++++ b/perl.c
+@@ -2428,7 +2428,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
+     if (xsinit)
+         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
+ #ifndef PERL_MICRO
+-#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
++#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__) || defined(__MVS__)
+     init_os_extras();
+ #endif
+ #endif
 diff --git a/os390/os390_init.c b/os390/os390_init.c
 new file mode 100644
-index 0000000..376a3aa
+index 0000000..16c6e68
 --- /dev/null
 +++ b/os390/os390_init.c
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,154 @@
 +#include "os390/os390.h"
 +#include <string.h>
 +#include <sys/stat.h>
@@ -205,14 +218,15 @@ index 0000000..376a3aa
 +
 +void init_stdio_streams() {
 +  // If stdout is not a TTY and is untagged, tag it as 1047
++  int ret = 0;
 +  if (0 == __getfdccsid(fileno(stdout))) {
 +    struct file_tag tag;
 +    tag.ft_ccsid = 1047;
 +    tag.ft_txtflag = 1;
-+    fcntl(fileno(stdout), F_SETTAG, &tag);
++    ret += fcntl(fileno(stdout), F_SETTAG, &tag) != 0;
 +
 +    struct f_cnvrt req = {SETCVTON, 0, 1047};
-+    fcntl(fileno(stdout), F_CONTROL_CVT, &req);
++    ret =+ fcntl(fileno(stdout), F_CONTROL_CVT, &req) != 0;
 +  }
 +
 +  // If stderr is not a TTY is untagged, tag as 1047
@@ -220,10 +234,10 @@ index 0000000..376a3aa
 +    struct file_tag tag;
 +    tag.ft_ccsid = 1047;
 +    tag.ft_txtflag = 1;
-+    fcntl(fileno(stderr), F_SETTAG, &tag);
++    ret += fcntl(fileno(stderr), F_SETTAG, &tag) != 0;
 +
 +    struct f_cnvrt req = {SETCVTON, 0, 1047};
-+    fcntl(fileno(stderr), F_CONTROL_CVT, &req);
++    ret =+ fcntl(fileno(stderr), F_CONTROL_CVT, &req) != 0;
 +  }
 +
 +  // If stdin not a TTY is untagged, tag as 1047
@@ -231,16 +245,19 @@ index 0000000..376a3aa
 +    struct file_tag tag;
 +    tag.ft_ccsid = 1047;
 +    tag.ft_txtflag = 1;
-+    fcntl(fileno(stdin), F_SETTAG, &tag);
++    ret += fcntl(fileno(stdin), F_SETTAG, &tag) != 0;
 +
-+    // Below is needed for /bin/sh STDIN
 +    struct f_cnvrt req = {SETCVTON, 0, 1047};
-+    fcntl(fileno(stdin), F_CONTROL_CVT, &req);
++    ret =+ fcntl(fileno(stdin), F_CONTROL_CVT, &req) != 0;
++  }
++
++  if (ret) {
++    fprintf(stderr, "WARNING: Could not tag stdio streams. Enhanced ASCII auto-conversion facilities may not function correctly.\n");
 +  }
 +}
 +
-+int orig_mode;
-+int orig_cvstate;
++static int orig_mode;
++static int orig_cvstate;
 +
 +#include "EXTERN.h"
 +#include "perl.h"
@@ -292,7 +309,7 @@ index 0000000..376a3aa
 +      if (realpath(buf.ps_pathptr, parent) == NULL)
 +        break;
 +
-+      // Get parent directory.
++      // Get parent directory, dirname modifies parent pointer
 +      dirname(parent);
 +
 +      // Get parent's parent directory.
@@ -300,6 +317,7 @@ index 0000000..376a3aa
 +      if (!parent2)
 +        break;
 +
++      // Get parent of parent, dirname modifies parent2 pointer
 +      dirname(parent2);
 +
 +      char* libpath_env = getenv("LIBPATH");
@@ -325,8 +343,10 @@ index 0000000..376a3aa
 +      break;
 +    }
 +   
++#if (__CHARSET_LIB == 1)
 +    // Tag stdio streams if not already tagged 
 +    init_stdio_streams();
++#endif
 +}
 +
 +__attribute__((destructor))
@@ -336,16 +356,3 @@ index 0000000..376a3aa
 +    __ae_thread_swapmode(orig_mode);
 +    __ae_autoconvert_state(orig_cvstate);
 +}
-diff --git a/perl.c b/perl.c
-index 057cd0e..75453d2 100644
---- a/perl.c
-+++ b/perl.c
-@@ -2428,7 +2428,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
-     if (xsinit)
-         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
- #ifndef PERL_MICRO
--#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
-+#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__) || defined(__MVS__)
-     init_os_extras();
- #endif
- #endif
