@@ -51,12 +51,18 @@ perlbld="${PERL_VRM}.${PERL_OS390_TGT_AMODE}.${PERL_OS390_TGT_LINK}.${PERL_OS390
 
 echo "Logs will be stored to ${PERL_OS390_TGT_LOG_DIR}"
 
-if [ ! -z "${PERL_OS390_TGT_CONFIG_OPTS}" ]; then
-  ConfigOpts="$PERL_OS390_TGT_CONFIG_OPTS"
+if [ ! -z "${PERL_INSTALL_DIR}" ]; then
+  install_dir=${PERL_INSTALL_DIR}
 else
-	echo "You need to specify envar PERL_OS390_TGT_CONFIG_OPTS." >&2
-	exit 16
+  install_dir="${HOME}/local/perl"
 fi
+
+mkdir -p $install_dir
+if [ $? -gt 0 ]; then
+  echo "Install directory $install_dir cannot be created"
+  exit 16
+fi
+ConfigOpts="-Dprefix=$install_dir"
 
 echo "Extra configure options: $ConfigOpts"
 case "$PERL_VRM" in
@@ -187,6 +193,16 @@ else
     FAILURES=`grep "Failed.*tests out of" ${PERL_OS390_TGT_LOG_DIR}/maketest.${USER}.${perlbld}.out | cut -f2 -d' '`
     echo "Perl test failures: $FAILURES";
 	fi
+
+	echo "Make Install Perl"
+	INSTALLFLAGS="+v" nohup make install >${PERL_OS390_TGT_LOG_DIR}/makeinstall.${USER}.${perlbld}.out 2>&1
+	rc=$?
+	if [ $rc -gt 0 ]; then
+		echo "MAKE install of Perl tree failed." >&2
+	fi
+  echo "Copying z/OS install files to $install_dir"
+  cp ../../install.sh ${install_dir}/
+  cp ../../README_ZOS.md ${install_dir}/
 fi
 date
 
