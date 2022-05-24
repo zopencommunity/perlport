@@ -10,19 +10,6 @@ index 309de23..1d0c3d8 100644
  *.a
  *.so
  *.i
-diff --git a/Configure b/Configure
-index bd96249..2c81e93 100755
---- a/Configure
-+++ b/Configure
-@@ -4566,7 +4566,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
- $cat >try.c <<EOM
- #include <stdio.h>
- int main() {
--#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__MVS__)
- #ifdef __VERSION__
- 	printf("%s\n", __VERSION__);
- #else
 diff --git a/cpan/Encode/Makefile.PL b/cpan/Encode/Makefile.PL
 index 632d736..266bb7c 100644
 --- a/cpan/Encode/Makefile.PL
@@ -173,88 +160,6 @@ index 552a106..a72a7c8 100644
  #ifdef PERL_MICRO
  #   include "uconfig.h"
  #else
-diff --git a/util.c b/util.c
-index b1da8e3..9fe743e 100644
---- a/util.c
-+++ b/util.c
-@@ -2646,22 +2646,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
- }
- #endif
- 
--#if defined(OEMVS)
--  #if (__CHARSET_LIB == 1)
--  static int chgfdccsid(int fd, unsigned short ccsid) 
--  {
--    attrib_t attr;
--    memset(&attr, 0, sizeof(attr));
--    attr.att_filetagchg = 1;
--    attr.att_filetag.ft_ccsid = ccsid;
--    if (ccsid != FT_BINARY) {
--      attr.att_filetag.ft_txtflag = 1;
--    }
--    return __fchattr(fd, &attr, sizeof(attr));
--  }
--  #endif
--#endif
--
- PerlIO *
- Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
- {
-@@ -2709,12 +2693,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
-         /* Close parent's end of error status pipe (if any) */
-         if (did_pipes)
-             PerlLIO_close(pp[0]);
--#if defined(OEMVS)
--  #if (__CHARSET_LIB == 1)
--        chgfdccsid(p[THIS], 819);
--        chgfdccsid(p[THAT], 819);
--  #endif
--#endif
-         /* Now dup our end of _the_ pipe to right position */
-         if (p[THIS] != (*mode == 'r')) {
-             PerlLIO_dup2(p[THIS], *mode == 'r');
-@@ -2790,19 +2768,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
-     }
-     if (did_pipes)
-          PerlLIO_close(pp[0]);
--#if defined(OEMVS)
--  #if (__CHARSET_LIB == 1)
--    PerlIO* io = PerlIO_fdopen(p[This], mode);
--    if (io) {
--      chgfdccsid(p[This], 819);
--    }
--    return io;
--  #else
--    return PerlIO_fdopen(p[This], mode);
--  #endif
--#else
-     return PerlIO_fdopen(p[This], mode);
--#endif
- 
- #else
- #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
-@@ -2870,12 +2836,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
- #define THAT This
-         if (did_pipes)
-             PerlLIO_close(pp[0]);
--#if defined(OEMVS)
--  #if (__CHARSET_LIB == 1)
--        chgfdccsid(p[THIS], 819);
--        chgfdccsid(p[THAT], 819);
--  #endif
--#endif
-         if (p[THIS] != (*mode == 'r')) {
-             PerlLIO_dup2(p[THIS], *mode == 'r');
-             PerlLIO_close(p[THIS]);
-@@ -2966,7 +2926,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
-   #if (__CHARSET_LIB == 1)
-     PerlIO* io = PerlIO_fdopen(p[This],	mode);
-     if (io) {
--      chgfdccsid(p[This], 819);
-+      __chgfdccsid(p[This], 819);
-     }
-     return io;
-   #else
 diff --git a/iperlsys.h b/iperlsys.h
 index b922af0..daed107 100644
 --- a/iperlsys.h
@@ -283,3 +188,117 @@ index b922af0..daed107 100644
  #  define PerlLIO_read(fd, buf, count)  read((fd), (buf), (count))
  #  define PerlLIO_rename(old, new)      rename((old), (new))
  #  define PerlLIO_setmode(fd, mode)     setmode((fd), (mode))
+diff --git a/util.c b/util.c
+index ca7d374..a902360 100644
+--- a/util.c
++++ b/util.c
+@@ -2646,22 +2646,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
+ }
+ #endif
+ 
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-  static int chgfdccsid(int fd, unsigned short ccsid) 
+-  {
+-    attrib_t attr;
+-    memset(&attr, 0, sizeof(attr));
+-    attr.att_filetagchg = 1;
+-    attr.att_filetag.ft_ccsid = ccsid;
+-    if (ccsid != FT_BINARY) {
+-      attr.att_filetag.ft_txtflag = 1;
+-    }
+-    return __fchattr(fd, &attr, sizeof(attr));
+-  }
+-  #endif
+-#endif
+-
+ /*
+ =for apidoc my_popen_list
+ 
+@@ -2717,12 +2701,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+         /* Close parent's end of error status pipe (if any) */
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         /* Now dup our end of _the_ pipe to right position */
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+@@ -2798,19 +2776,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+     }
+     if (did_pipes)
+          PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    PerlIO* io = PerlIO_fdopen(p[This], mode);
+-    if (io) {
+-      chgfdccsid(p[This], 819);
+-    }
+-    return io;
+-  #else
+-    return PerlIO_fdopen(p[This], mode);
+-  #endif
+-#else
+     return PerlIO_fdopen(p[This], mode);
+-#endif
+ 
+ #else
+ #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
+@@ -2889,12 +2855,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+ #define THAT This
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+             PerlLIO_close(p[THIS]);
+@@ -2985,7 +2945,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+   #if (__CHARSET_LIB == 1)
+     PerlIO* io = PerlIO_fdopen(p[This],	mode);
+     if (io) {
+-      chgfdccsid(p[This], 819);
++      __chgfdccsid(p[This], 819);
+     }
+     return io;
+   #else
+diff --git a/Configure b/Configure
+index bd96249..28f19c0 100755
+--- a/Configure
++++ b/Configure
+@@ -4566,7 +4566,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
+ $cat >try.c <<EOM
+ #include <stdio.h>
+ int main() {
+-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
++#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__MVS__)
+ #ifdef __VERSION__
+ 	printf("%s\n", __VERSION__);
+ #else
+@@ -8726,10 +8726,14 @@ case "$useshrplib" in
+ true)
+ 	case "$userelocatableinc" in
+ 	true|define)
+-		echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
+-		echo "See INSTALL for an explanation why that won't work." >&4
+-		exit 4
+-		;;
++    case "$osname" in
++      os390) ;;
++      *)
++        echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
++        echo "See INSTALL for an explanation why that won't work." >&4
++        exit 4
++        ;;
++    esac
+ 	esac
+ 	case "$libperl" in
+ 	'')
