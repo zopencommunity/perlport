@@ -1,5 +1,5 @@
 diff --git a/hints/os390.sh b/hints/os390.sh
-index 8995d8c..cea9023 100644
+index 8995d8c..97ccc57 100644
 --- a/hints/os390.sh
 +++ b/hints/os390.sh
 @@ -18,23 +18,10 @@
@@ -84,16 +84,17 @@ index 8995d8c..cea9023 100644
  
  def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
  def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
-@@ -96,6 +110,8 @@ def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
+@@ -96,6 +110,9 @@ def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
  # Set up feature test macros required for features available on supported z/OS systems
  def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED"
  
++# Find perl base on PATH environment variable rather than hardcoding install location
 +startperl='#!/bin/env perl'
 +
  # Combine -D with cflags
  case "$ccflags" in
  '') ccflags="$def_os390_cflags $def_os390_defs"  ;;
-@@ -234,10 +250,10 @@ esac
+@@ -234,10 +251,10 @@ esac
  # NOLOC says to use the 1047 code page, and no locale
  case "$usedl" in
  define)

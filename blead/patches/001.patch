@@ -271,7 +271,7 @@ index ca7d374..a902360 100644
      return io;
    #else
 diff --git a/Configure b/Configure
-index bd96249..28f19c0 100755
+index bd96249..53e8787 100755
 --- a/Configure
 +++ b/Configure
 @@ -4566,7 +4566,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
@@ -279,7 +279,7 @@ index bd96249..28f19c0 100755
  #include <stdio.h>
  int main() {
 -#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__MVS__)
++#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__MVS__) /* xlclang sets __GNUC__ but does not set __VERSION__ */
  #ifdef __VERSION__
  	printf("%s\n", __VERSION__);
  #else
@@ -292,7 +292,7 @@ index bd96249..28f19c0 100755
 -		exit 4
 -		;;
 +    case "$osname" in
-+      os390) ;;
++      os390) echo "Perl on z/OS uses LIBPATH to dynamically locate shared objects." ;;
 +      *)
 +        echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
 +        echo "See INSTALL for an explanation why that won't work." >&4
