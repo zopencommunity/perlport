@@ -62,7 +62,7 @@ if [ $? -gt 0 ]; then
   echo "Install directory $install_dir cannot be created"
   exit 16
 fi
-ConfigOpts="-Dprefix=$install_dir"
+ConfigOpts="-Dprefix=$install_dir -Duserelocatableinc"
 
 echo "Extra configure options: $ConfigOpts"
 case "$PERL_VRM" in
