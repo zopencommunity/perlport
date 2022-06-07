@@ -10,7 +10,11 @@ fi
 export PORT_ROOT="${PWD}"
 export PORT_TYPE="GIT"
 export PORT_CONFIGURE="./Configure"
-export PORT_CONFIGURE_OPTS="-Dprefix=$install_dir -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl"
+
+if [ "${PORT_INSTALL_DIR}x" = "x" ]; then
+  export PORT_INSTALL_DIR="${HOME}/zot/prod/${dir}"
+fi
+export PORT_CONFIGURE_OPTS="-Dprefix=${PORT_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl"
 export PORT_CHECK_OPTS="test"
 export PORT_GIT_URL="https://github.com/Perl/perl5.git"
 export PORT_GIT_DEPS="git make"
