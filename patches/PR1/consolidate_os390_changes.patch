@@ -456,28 +456,6 @@ index 309de23..1d0c3d8 100644
  *.a
  *.so
  *.i
-diff --git a/cpan/Encode/Makefile.PL b/cpan/Encode/Makefile.PL
-index 632d736..266bb7c 100644
---- a/cpan/Encode/Makefile.PL
-+++ b/cpan/Encode/Makefile.PL
-@@ -133,7 +133,7 @@ WriteMakefile(
-             'MORIYAMA Masayuki <msyk@mtg.biglobe.ne.jp>',
-             'Nick Ing-Simmons <nick@ing-simmons.net>',
-             'Nicholas Clark <nick@ccl4.org>',
--            'Olivier Mengué <dolmen@cpan.org>',
-+            'Olivier Mengue <dolmen@cpan.org>',
-             'otsune',
-             'Pali <pali@cpan.org>',
-             'Paul Marquess <paul_marquess@yahoo.co.uk>',
-@@ -159,7 +159,7 @@ WriteMakefile(
-             'Tony Cook <tony@develop-help.com>',
-             'Vadim Konovalov <vkonovalov@peterstar.ru>',
-             'Victor <victor@vsespb.ru>',
--            'Ville Skyttä <ville.skytta@iki.fi>',
-+            'Ville Skytta <ville.skytta@iki.fi>',
-             'Vincent van Dam <vvandam@sandvine.com>',
-             'Yitzchak Scott-Thoennes <sthoenna@efn.org>',
-         ],
 diff --git a/doio.c b/doio.c
 index 4009545..3d5dc99 100644
 --- a/doio.c
