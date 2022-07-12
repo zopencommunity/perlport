@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Set up environment variables for general build tool to operate
+#
+if ! [ -f ./buildenv ]; then
+  echo "Need to source from the buildenv directory" >&2
+  return 0
+fi
+
+export ZOPEN_ROOT="${PWD}"
+export ZOPEN_TYPE="GIT"
+export ZOPEN_CONFIGURE="./Configure"
+
+if [ "${ZOPEN_INSTALL_DIR}x" = "x" ]; then
+  export ZOPEN_INSTALL_DIR="${HOME}/zot/prod/${dir}"
+fi
+export ZOPEN_CONFIGURE_OPTS="-Dprefix=${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl"
+export ZOPEN_CHECK_OPTS="test"
+export ZOPEN_GIT_URL="https://github.com/Perl/perl5.git"
+export ZOPEN_GIT_DEPS="git make"
+export ZOPEN_GIT_BRANCH="blead"
+
+# Perl Environment variables
+export INSTALLFLAGS="+v"
