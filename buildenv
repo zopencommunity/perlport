@@ -12,7 +12,7 @@ export ZOPEN_TYPE="GIT"
 export ZOPEN_CONFIGURE="./Configure"
 
 if [ "${ZOPEN_INSTALL_DIR}x" = "x" ]; then
-  export ZOPEN_INSTALL_DIR="${HOME}/zot/prod/${dir}"
+  export ZOPEN_INSTALL_DIR="${HOME}/zopen/prod/${dir}"
 fi
 export ZOPEN_CONFIGURE_OPTS="-Dprefix=${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl"
 export ZOPEN_CHECK_OPTS="test"
