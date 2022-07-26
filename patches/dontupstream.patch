@@ -1,0 +1,20 @@
+diff --git a/cpan/Encode/Makefile.PL b/cpan/Encode/Makefile.PL
+index fd3ebe3d66..642f6036d6 100644
+--- a/cpan/Encode/Makefile.PL
++++ b/cpan/Encode/Makefile.PL
+@@ -135,7 +135,6 @@ WriteMakefile(
+             'MORIYAMA Masayuki <msyk@mtg.biglobe.ne.jp>',
+             'Nick Ing-Simmons <nick@ing-simmons.net>',
+             'Nicholas Clark <nick@ccl4.org>',
+-            'Olivier MenguÃ© <dolmen@cpan.org>',
+             'otsune',
+             'Pali <pali@cpan.org>',
+             'Paul Marquess <paul_marquess@yahoo.co.uk>',
+@@ -161,7 +160,6 @@ WriteMakefile(
+             'Tony Cook <tony@develop-help.com>',
+             'Vadim Konovalov <vkonovalov@peterstar.ru>',
+             'Victor <victor@vsespb.ru>',
+-            'Ville SkyttÃ¤ <ville.skytta@iki.fi>',
+             'Vincent van Dam <vvandam@sandvine.com>',
+             'Yitzchak Scott-Thoennes <sthoenna@efn.org>',
+         ],
