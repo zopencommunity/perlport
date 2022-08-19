@@ -13,7 +13,7 @@ export _TAG_REDIR_ERR=txt
 export _TAG_REDIR_OUT=txt
 mydir="\${PWD}"
 export PATH="\${mydir}/bin:\$PATH"
-for libperl in \$(find \${mydir} -name "libperl.so"); do
+for libperl in \$(find \${mydir}/ -name "libperl.so"); do
   libperl=\$(dirname "\${libperl}")
   export LIBPATH="\${libperl}:\$LIBPATH"
 done
