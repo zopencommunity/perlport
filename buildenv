@@ -31,3 +31,21 @@ fi
 export PERL5LIB="\${PERL5LIB_ROOT}:\${PERL5LIB_ROOT}/os390"
 EOF
 }
+
+zopen_check_results()
+{
+#!/bin/sh
+# perl should have less than 22 failurs
+# Determine number of failures by looking at "Failed.*tests out of" line
+#
+chk="$2_check.log"
+
+set -x
+failures=$(grep "Failed.*tests out of" ${chk} | cut -f2 -d' ')
+if [ ${failures} -gt 21 ]; then
+  exit 2
+else
+  exit 1
+fi
+}
+
