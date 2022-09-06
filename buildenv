@@ -2,12 +2,6 @@
 #
 # Set up environment variables for general build tool to operate
 #
-if ! [ -f ./buildenv ]; then
-  echo "Need to source from the buildenv directory" >&2
-  return 0
-fi
-
-export ZOPEN_ROOT="${PWD}"
 export ZOPEN_TYPE="GIT"
 export ZOPEN_CONFIGURE="./Configure"
 
@@ -22,3 +16,18 @@ export ZOPEN_GIT_BRANCH="blead"
 
 # Perl Environment variables
 export INSTALLFLAGS="+v"
+
+zopen_append_envs() {
+cat <<EOF
+for libperl in \$(find \${PWD}/ -name "libperl.so"); do
+  libperl=\$(dirname "\${libperl}")
+  export LIBPATH="\${libperl}:\$LIBPATH"
+done
+if ls \${mydir}/lib/perl[0-9]* >/dev/null 2>&1; then
+  PERL5LIB_ROOT=\$( cd \${PWD}/lib/perl[0-9]/[0-9]*; echo \$PWD )
+else
+  PERL5LIB_ROOT=\$( cd \${PWD}/lib/[0-9]*; echo \$PWD )
+fi
+export PERL5LIB="\${PERL5LIB_ROOT}:\${PERL5LIB_ROOT}/os390"
+EOF
+}
