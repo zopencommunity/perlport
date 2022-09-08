@@ -23,7 +23,7 @@ for libperl in \$(find \${PWD}/ -name "libperl.so"); do
   libperl=\$(dirname "\${libperl}")
   export LIBPATH="\${libperl}:\$LIBPATH"
 done
-if ls \${mydir}/lib/perl[0-9]* >/dev/null 2>&1; then
+if ls \${PWD}/lib/perl[0-9]* >/dev/null 2>&1; then
   PERL5LIB_ROOT=\$( cd \${PWD}/lib/perl[0-9]/[0-9]*; echo \$PWD )
 else
   PERL5LIB_ROOT=\$( cd \${PWD}/lib/[0-9]*; echo \$PWD )
