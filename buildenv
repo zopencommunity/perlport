@@ -17,7 +17,7 @@ export ZOPEN_GIT_BRANCH="blead"
 # Perl Environment variables
 export INSTALLFLAGS="+v"
 
-zopen_append_envs() {
+zopen_append_to_env() {
 cat <<EOF
 for libperl in \$(find \${PWD}/ -name "libperl.so"); do
   libperl=\$(dirname "\${libperl}")
