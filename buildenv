@@ -34,18 +34,19 @@ EOF
 
 zopen_check_results()
 {
-#!/bin/sh
-# perl should have less than 22 failurs
-# Determine number of failures by looking at "Failed.*tests out of" line
-#
 chk="$2_check.log"
 
-set -x
-failures=$(grep "Failed.*tests out of" ${chk} | cut -f2 -d' ')
-if [ ${failures} -gt 21 ]; then
-  exit 2
-else
-  exit 1
-fi
+failures=$(grep -E " ok$" ${chk} | wc -l)
+totalTests=$(grep -E " FAILED at.*$| ok$" ${chk} | wc -l)
+cat <<ZZ
+actualFailures:$failures
+totalTests:$totalTests
+expectedFailures:22
+ZZ
 }
 
+zopen_append_env()
+{
+  # Needed for autoconf, automake and potentially others
+  echo "export PERL=\"/bin/env perl\""
+}
