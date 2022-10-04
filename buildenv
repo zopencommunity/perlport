@@ -29,6 +29,8 @@ else
   PERL5LIB_ROOT=\$( cd \${PWD}/lib/[0-9]*; echo \$PWD )
 fi
 export PERL5LIB="\${PERL5LIB_ROOT}:\${PERL5LIB_ROOT}/os390"
+# Needed for autoconf, automake and potentially others
+export PERL="/bin/env perl"
 EOF
 }
 
@@ -41,12 +43,6 @@ totalTests=$(grep -E " FAILED at.*$| ok$" ${chk} | wc -l)
 cat <<ZZ
 actualFailures:$failures
 totalTests:$totalTests
-expectedFailures:22
+expectedFailures:23
 ZZ
-}
-
-zopen_append_env()
-{
-  # Needed for autoconf, automake and potentially others
-  echo "export PERL=\"/bin/env perl\""
 }
