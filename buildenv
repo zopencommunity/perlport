@@ -1,14 +1,6 @@
-#!/bin/sh
-#
-# Set up environment variables for general build tool to operate
-#
 export ZOPEN_TYPE="GIT"
 export ZOPEN_CONFIGURE="./Configure"
-
-if [ "${ZOPEN_INSTALL_DIR}x" = "x" ]; then
-  export ZOPEN_INSTALL_DIR="${HOME}/zopen/prod/${dir}"
-fi
-export ZOPEN_CONFIGURE_OPTS="-Dprefix=${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl"
+export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl"
 export ZOPEN_CHECK_OPTS="test"
 export ZOPEN_GIT_URL="https://github.com/Perl/perl5.git"
 export ZOPEN_GIT_DEPS="git make"
@@ -38,8 +30,9 @@ zopen_check_results()
 {
 chk="$2_check.log"
 
-failures=$(grep -E " ok$" ${chk} | wc -l)
+successes=$(grep -E " ok$" ${chk} | wc -l)
 totalTests=$(grep -E " FAILED at.*$| ok$" ${chk} | wc -l)
+failures="$((totalTests-successes))"
 cat <<ZZ
 actualFailures:$failures
 totalTests:$totalTests
