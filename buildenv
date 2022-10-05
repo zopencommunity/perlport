@@ -21,8 +21,6 @@ else
   PERL5LIB_ROOT=\$( cd \${PWD}/lib/[0-9]*; echo \$PWD )
 fi
 export PERL5LIB="\${PERL5LIB_ROOT}:\${PERL5LIB_ROOT}/os390"
-# Needed for autoconf, automake and potentially others
-export PERL="/bin/env perl"
 EOF
 }
 
