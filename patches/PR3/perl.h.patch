@@ -1,0 +1,24 @@
+diff --git a/perl.h b/perl.h
+index 8116144db1..c153fd704e 100644
+--- a/perl.h
++++ b/perl.h
+@@ -22,6 +22,10 @@
+ #define USE_STDIO
+ #endif /* PERL_FOR_X2P */
+ 
++#if defined(__MVS__)
++#   include "os390/os390.h"
++#endif
++
+ #ifdef PERL_MICRO
+ #   include "uconfig.h"
+ #else
+@@ -1213,7 +1217,7 @@ violations are fatal.
+ #    define PERL_DUMMY_NAME_            PERL_DUMMY_TELEPHONE_
+ #  endif
+ #  ifdef USE_LOCALE_SYNTAX
+-#    define LC_SYNTAX_INDEX_            PERL_DUMMY_NAME + 1
++#    define LC_SYNTAX_INDEX_            PERL_DUMMY_NAME_ + 1
+ #    define PERL_DUMMY_SYNTAX_          LC_SYNTAX_INDEX_
+ #  else
+ #    define PERL_DUMMY_SYNTAX_          PERL_DUMMY_NAME_
