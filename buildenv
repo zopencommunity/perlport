@@ -29,8 +29,8 @@ zopen_check_results()
 chk="$1/$2_check.log"
 
 successes=$(grep -E " ok$" ${chk} | wc -l)
-totalTests=$(grep -E " FAILED at.*$| ok$" ${chk} | wc -l)
-failures="$((totalTests-successes))"
+failures=$(grep -E "FAILED" ${chk} | wc -l)
+totalTests="$((failures+successes))"
 cat <<ZZ
 actualFailures:$failures
 totalTests:$totalTests
