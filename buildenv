@@ -1,9 +1,9 @@
 export ZOPEN_TYPE="GIT"
 export ZOPEN_CONFIGURE="./Configure"
-export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl"
+export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl -D ccflags=\"\$CFLAGS \$CPPFLAGS -DOS390 -DZOS -DNO_LOCALE_MESSAGES -DOEMVS -DMAXSIG=39 -qNOOPT\" -D ldflags=\"\$LDFLAGS\" -D libs=\"\$LIBS\""
 export ZOPEN_CHECK_OPTS="test"
 export ZOPEN_GIT_URL="https://github.com/Perl/perl5.git"
-export ZOPEN_GIT_DEPS="git make"
+export ZOPEN_GIT_DEPS="git make zoslib sed"
 export ZOPEN_GIT_BRANCH="blead"
 
 # Perl Environment variables
@@ -29,8 +29,8 @@ zopen_check_results()
 chk="$1/$2_check.log"
 
 successes=$(grep -E " ok$" ${chk} | wc -l)
-totalTests=$(grep -E " FAILED at.*$| ok$" ${chk} | wc -l)
-failures="$((totalTests-successes))"
+failures=$(grep -E "FAILED" ${chk} | wc -l)
+totalTests="$((failures+successes))"
 cat <<ZZ
 actualFailures:$failures
 totalTests:$totalTests

@@ -1,0 +1,619 @@
+diff --git a/.gitignore b/.gitignore
+index 309de23325..1d0c3d8f0d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -56,6 +56,7 @@ perldtrace.h
+ 
+ # general build products
+ *.o
++*.d
+ *.a
+ *.so
+ *.i
+diff --git a/Configure b/Configure
+index 2724f8709b..0924bc06c4 100755
+--- a/Configure
++++ b/Configure
+@@ -4583,7 +4583,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
+ $cat >try.c <<EOM
+ #include <stdio.h>
+ int main() {
+-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
++#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__MVS__) /* xlclang sets __GNUC__ but does not set __VERSION__ */
+ #ifdef __VERSION__
+ 	printf("%s\n", __VERSION__);
+ #else
+@@ -8729,10 +8729,14 @@ case "$useshrplib" in
+ true)
+ 	case "$userelocatableinc" in
+ 	true|define)
+-		echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
+-		echo "See INSTALL for an explanation why that won't work." >&4
+-		exit 4
+-		;;
++    case "$osname" in
++      os390) echo "Perl on z/OS uses LIBPATH to dynamically locate shared objects." ;;
++      *)
++        echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
++        echo "See INSTALL for an explanation why that won't work." >&4
++        exit 4
++        ;;
++    esac
+ 	esac
+ 	case "$libperl" in
+ 	'')
+diff --git a/Makefile.SH b/Makefile.SH
+index d1aa10a91b..d5b13f1fda 100755
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -434,6 +434,7 @@ FIRSTMAKEFILE = $firstmakefile
+ 
+ # Any special object files needed by this architecture, e.g. os2/os2.obj
+ ARCHOBJS = $archobjs
++ARCH_MAIN_OBJS = $arch_main_objs
+ 
+ .SUFFIXES: .c \$(OBJ_EXT) .i .s .c.depends
+ 
+@@ -595,9 +596,9 @@ miniperl_dtrace_objs = $(miniperl_objs_nodt:%=mpdtrace/%)
+ perllib_dtrace_objs = $(perllib_objs_nodt:%=libpdtrace/%)
+ perlmain_dtrace_objs = maindtrace/perlmain$(OBJ_EXT)
+ 
+-miniperl_objs = $(miniperl_dtrace_objs) $(DTRACE_MINI_O)
++miniperl_objs = $(miniperl_dtrace_objs) $(DTRACE_MINI_O) $(ARCH_MAIN_OBJS)
+ perllib_objs  = $(perllib_dtrace_objs) $(DTRACE_PERLLIB_O)
+-perlmain_objs = $(perlmain_dtrace_objs) $(DTRACE_MAIN_O)
++perlmain_objs = $(perlmain_dtrace_objs) $(DTRACE_MAIN_O) $(ARCH_MAIN_OBJS)
+ 
+ miniperl_dep = $(DTRACE_MINI_O)
+ perllib_dep = $(DTRACE_PERLLIB_O)
+@@ -608,9 +609,9 @@ perlmain_dep = $(DTRACE_MAIN_O)
+ *)
+     $spitshell >>$Makefile <<'!NO!SUBS!'
+ 
+-miniperl_objs = $(miniperl_objs_nodt) $(DTRACE_MINI_O)
++miniperl_objs = $(miniperl_objs_nodt) $(DTRACE_MINI_O) $(ARCH_MAIN_OBJS)
+ perllib_objs  = $(perllib_objs_nodt) $(DTRACE_PERLLIB_O)
+-perlmain_objs = perlmain$(OBJ_EXT) $(DTRACE_MAIN_O)
++perlmain_objs = perlmain$(OBJ_EXT) $(DTRACE_MAIN_O) $(ARCH_MAIN_OBJS)
+ 
+ miniperl_dep = $(miniperl_objs)
+ perllib_dep = $(perllib_objs)
+@@ -933,7 +934,7 @@ $(LIBPERL): $& $(perllib_dep) $(DYNALOADER) $(LIBPERLEXPORT)
+ 	true)
+ 		$spitshell >>$Makefile <<'!NO!SUBS!'
+ 	rm -f $@
+-	$(LD) -o $@ $(SHRPLDFLAGS) $(perllib_objs) $(DYNALOADER) $(libs)
++	$(LD) -o $@ $(SHRPLDFLAGS) $(LDFLAGS) $(perllib_objs) $(DYNALOADER) $(libs)
+ !NO!SUBS!
+ 		case "$osname" in
+ 		aix)
+diff --git a/doio.c b/doio.c
+index 48deb13d6a..789bd1ff76 100644
+--- a/doio.c
++++ b/doio.c
+@@ -218,57 +218,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
+ #endif
+ }
+ 
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-#   include <stdio.h>
+-#   include <stdlib.h>
+-
+-    static int setccsid(int fd, int ccsid) 
+-    {
+-      attrib_t attr;
+-      int rc;
+-
+-      memset(&attr, 0, sizeof(attr));
+-      attr.att_filetagchg = 1;
+-      attr.att_filetag.ft_ccsid = ccsid;
+-      attr.att_filetag.ft_txtflag = 1;
+-
+-      rc = __fchattr(fd, &attr, sizeof(attr));
+-      return rc;
+-    }
+-
+-    static void updateccsid(int fd, const char* path, int oflag, int perm) 
+-    { 
+-      int rc;
+-      if (oflag & O_CREAT) {
+-        rc = setccsid(fd, 819);
+-      }
+-    }
+-
+-    int asciiopen(const char* path, int oflag) 
+-    {
+-      int rc;
+-      int fd = open(path, oflag);
+-      if (fd == -1) { 
+-        return fd;
+-      }
+-      updateccsid(fd, path, oflag, -1);
+-      return fd; 
+-    }
+-
+-    int asciiopen3(const char* path, int oflag, int perm) 
+-    {
+-      int rc;
+-      int fd = open(path, oflag, perm);
+-      if (fd == -1) { 
+-        return fd;
+-      }
+-      updateccsid(fd, path, oflag, perm);
+-      return fd;
+-    } 
+-  #endif
+-#endif
+-
+ int
+ Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
+ {
+@@ -298,9 +247,6 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
+ }
+ 
+ #if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    #define TEMP_CCSID 819
+-  #endif
+ static int Internal_Perl_my_mkstemp_cloexec(char *templte)
+ {     
+     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
+@@ -317,9 +263,6 @@ int
+ Perl_my_mkstemp_cloexec(char *templte) 
+ {
+     int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
+-#  if defined(TEMP_CCSID)
+-    setccsid(tempfd, TEMP_CCSID);
+-#  endif
+     return tempfd;
+ }
+ 
+@@ -2528,6 +2471,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
+             }
+           doshell:
+             PERL_FPU_PRE_EXEC
++#if defined(OEMVS)
++ // #if (__CHARSET_LIB == 1)
++ //           unsetenv("_TAG_REDIR_ERR");
++ // #endif
++#endif
+             PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
+             PERL_FPU_POST_EXEC
+             S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
+diff --git a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
+index 18627f8a5e..f5963b51ab 100644
+--- a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
++++ b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
+@@ -68,6 +68,7 @@ sub writemain{
+  */
+ 
+ #ifdef OEMVS
++#ifndef __LP64__
+ #ifdef MYMALLOC
+ /* sbrk is limited to first heap segment so make it big */
+ #pragma runopts(HEAP(8M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
+@@ -75,6 +76,7 @@ sub writemain{
+ #pragma runopts(HEAP(2M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
+ #endif
+ #endif
++#endif
+ 
+ #define PERL_IN_MINIPERLMAIN_C
+ 
+diff --git a/hints/os390.sh b/hints/os390.sh
+index 56f247bfcf..b05a144a81 100644
+--- a/hints/os390.sh
++++ b/hints/os390.sh
+@@ -18,22 +18,9 @@
+ #     Mike Fulton
+ #     Karl Williamson
+ #
+-# The z/OS 'cc' and 'ld' are insufficient for our needs, so we use c99 instead
+-# c99 has compiler options specified via standard Unix-style options, but some
+-# options need to be specified using -Wc,<compiler-option> or -Wl,<link-option>
+ me=$0
+-case "$cc" in
+-'') cc='c99' ;;
+-esac
+-case "$ld" in
+-'') ld='c99' ;;
+-esac
+-
+-# Prepend your favorites with Configure -Dccflags=your_favorites
+ 
+-# This overrides the name the compiler was called with.  'ext' is required for
+-# "unicode literals" to be enabled
+-def_os390_cflags='-qlanglvl=extc1x';
++# Prepend your favorites with Configure -Dccflags=your_favorites -Dcppflags=your_favourites
+ 
+ # For #ifdefs in code
+ def_os390_defs="-DOS390 -DZOS";
+@@ -47,6 +34,19 @@ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
+ 
+ case "$use64bitall" in
+ '')
++  # The z/OS 'cc' and 'ld' are insufficient for our needs, so we use c99 instead
++  # c99 has compiler options specified via standard Unix-style options, but some
++  # options need to be specified using -Wc,<compiler-option> or -Wl,<link-option>
++  case "$cc" in
++  '') cc='c99' ;;
++  esac
++  case "$ld" in
++  '') ld='c99' ;;
++  esac
++
++  # This overrides the name the compiler was called with.  'ext' is required for
++  # "unicode literals" to be enabled
++  def_os390_cflags='-qlanglvl=extc1x';
+   def_os390_cflags="$def_os390_cflags -qxplink"
+   def_os390_cccdlflags="-qxplink"
+   def_os390_ldflags="-qxplink"
+@@ -54,11 +54,24 @@ case "$use64bitall" in
+   def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
+   ;;
+ *)
+-  def_os390_cflags="$def_os390_cflags -Wc,lp64"
+-  def_os390_cccdlflags="$def_os390_cflags -Wl,lp64"
+-  def_os390_ldflags="-Wl,lp64"
++  # Use xlclang for 64-bit
++  case "$cc" in
++  '') cc='xlclang' ;;
++  esac
++  case "$ld" in
++  '') ld='xlclang' ;;
++  esac
++  def_os390_cflags="-q64"
++  def_os390_cccdlflags="$def_os390_cflags"
++  def_os390_ldflags="-q64"
+ esac
+ 
++arch_main_objs=""
++archobjs="os390.o"
++
++# Help make find os390.c
++test -h os390.c || ln -s os390/os390.c os390.c
++
+ myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
+ if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
+   unset ebcdic
+@@ -79,7 +92,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
+ #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
+ # 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
+ #       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
+-def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108 -qsuppress=CCN3159 -qfloat=ieee"
++def_os390_cflags="$def_os390_cflags -qfloat=ieee"
+ 
+ def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
+ def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
+@@ -94,10 +107,13 @@ def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
+ # Set up feature test macros required for features available on supported z/OS systems
+ def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED"
+ 
++# Find perl base on PATH environment variable rather than hardcoding install location
++startperl='#!/bin/env perl'
++
+ # Combine -D with cflags
+ case "$ccflags" in
+ '') ccflags="$def_os390_cflags $def_os390_defs"  ;;
+-*)  ccflags="$ccflags $def_os390_cflags $def_os390_defs" ;;
++*)  ccflags="$ccflags $cppflags $def_os390_cflags $def_os390_defs" ;;
+ esac
+ 
+ # Turning on optimization causes perl to not even compile from miniperl.  You
+@@ -232,10 +248,10 @@ esac
+ # NOLOC says to use the 1047 code page, and no locale
+ case "$usedl" in
+ define)
+-echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -D_SHR_ENVIRON -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
++echo 'cat >.$$.c; '"$cc"' -D_ALL_SOURCE -D_SHR_ENVIRON -E -qdollar ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
+    ;;
+ *)
+-echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
++echo 'cat >.$$.c; '"$cc"' -D_ALL_SOURCE -E -qdollar ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
+    ;;
+ esac
+ 
+diff --git a/installperl b/installperl
+index 3c8af53bef..e2006c5561 100755
+--- a/installperl
++++ b/installperl
+@@ -284,7 +284,6 @@ else {
+     strip("$installbin/$perl_verbase$ver$exe_ext");
+     fix_dep_names("$installbin/$perl_verbase$ver$exe_ext");
+     chmod(0755, "$installbin/$perl_verbase$ver$exe_ext");
+-    `chtag -r "$installbin/$perl_verbase$ver$exe_ext"` if ($^O eq 'os390');
+ }
+ 
+ # Install library files.
+@@ -355,7 +354,6 @@ foreach my $file (@corefiles) {
+ 	} else {
+ 	    chmod($NON_SO_MODE, "$installarchlib/CORE/$file");
+ 	}
+-        `chtag -r "$installarchlib/CORE/$file"` if ($^O eq 'os390');
+     }
+ }
+ 
+@@ -424,7 +422,6 @@ if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
+ 	  eval { CORE::link $instperl, $usrbinperl } )	||
+ 	eval { symlink $expinstperl, $usrbinperl }	||
+ 	copy($instperl, $usrbinperl);
+-        `chtag -r "$usrbinperl"` if ($^O eq 'os390');
+ 
+ 	$mainperl_is_instperl = 1;
+     }
+@@ -719,7 +716,6 @@ sub copy_if_diff {
+ 	    my ($atime, $mtime) = (stat $from)[8,9];
+ 	    utime $atime, $mtime, $to;
+ 	}
+-        `chtag -r "$to"` if ($^O eq "os390");
+ 	1;
+     }
+ }
+diff --git a/iperlsys.h b/iperlsys.h
+index 40ff8a3103..b475ff4011 100644
+--- a/iperlsys.h
++++ b/iperlsys.h
+@@ -770,21 +770,8 @@ struct IPerlLIOInfo
+ #    define PerlLIO_lstat(name, buf)    PerlLIO_stat((name), (buf))
+ #  endif
+ #  define PerlLIO_mktemp(file)          mktemp((file))
+-#  if defined(OEMVS)
+-#    if (__CHARSET_LIB == 1)
+-    int asciiopen(const char* path, int oflag);
+-    int asciiopen3(const char* path, int oflag, int perm);
+-
+-#      define PerlLIO_open(file, flag)          asciiopen((file), (flag))
+-#      define PerlLIO_open3(file, flag, perm)   asciiopen3((file), (flag), (perm))
+-#    else
+-#      define PerlLIO_open(file, flag)          open((file), (flag))
+-#      define PerlLIO_open3(file, flag, perm)   open((file), (flag), (perm))
+-#    endif
+-#  else
+-#    define PerlLIO_open(file, flag)            open((file), (flag))
+-#    define PerlLIO_open3(file, flag, perm)     open((file), (flag), (perm))
+-#  endif
++#  define PerlLIO_open(file, flag)            open((file), (flag))
++#  define PerlLIO_open3(file, flag, perm)     open((file), (flag), (perm))
+ #  define PerlLIO_read(fd, buf, count)  read((fd), (buf), (count))
+ #  define PerlLIO_rename(old, new)      rename((old), (new))
+ #  define PerlLIO_setmode(fd, mode)     setmode((fd), (mode))
+diff --git a/lib/File/Copy.pm b/lib/File/Copy.pm
+index 39bc23656b..1070fe3582 100644
+--- a/lib/File/Copy.pm
++++ b/lib/File/Copy.pm
+@@ -180,6 +180,11 @@ sub copy {
+ 	}
+     }
+ 
++    # Copy file tags on os390
++    if ($^O eq 'os390') {
++      ZOS::Filespec::copytags(fileno($from_h), fileno($to_h));
++    }
++
+     close($to_h) || goto fail_open2 if $closeto;
+     close($from_h) || goto fail_open1 if $closefrom;
+ 
+diff --git a/makedepend_file.SH b/makedepend_file.SH
+index f5a0a923a0..05b2443390 100644
+--- a/makedepend_file.SH
++++ b/makedepend_file.SH
+@@ -135,6 +135,11 @@ esac
+         $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c |
+         $sed \
+     	    -e '/^#.*<stdin>/d' \
++          -e '/^#.*<builtin>/d' \
++          -e '/^#.*<built-in>/d' \
++          -e '/^#.*<command line>/d' \
++          -e '/^#.*<command-line>/d' \
++          -e '/".*In file included from.*:/d' \'
+ 	    -e '/^#.*"-"/d' \
+ 	    -e '/^#.*git_version\.h/d' \
+ 	    -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
+diff --git a/os390/os390.c b/os390/os390.c
+new file mode 100644
+index 0000000000..22b95204eb
+--- /dev/null
++++ b/os390/os390.c
+@@ -0,0 +1,51 @@
++#include <string.h>
++#include <sys/stat.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/ps.h>
++#include <unistd.h>
++#include <stdarg.h>
++#include <varargs.h>
++#include <limits.h>
++#include <_Nascii.h>
++#include <fcntl.h>
++#include <libgen.h>
++#include "EXTERN.h"
++#include "perl.h"
++#include "XSUB.h"
++
++void
++zos_copytags(pTHX_ CV *cv)
++{
++  dXSARGS;
++  STRLEN n_a;
++  int ret = 0;
++
++  if (items != 2)
++    Perl_croak(aTHX_ "Usage: ZOS::Filespec::copytags(f1, f2])");
++
++  int from_fd = (int)SvIV(ST(0));
++  int to_fd = (int)SvIV(ST(1));
++
++  struct stat src_statsbuf;
++  if (fstat(from_fd, &src_statsbuf)) {
++    ret = -1;
++  }
++  if (ret != -1) {
++    ret = __setfdccsid(to_fd,  (src_statsbuf.st_tag.ft_txtflag << 16) | src_statsbuf.st_tag.ft_ccsid);
++  }
++
++  XSRETURN(ret);
++}
++
++
++void
++init_os_extras(void)
++{
++  dTHX;
++  char* file = __FILE__;
++
++  newXSproto("ZOS::Filespec::copytags",zos_copytags,file,"$;$");
++
++  return;
++}
+diff --git a/perl.c b/perl.c
+index 54afc2c6fb..38197852ac 100644
+--- a/perl.c
++++ b/perl.c
+@@ -2513,7 +2513,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
+     if (xsinit)
+         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
+ #ifndef PERL_MICRO
+-#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
++#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__) || defined(__MVS__)
+     init_os_extras();
+ #endif
+ #endif
+@@ -3940,10 +3940,6 @@ S_minus_v(pTHX)
+                       "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+                       "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
+ #endif
+-#ifdef OEMVS
+-        PerlIO_printf(PIO_stdout,
+-                      "MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
+-#endif
+ #ifdef __VOS__
+         PerlIO_printf(PIO_stdout,
+                       "Stratus OpenVOS port by Paul.Green@stratus.com, 1997-2013\n");
+diff --git a/perl.h b/perl.h
+index 6f7f2292eb..35ed5b6d8f 100644
+--- a/perl.h
++++ b/perl.h
+@@ -1220,7 +1220,7 @@ violations are fatal.
+ #    define PERL_DUMMY_NAME_            PERL_DUMMY_TELEPHONE_
+ #  endif
+ #  ifdef USE_LOCALE_SYNTAX
+-#    define LC_SYNTAX_INDEX_            PERL_DUMMY_NAME + 1
++#    define LC_SYNTAX_INDEX_            PERL_DUMMY_NAME_ + 1
+ #    define PERL_DUMMY_SYNTAX_          LC_SYNTAX_INDEX_
+ #  else
+ #    define PERL_DUMMY_SYNTAX_          PERL_DUMMY_NAME_
+@@ -4576,7 +4576,7 @@ struct ptr_tbl {
+ #if defined(ntohs) && !defined(HAS_NTOHS)
+ #define HAS_NTOHS
+ #endif
+-#ifndef HAS_HTONL
++#if !defined(HAS_HTONL)
+ #define HAS_HTONS
+ #define HAS_HTONL
+ #define HAS_NTOHS
+diff --git a/util.c b/util.c
+index 420eaefae6..51828249f5 100644
+--- a/util.c
++++ b/util.c
+@@ -77,6 +77,10 @@ int putenv(char *);
+ # include <sys/mman.h>
+ #endif
+ 
++#ifdef __MVS__
++#include <arpa/inet.h>
++#endif
++
+ #define FLUSH
+ 
+ /* NOTE:  Do not call the next three routines directly.  Use the macros
+@@ -2403,22 +2407,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
+ }
+ #endif
+ 
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-  static int chgfdccsid(int fd, unsigned short ccsid) 
+-  {
+-    attrib_t attr;
+-    memset(&attr, 0, sizeof(attr));
+-    attr.att_filetagchg = 1;
+-    attr.att_filetag.ft_ccsid = ccsid;
+-    if (ccsid != FT_BINARY) {
+-      attr.att_filetag.ft_txtflag = 1;
+-    }
+-    return __fchattr(fd, &attr, sizeof(attr));
+-  }
+-  #endif
+-#endif
+-
+ /*
+ =for apidoc my_popen_list
+ 
+@@ -2474,12 +2462,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+         /* Close parent's end of error status pipe (if any) */
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         /* Now dup our end of _the_ pipe to right position */
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+@@ -2555,19 +2537,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+     }
+     if (did_pipes)
+          PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    PerlIO* io = PerlIO_fdopen(p[This], mode);
+-    if (io) {
+-      chgfdccsid(p[This], 819);
+-    }
+-    return io;
+-  #else
+     return PerlIO_fdopen(p[This], mode);
+-  #endif
+-#else
+-    return PerlIO_fdopen(p[This], mode);
+-#endif
+ 
+ #else
+ #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
+@@ -2646,12 +2616,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+ #define THAT This
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+             PerlLIO_close(p[THIS]);
+@@ -2738,19 +2702,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+     }
+     if (did_pipes)
+          PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    PerlIO* io = PerlIO_fdopen(p[This],	mode);
+-    if (io) {
+-      chgfdccsid(p[This], 819);
+-    }
+-    return io;
+-  #else
+     return PerlIO_fdopen(p[This], mode);
+-  #endif
+-#else
+-    return PerlIO_fdopen(p[This], mode);
+-#endif
+ }
+ #elif defined(__LIBCATAMOUNT__)
+ PerlIO *
