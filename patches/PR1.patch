@@ -174,9 +174,9 @@ index 48deb13d6a..789bd1ff76 100644
            doshell:
              PERL_FPU_PRE_EXEC
 +#if defined(OEMVS)
-+ // #if (__CHARSET_LIB == 1)
-+ //           unsetenv("_TAG_REDIR_ERR");
-+ // #endif
++  #if (__CHARSET_LIB == 1)
++            unsetenv("_TAG_REDIR_ERR");
++  #endif
 +#endif
              PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
              PERL_FPU_POST_EXEC
