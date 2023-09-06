@@ -4,7 +4,7 @@ export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc 
 export ZOPEN_CHECK_OPTS="test"
 export ZOPEN_GIT_URL="https://github.com/Perl/perl5.git"
 export ZOPEN_GIT_DEPS="git make zoslib sed"
-export ZOPEN_GIT_BRANCH="blead"
+export ZOPEN_GIT_TAG="v5.38.0"
 
 # Perl Environment variables
 export INSTALLFLAGS="+v"
