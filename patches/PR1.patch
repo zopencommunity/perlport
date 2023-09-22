@@ -1,5 +1,5 @@
 diff --git a/.gitignore b/.gitignore
-index 309de23325..1d0c3d8f0d 100644
+index a0f98256b1..84a24fd896 100644
 --- a/.gitignore
 +++ b/.gitignore
 @@ -56,6 +56,7 @@ perldtrace.h
@@ -11,10 +11,10 @@ index 309de23325..1d0c3d8f0d 100644
  *.so
  *.i
 diff --git a/Configure b/Configure
-index 2724f8709b..0924bc06c4 100755
+index e261cb9548..c5dd7c1123 100755
 --- a/Configure
 +++ b/Configure
-@@ -4583,7 +4583,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
+@@ -4584,7 +4584,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
  $cat >try.c <<EOM
  #include <stdio.h>
  int main() {
@@ -23,7 +23,7 @@ index 2724f8709b..0924bc06c4 100755
  #ifdef __VERSION__
  	printf("%s\n", __VERSION__);
  #else
-@@ -8729,10 +8729,14 @@ case "$useshrplib" in
+@@ -8697,10 +8697,14 @@ case "$useshrplib" in
  true)
  	case "$userelocatableinc" in
  	true|define)
@@ -43,9 +43,18 @@ index 2724f8709b..0924bc06c4 100755
  	case "$libperl" in
  	'')
 diff --git a/Makefile.SH b/Makefile.SH
-index d1aa10a91b..d5b13f1fda 100755
+index 163a646707..352cd51726 100755
 --- a/Makefile.SH
 +++ b/Makefile.SH
+@@ -119,7 +119,7 @@ true)
+ 		;;
+ 	os390*)
+             case "$use64bitall" in
+-            define|true|[yY]*) shrpldflags='-Wl,LP64,dll'
++            define|true|[yY]*) shrpldflags='-shared'
+                    linklibperl='libperl.x'
+                    ;;
+             *)     shrpldflags='-Wl,XPLINK,dll'
 @@ -434,6 +434,7 @@ FIRSTMAKEFILE = $firstmakefile
  
  # Any special object files needed by this architecture, e.g. os2/os2.obj
@@ -87,10 +96,32 @@ index d1aa10a91b..d5b13f1fda 100755
  !NO!SUBS!
  		case "$osname" in
  		aix)
+diff --git a/cpan/IPC-SysV/SysV.xs b/cpan/IPC-SysV/SysV.xs
+index 6690718aa8..b362aed17b 100644
+--- a/cpan/IPC-SysV/SysV.xs
++++ b/cpan/IPC-SysV/SysV.xs
+@@ -32,7 +32,7 @@
+ #      include <sys/sysmacros.h>	/* SHMLBA */
+ #    endif
+ #    include <sys/shm.h>
+-#    ifndef HAS_SHMAT_PROTOTYPE
++#    if ! defined(HAS_SHMAT_PROTOTYPE) && !defined(__MVS__)
+        extern Shmat_t shmat(int, char *, int);
+ #    endif
+ #    if defined(HAS_SYSCONF) && defined(_SC_PAGESIZE)
 diff --git a/doio.c b/doio.c
-index 48deb13d6a..789bd1ff76 100644
+index 48deb13d6a..fcae5e48e1 100644
 --- a/doio.c
 +++ b/doio.c
+@@ -35,7 +35,7 @@
+ #endif
+ #ifdef HAS_SHM
+ #include <sys/shm.h>
+-# ifndef HAS_SHMAT_PROTOTYPE
++#if 0 //# ifndef HAS_SHMAT_PROTOTYPE
+     extern Shmat_t shmat (int, char *, int);
+ # endif
+ #endif
 @@ -218,57 +218,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
  #endif
  }
@@ -202,7 +233,7 @@ index 18627f8a5e..f5963b51ab 100644
  #define PERL_IN_MINIPERLMAIN_C
  
 diff --git a/hints/os390.sh b/hints/os390.sh
-index 56f247bfcf..b05a144a81 100644
+index 56f247bfcf..e1a8789f7f 100644
 --- a/hints/os390.sh
 +++ b/hints/os390.sh
 @@ -18,22 +18,9 @@
@@ -219,9 +250,9 @@ index 56f247bfcf..b05a144a81 100644
 -case "$ld" in
 -'') ld='c99' ;;
 -esac
--
--# Prepend your favorites with Configure -Dccflags=your_favorites
  
+-# Prepend your favorites with Configure -Dccflags=your_favorites
+-
 -# This overrides the name the compiler was called with.  'ext' is required for
 -# "unicode literals" to be enabled
 -def_os390_cflags='-qlanglvl=extc1x';
@@ -249,7 +280,7 @@ index 56f247bfcf..b05a144a81 100644
    def_os390_cflags="$def_os390_cflags -qxplink"
    def_os390_cccdlflags="-qxplink"
    def_os390_ldflags="-qxplink"
-@@ -54,11 +54,24 @@ case "$use64bitall" in
+@@ -54,32 +54,40 @@ case "$use64bitall" in
    def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
    ;;
  *)
@@ -258,14 +289,14 @@ index 56f247bfcf..b05a144a81 100644
 -  def_os390_ldflags="-Wl,lp64"
 +  # Use xlclang for 64-bit
 +  case "$cc" in
-+  '') cc='xlclang' ;;
++  '') cc='clang' ;;
 +  esac
 +  case "$ld" in
-+  '') ld='xlclang' ;;
++  '') ld='clang' ;;
 +  esac
-+  def_os390_cflags="-q64"
++  def_os390_cflags="-m64"
 +  def_os390_cccdlflags="$def_os390_cflags"
-+  def_os390_ldflags="-q64"
++  def_os390_ldflags="-m64"
  esac
  
 +arch_main_objs=""
@@ -277,16 +308,35 @@ index 56f247bfcf..b05a144a81 100644
  myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
  if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
    unset ebcdic
-@@ -79,7 +92,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
- #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
- # 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
- #       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
+-  def_os390_cflags="$def_os390_cflags -qascii"
++  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ascii"
+ else
+   ebcdic=true
+ fi
+ 
++case "$cc" in
++'xlclang') 
+ # Export all externally defined functions and variables in the compilation
+ # unit so that a DLL application can use them.
+-def_os390_cflags="$def_os390_cflags -qexportall";
+-def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
+-
+-# 3296= #include file not found;
+-# 4108= The use of keyword &1 is non-portable
+-#       We care about this because it
+-#       actually means it didn't do what we expected. e.g.,
+-#          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
+-# 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
+-#       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
 -def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108 -qsuppress=CCN3159 -qfloat=ieee"
-+def_os390_cflags="$def_os390_cflags -qfloat=ieee"
++def_os390_cflags="$def_os390_cflags"
++def_os390_cccdlflags="$def_os390_cccdlflags"
++;;
++esac
  
  def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
  def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
-@@ -94,10 +107,13 @@ def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
+@@ -94,10 +102,13 @@ def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
  # Set up feature test macros required for features available on supported z/OS systems
  def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED"
  
@@ -301,7 +351,16 @@ index 56f247bfcf..b05a144a81 100644
  esac
  
  # Turning on optimization causes perl to not even compile from miniperl.  You
-@@ -232,10 +248,10 @@ esac
+@@ -109,7 +120,7 @@ esac
+ # To link via definition side decks we need the dll option
+ # You can override this with Configure -Ucccdlflags or somesuch.
+ case "$cccdlflags" in
+-'') cccdlflags="$def_os390_cccdlflags -Wl,dll";;
++'') cccdlflags="$def_os390_cccdlflags -shared";;
+ esac
+ 
+ case "$so" in
+@@ -232,10 +243,10 @@ esac
  # NOLOC says to use the 1047 code page, and no locale
  case "$usedl" in
  define)
@@ -379,7 +438,7 @@ index 40ff8a3103..b475ff4011 100644
  #  define PerlLIO_rename(old, new)      rename((old), (new))
  #  define PerlLIO_setmode(fd, mode)     setmode((fd), (mode))
 diff --git a/lib/File/Copy.pm b/lib/File/Copy.pm
-index 39bc23656b..1070fe3582 100644
+index 1dc1d2d95c..6210af4cbe 100644
 --- a/lib/File/Copy.pm
 +++ b/lib/File/Copy.pm
 @@ -180,6 +180,11 @@ sub copy {
@@ -468,10 +527,10 @@ index 0000000000..22b95204eb
 +  return;
 +}
 diff --git a/perl.c b/perl.c
-index 54afc2c6fb..38197852ac 100644
+index a8d92aef77..e521263aec 100644
 --- a/perl.c
 +++ b/perl.c
-@@ -2513,7 +2513,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
+@@ -2524,7 +2524,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
      if (xsinit)
          (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
  #ifndef PERL_MICRO
@@ -480,7 +539,7 @@ index 54afc2c6fb..38197852ac 100644
      init_os_extras();
  #endif
  #endif
-@@ -3940,10 +3940,6 @@ S_minus_v(pTHX)
+@@ -3951,10 +3951,6 @@ S_minus_v(pTHX)
                        "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
                        "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
  #endif
@@ -492,10 +551,10 @@ index 54afc2c6fb..38197852ac 100644
          PerlIO_printf(PIO_stdout,
                        "Stratus OpenVOS port by Paul.Green@stratus.com, 1997-2013\n");
 diff --git a/perl.h b/perl.h
-index 6f7f2292eb..35ed5b6d8f 100644
+index 4ef161db95..a2464f9c5a 100644
 --- a/perl.h
 +++ b/perl.h
-@@ -1220,7 +1220,7 @@ violations are fatal.
+@@ -1248,7 +1248,7 @@ violations are fatal.
  #    define PERL_DUMMY_NAME_            PERL_DUMMY_TELEPHONE_
  #  endif
  #  ifdef USE_LOCALE_SYNTAX
@@ -504,7 +563,7 @@ index 6f7f2292eb..35ed5b6d8f 100644
  #    define PERL_DUMMY_SYNTAX_          LC_SYNTAX_INDEX_
  #  else
  #    define PERL_DUMMY_SYNTAX_          PERL_DUMMY_NAME_
-@@ -4576,7 +4576,7 @@ struct ptr_tbl {
+@@ -4604,7 +4604,7 @@ struct ptr_tbl {
  #if defined(ntohs) && !defined(HAS_NTOHS)
  #define HAS_NTOHS
  #endif
@@ -514,7 +573,7 @@ index 6f7f2292eb..35ed5b6d8f 100644
  #define HAS_HTONL
  #define HAS_NTOHS
 diff --git a/util.c b/util.c
-index 420eaefae6..51828249f5 100644
+index 3c1cae409a..c2000d0795 100644
 --- a/util.c
 +++ b/util.c
 @@ -77,6 +77,10 @@ int putenv(char *);

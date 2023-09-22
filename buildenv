@@ -1,10 +1,12 @@
 export ZOPEN_TYPE="GIT"
 export ZOPEN_CONFIGURE="./Configure"
-export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl -D ccflags=\"\$CFLAGS \$CPPFLAGS -DOS390 -DZOS -DNO_LOCALE_MESSAGES -DOEMVS -DMAXSIG=39 -qNOOPT\" -D ldflags=\"\$LDFLAGS\" -D libs=\"\$LIBS\""
+export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl -D ccflags=\"\$CFLAGS \$CPPFLAGS -DOS390 -DZOS -DNO_LOCALE_MESSAGES -DOEMVS -DMAXSIG=39 -D_EXT=1 -fvisibility=default\" -D ldflags=\"\$LDFLAGS\" -D libs=\"\$LIBS\""
 export ZOPEN_CHECK_OPTS="test"
 export ZOPEN_GIT_URL="https://github.com/Perl/perl5.git"
 export ZOPEN_GIT_DEPS="git make zoslib sed"
-export ZOPEN_GIT_TAG="v5.38.0"
+export PERL_VERSION="5.38.0"
+export ZOPEN_GIT_TAG="v$PERL_VERSION"
+export ZOPEN_COMP=CLANG
 
 # Perl Environment variables
 export INSTALLFLAGS="+v"
@@ -24,6 +26,21 @@ export PERL5LIB="\${PERL5LIB_ROOT}:\${PERL5LIB_ROOT}/os390"
 EOF
 }
 
+zopen_append_to_zoslib_env() {
+cat <<EOF
+PERL5LIB|set|PROJECT_ROOT/lib/$PERL_VERSION/:PROJECT_ROOT/lib/$PERL_VERSION/os390/
+LIBPATH|prepend|PROJECT_ROOT/lib/$PERL_VERSION/os390/CORE
+EOF
+}
+
+zopen_post_install() {
+  install_dir=$1
+
+  set -e
+  cp -v $install_dir/lib/$PERL_VERSION/os390/CORE/libperl.so $install_dir/lib/
+  set +e
+}
+
 zopen_check_results()
 {
 chk="$1/$2_check.log"
@@ -37,3 +54,9 @@ totalTests:$totalTests
 expectedFailures:23
 ZZ
 }
+
+zopen_get_version()
+{
+  LIBPATH=. ./perl --version | grep "built for os390" | sed -e "s#.*(v##" -e "s#\*##g" -e "s#).*##g"  
+}
+
