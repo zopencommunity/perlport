@@ -54,3 +54,9 @@ totalTests:$totalTests
 expectedFailures:23
 ZZ
 }
+
+zopen_get_version()
+{
+  LIBPATH=. ./perl --version | grep "built for os390" | sed -e "s#.*(v##" -e "s#\*##g" -e "s#).*##g"  
+}
+
