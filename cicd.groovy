@@ -10,6 +10,6 @@ node('linux')
         }
 
         stage('Build') {
-                build job: 'Port-Pipeline', parameters: [string(name: 'PORT_GITHUB_REPO', value: 'https://github.com/ZOSOpenTools/perlport.git'), string(name: 'PORT_DESCRIPTION', value: 'Perl is a family of two high-level, general-purpose, interpreted, dynamic programming languages.' )]
+                build job: 'Port-Pipeline', parameters: [string(name: 'PORT_GITHUB_REPO', value: 'https://github.com/ZOSOpenTools/perlport.git'), string(name: 'PORT_DESCRIPTION', value: 'Perl is a family of two high-level, general-purpose, interpreted, dynamic programming languages.' ), string(name: 'NODE_LABEL', value: "v2r4")]
         }
 }

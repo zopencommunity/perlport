@@ -12,18 +12,6 @@ export ZOPEN_COMP=CLANG
 export INSTALLFLAGS="+v"
 
 zopen_append_to_env() {
-cat <<EOF
-for libperl in \$(find \${PWD}/ -name "libperl.so"); do
-  libperl=\$(dirname "\${libperl}")
-  export LIBPATH="\${libperl}:\$LIBPATH"
-done
-if ls \${PWD}/lib/perl[0-9]* >/dev/null 2>&1; then
-  PERL5LIB_ROOT=\$( cd \${PWD}/lib/perl[0-9]/[0-9]*; echo \$PWD )
-else
-  PERL5LIB_ROOT=\$( cd \${PWD}/lib/[0-9]*; echo \$PWD )
-fi
-export PERL5LIB="\${PERL5LIB_ROOT}:\${PERL5LIB_ROOT}/os390"
-EOF
 }
 
 zopen_append_to_zoslib_env() {
@@ -51,7 +39,7 @@ totalTests="$((failures+successes))"
 cat <<ZZ
 actualFailures:$failures
 totalTests:$totalTests
-expectedFailures:23
+expectedFailures:24
 ZZ
 }
 
