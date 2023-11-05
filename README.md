@@ -1,4 +1,6 @@
-# perlport
+[![Automatic version updates](https://github.com/ZOSOpenTools/perlport/actions/workflows/bump.yml/badge.svg)](https://github.com/ZOSOpenTools/perlport/actions/workflows/bump.yml)
+
+# perl
 Place to share information about configure/build of perl for z/OS (only deltas to open source)
 
 # pre-reqs
