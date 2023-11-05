@@ -1,13 +1,13 @@
 # bump: perl-version /PERL_VERSION="(.*)"/ https://github.com/Perl/perl5.git|semver:*
 PERL_VERSION="5.38.0"
 
-export ZOPEN_BUILD_LINE="DEV"
+export ZOPEN_BUILD_LINE="STABLE"
 export ZOPEN_CONFIGURE="./Configure"
 export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl -D ccflags=\"\$CFLAGS \$CPPFLAGS -DOS390 -DZOS -DNO_LOCALE_MESSAGES -DOEMVS -DMAXSIG=39 -D_EXT=1 -fvisibility=default\" -D ldflags=\"\$LDFLAGS\" -D libs=\"\$LIBS\""
 export ZOPEN_CHECK_OPTS="test"
 export ZOPEN_DEV_URL="https://github.com/Perl/perl5.git"
 export ZOPEN_DEV_DEPS="git make zoslib sed"
-export ZOPEN_DEV_TAG="v$PERL_VERSION"
+export ZOPEN_DEV_TAG="blead"
 export ZOPEN_COMP=CLANG
 
 # Perl Environment variables
