@@ -1,0 +1,104 @@
+diff --git a/util.c b/util.c
+index 3830f47266..f27fa10326 100644
+--- a/util.c
++++ b/util.c
+@@ -75,6 +75,10 @@ int putenv(char *);
+ # include <sys/mman.h>
+ #endif
+ 
++#ifdef __MVS__
++# include <arpa/inet.h>
++#endif
++
+ #define FLUSH
+ 
+ /* NOTE:  Do not call the next three routines directly.  Use the macros
+@@ -2403,22 +2407,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
+ }
+ #endif
+ 
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-  static int chgfdccsid(int fd, unsigned short ccsid) 
+-  {
+-    attrib_t attr;
+-    memset(&attr, 0, sizeof(attr));
+-    attr.att_filetagchg = 1;
+-    attr.att_filetag.ft_ccsid = ccsid;
+-    if (ccsid != FT_BINARY) {
+-      attr.att_filetag.ft_txtflag = 1;
+-    }
+-    return __fchattr(fd, &attr, sizeof(attr));
+-  }
+-  #endif
+-#endif
+-
+ /*
+ =for apidoc my_popen_list
+ 
+@@ -2474,12 +2462,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+         /* Close parent's end of error status pipe (if any) */
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         /* Now dup our end of _the_ pipe to right position */
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+@@ -2555,19 +2537,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+     }
+     if (did_pipes)
+          PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    PerlIO* io = PerlIO_fdopen(p[This], mode);
+-    if (io) {
+-      chgfdccsid(p[This], 819);
+-    }
+-    return io;
+-  #else
+     return PerlIO_fdopen(p[This], mode);
+-  #endif
+-#else
+-    return PerlIO_fdopen(p[This], mode);
+-#endif
+ 
+ #else
+ #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
+@@ -2646,12 +2616,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+ #define THAT This
+         if (did_pipes)
+             PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-        chgfdccsid(p[THIS], 819);
+-        chgfdccsid(p[THAT], 819);
+-  #endif
+-#endif
+         if (p[THIS] != (*mode == 'r')) {
+             PerlLIO_dup2(p[THIS], *mode == 'r');
+             PerlLIO_close(p[THIS]);
+@@ -2738,19 +2702,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+     }
+     if (did_pipes)
+          PerlLIO_close(pp[0]);
+-#if defined(OEMVS)
+-  #if (__CHARSET_LIB == 1)
+-    PerlIO* io = PerlIO_fdopen(p[This],	mode);
+-    if (io) {
+-      chgfdccsid(p[This], 819);
+-    }
+-    return io;
+-  #else
+     return PerlIO_fdopen(p[This], mode);
+-  #endif
+-#else
+-    return PerlIO_fdopen(p[This], mode);
+-#endif
+ }
+ #elif defined(__LIBCATAMOUNT__)
+ PerlIO *
