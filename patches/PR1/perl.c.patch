@@ -1,0 +1,24 @@
+diff --git a/perl.c b/perl.c
+index a8d92aef77..e521263aec 100644
+--- a/perl.c
++++ b/perl.c
+@@ -2524,7 +2524,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
+     if (xsinit)
+         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
+ #ifndef PERL_MICRO
+-#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
++#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__) || defined(__MVS__)
+     init_os_extras();
+ #endif
+ #endif
+@@ -3951,10 +3951,6 @@ S_minus_v(pTHX)
+                       "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+                       "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
+ #endif
+-#ifdef OEMVS
+-        PerlIO_printf(PIO_stdout,
+-                      "MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
+-#endif
+ #ifdef __VOS__
+         PerlIO_printf(PIO_stdout,
+                       "Stratus OpenVOS port by Paul.Green@stratus.com, 1997-2013\n");

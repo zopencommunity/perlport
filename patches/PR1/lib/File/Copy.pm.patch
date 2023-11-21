@@ -1,0 +1,16 @@
+diff --git a/lib/File/Copy.pm b/lib/File/Copy.pm
+index 1dc1d2d95c..6210af4cbe 100644
+--- a/lib/File/Copy.pm
++++ b/lib/File/Copy.pm
+@@ -180,6 +180,11 @@ sub copy {
+ 	}
+     }
+ 
++    # Copy file tags on os390
++    if ($^O eq 'os390') {
++      ZOS::Filespec::copytags(fileno($from_h), fileno($to_h));
++    }
++
+     close($to_h) || goto fail_open2 if $closeto;
+     close($from_h) || goto fail_open1 if $closefrom;
+ 
