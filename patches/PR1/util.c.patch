@@ -8,6 +8,7 @@ index 3830f47266..f27fa10326 100644
  
 +#ifdef __MVS__
 +# include <arpa/inet.h>
++#include <arpa/inet.h>
 +#endif
 +
  #define FLUSH
