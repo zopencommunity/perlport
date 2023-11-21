@@ -68,4 +68,5 @@ Mkfile.old
 dkms.conf
 
 log/
+log.STABLE/
 perl5/
