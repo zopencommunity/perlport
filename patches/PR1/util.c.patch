@@ -1,5 +1,5 @@
 diff --git a/util.c b/util.c
-index 3830f47266..d93a11ffce 100644
+index 3830f47266..cb6966d07f 100644
 --- a/util.c
 +++ b/util.c
 @@ -75,6 +75,11 @@ int putenv(char *);
@@ -84,7 +84,7 @@ index 3830f47266..d93a11ffce 100644
          if (p[THIS] != (*mode == 'r')) {
              PerlLIO_dup2(p[THIS], *mode == 'r');
              PerlLIO_close(p[THIS]);
-@@ -2738,16 +2701,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+@@ -2738,19 +2701,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
      }
      if (did_pipes)
           PerlLIO_close(pp[0]);
@@ -96,8 +96,11 @@ index 3830f47266..d93a11ffce 100644
 -    }
 -    return io;
 -  #else
-     return PerlIO_fdopen(p[This], mode);
+-    return PerlIO_fdopen(p[This], mode);
 -  #endif
- #else
+-#else
      return PerlIO_fdopen(p[This], mode);
- #endif
+-#endif
+ }
+ #elif defined(__LIBCATAMOUNT__)
+ PerlIO *
