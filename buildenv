@@ -1,8 +1,8 @@
 # bump: perl-version /PERL_VERSION="(.*)"/ https://github.com/Perl/perl5.git|semver:*
-PERL_VERSION="5.39.4"
+PERL_VERSION="5.39.5"
 
 export ZOPEN_BUILD_LINE="STABLE"
-export ZOPEN_STABLE_DEPS="curl gzip make coreutils git make zoslib sed"
+export ZOPEN_STABLE_DEPS="curl gzip make git make zoslib sed"
 export ZOPEN_STABLE_URL="https://github.com/Perl/perl5.git"
 export ZOPEN_STABLE_TAG="v${PERL_VERSION}"
 # export ZOPEN_STABLE_URL="https://github.com/Perl/perl5/archive/refs/tags/v${PERL_VERSION}.tar.gz"
