@@ -1,17 +1,17 @@
 diff --git a/perl.c b/perl.c
-index a8d92aef77..e521263aec 100644
+index 6d1752203d..1034ce7786 100644
 --- a/perl.c
 +++ b/perl.c
-@@ -2524,7 +2524,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
+@@ -2514,7 +2514,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
+ 
      if (xsinit)
          (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
- #ifndef PERL_MICRO
 -#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
 +#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__) || defined(__MVS__)
      init_os_extras();
  #endif
- #endif
-@@ -3951,10 +3951,6 @@ S_minus_v(pTHX)
+ 
+@@ -3981,10 +3981,6 @@ S_minus_v(pTHX)
                        "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
                        "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
  #endif
