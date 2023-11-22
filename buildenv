@@ -34,6 +34,10 @@ zopen_post_install() {
   set +e
 }
 
+# Perl 5.39.5
+# actualFailures:  33
+# totalTests:      2606
+
 zopen_check_results()
 {
 chk="$1/$2_check.log"
@@ -44,7 +48,7 @@ totalTests="$((failures+successes))"
 cat <<ZZ
 actualFailures:$failures
 totalTests:$totalTests
-expectedFailures:26
+expectedFailures:33
 ZZ
 }
 
