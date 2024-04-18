@@ -1,5 +1,5 @@
 diff --git a/doio.c b/doio.c
-index 48deb13d6a..fcae5e48e1 100644
+index c8fe756ae1..90b6388198 100644
 --- a/doio.c
 +++ b/doio.c
 @@ -35,7 +35,7 @@
@@ -11,7 +11,7 @@ index 48deb13d6a..fcae5e48e1 100644
      extern Shmat_t shmat (int, char *, int);
  # endif
  #endif
-@@ -218,57 +218,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
+@@ -222,57 +222,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
  #endif
  }
  
@@ -69,7 +69,7 @@ index 48deb13d6a..fcae5e48e1 100644
  int
  Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
  {
-@@ -298,9 +247,6 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
+@@ -302,9 +251,6 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
  }
  
  #if defined(OEMVS)
@@ -79,7 +79,7 @@ index 48deb13d6a..fcae5e48e1 100644
  static int Internal_Perl_my_mkstemp_cloexec(char *templte)
  {     
      PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
-@@ -317,9 +263,6 @@ int
+@@ -321,9 +267,6 @@ int
  Perl_my_mkstemp_cloexec(char *templte) 
  {
      int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
@@ -89,7 +89,37 @@ index 48deb13d6a..fcae5e48e1 100644
      return tempfd;
  }
  
-@@ -2528,6 +2471,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
+@@ -1466,6 +1409,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+ #endif
+                 Uid_t fileuid;
+                 Gid_t filegid;
++#ifdef __MVS__
++                int txtflag;
++                int ccsid;
++#endif
+                 AV *magic_av = NULL;
+                 SV *temp_name_sv = NULL;
+                 MAGIC *mg;
+@@ -1482,6 +1429,8 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+ #endif
+                 PL_filemode = statbuf.st_mode;
+                 fileuid = statbuf.st_uid;
++                txtflag = statbuf.st_tag.ft_txtflag;
++                ccsid = statbuf.st_tag.ft_ccsid;
+                 filegid = statbuf.st_gid;
+                 if (!S_ISREG(PL_filemode)) {
+                     Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
+@@ -1559,6 +1508,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+                 PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
+                 if (PL_lastfd >= 0) {
+                     (void)PerlLIO_fstat(PL_lastfd,&statbuf);
++#ifdef __MVS__
++                    __setfdccsid(PL_lastfd, (txtflag << 16) | ccsid);
++#endif
+ #ifdef HAS_FCHMOD
+                     (void)fchmod(PL_lastfd,PL_filemode);
+ #else
+@@ -2569,6 +2521,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
              }
            doshell:
              PERL_FPU_PRE_EXEC
