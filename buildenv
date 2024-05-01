@@ -29,9 +29,9 @@ EOF
 zopen_post_install() {
   install_dir=$1
 
-  set -e
-  cp -v $install_dir/lib/$PERL_VERSION/os390/CORE/libperl.so $install_dir/lib/
   set +e
+  cp -v $install_dir/lib/perl5/$PERL_VERSION/os390/CORE/libperl.so $install_dir/lib/
+  set -e
 }
 
 # Perl 5.39.5
