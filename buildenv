@@ -21,17 +21,19 @@ export INSTALLFLAGS="+v"
 
 zopen_append_to_zoslib_env() {
 cat <<EOF
-PERL5LIB|prepend|PROJECT_ROOT/lib/$PERL_VERSION/:PROJECT_ROOT/lib/$PERL_VERSION/os390/
-LIBPATH|prepend|PROJECT_ROOT/lib/$PERL_VERSION/os390/CORE
+PERL5LIB|prepend|PROJECT_ROOT/lib/$PERL_VERSION/:PROJECT_ROOT/lib/$PERL_VERSION/os390/:PROJECT_ROOT/lib/perl5/$PERL_VERSION/:PROJECT_ROOT/lib/perl5/$PERL_VERSION/os390/
+LIBPATH|prepend|PROJECT_ROOT/lib/perl5/$PERL_VERSION/os390/CORE:PROJECT_ROOT/lib/$PERL_VERSION/os390/CORE
 EOF
 }
 
 zopen_post_install() {
   install_dir=$1
 
-  set -e
-  cp -v $install_dir/lib/perl5/$PERL_VERSION/os390/CORE/libperl.so $install_dir/lib/
-  set +e
+  cp -f $install_dir/lib/perl5/$PERL_VERSION/os390/CORE/libperl.so $install_dir/lib/
+  cp -f $install_dir/lib/$PERL_VERSION/os390/CORE/libperl.so $install_dir/lib/
+  if [ ! -f "$install_dir/lib/libperl.so" ]; then
+    printError "libperl.so not copied"
+  fi
 }
 
 # Perl 5.39.5
