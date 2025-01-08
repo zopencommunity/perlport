@@ -1,8 +1,8 @@
 # bump: perl-version /PERL_VERSION="(.*)"/ https://github.com/Perl/perl5.git|semver:*
-PERL_VERSION="5.41.5"
+PERL_VERSION="5.41.7"
 
 export ZOPEN_BUILD_LINE="STABLE"
-export ZOPEN_STABLE_DEPS="curl gzip make git make zoslib sed"
+export ZOPEN_STABLE_DEPS="curl gzip make git make zoslib sed coreutils grep findutils zlib"
 export ZOPEN_STABLE_URL="https://github.com/Perl/perl5.git"
 export ZOPEN_STABLE_TAG="v${PERL_VERSION}"
 # export ZOPEN_STABLE_URL="https://github.com/Perl/perl5/archive/refs/tags/v${PERL_VERSION}.tar.gz"
@@ -35,10 +35,6 @@ zopen_post_install() {
     printError "libperl.so not copied"
   fi
 }
-
-# Perl 5.39.5
-# actualFailures:  33
-# totalTests:      2606
 
 zopen_check_results()
 {
