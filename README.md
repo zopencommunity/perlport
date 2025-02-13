@@ -1,20 +1,101 @@
 [![Automatic version updates](https://github.com/ZOSOpenTools/perlport/actions/workflows/bump.yml/badge.svg)](https://github.com/ZOSOpenTools/perlport/actions/workflows/bump.yml)
 
-# perl
-Place to share information about configure/build of perl for z/OS (only deltas to open source)
+[![Automatic version updates](https://github.com/ZOSOpenTools/gitport/actions/workflows/bump.yml/badge.svg)](https://github.com/ZOSOpenTools/gitport/actions/workflows/bump.yml)
 
-# pre-reqs
-You need gnu make, xlclang, and curl to download and unzip a tarball or git to build from scratch. 
-Detailed dependencies are in buildenv
+# Perl
 
-You will also need a 'bootstrap' make to build.
+The perl programming language
 
-To build, use zopen build from (https://github.com/ZOSOpenTools/utils) after setting up your environment, e.g.
-```
-. ./buildenv
-zopen build
+# Installation and Usage
+
+Use the zopen package manager ([QuickStart Guide](https://zopen.community/#/Guides/QuickStart)) to install:
+```bash
+zopen install perl
 ```
 
-For details on the build, see (https://zosopentools.github.io/meta/#/Guides/Porting)
+# Building from Source
 
-See expectedResults.txt for current failures
+1. Clone the repository:
+```bash
+git clone https://github.com/zopencommunity/perlport.git
+cd perlport
+```
+2. Build using zopen:
+```bash
+zopen build -vv
+```
+
+See the [zopen porting guide](https://zopen.community/#/Guides/Porting) for more details.
+
+# Documentation
+
+# Setting Up CPAN
+
+If `cpan` is not configured correctly, it may not work out of the box. The following are steps to set up `cpan`
+
+## Prerequisites
+Before setting up CPAN, ensure the following tools are installed via `zopen`:
+
+- `wget`
+- `curl`
+- `tar`
+- `make`
+- `gzip`
+- `bzip2`
+
+You can install them using:
+```sh
+zopen install curl wget tar make gzip bzip2
+```
+
+## Configuring CPAN
+
+### 1. Initialize CPAN
+Run the following command to enter the CPAN shell:
+```sh
+cpan
+```
+If this is the first time running CPAN, it will prompt for initial configuration. You can choose automatic configuration (press enter) unless you need custom settings.
+
+If the current CPAN configuration is incorrect, reset it using:
+```sh
+rm -rf ~/.cpan
+cpan
+```
+
+### 2. Set Up CPAN Configuration
+If `cpan` detects the z/OS version of make and tar and fails the initial setup, then you can configure it to pick up the zopen tools with the following:
+```sh
+cpan
+o conf make /path/to/zopen/make
+o conf tar /path/to/zopen/tar
+# do the same for wget, gzip, and others as needed...
+o conf commit
+```
+Verify that the ` ~/.cpan/CPAN/MyConfig.pm` file is updated accordingly by viewing it.
+
+### 3. Install Required Modules
+Once CPAN is set up, install Perl modules as needed:
+```sh
+cpan install Switch
+```
+
+## Troubleshooting
+- If CPAN fails due to missing dependencies, verify that `wget`, `tar`, `make`, `gzip`, and `bzip2` are properly installed and referenced in the `~/.cpan/CPAN/MyConfig.pm` file.
+- If CPAN configuration is incorrect, reset it using:
+  ```sh
+  rm -rf ~/.cpan
+  ```
+  Then re-run `cpan` to reconfigure.
+
+## Verification
+To confirm CPAN is working correctly, try installing and using a simple module:
+```sh
+perl -MTest::Simple -e 'print "CPAN setup successful!\\n"'
+```
+
+## Troubleshooting
+TBD
+
+## Contributing
+Contributions are welcome! Please follow the [zopen contribution guidelines](https://github.com/zopencommunity/meta/blob/main/CONTRIBUTING.md).
