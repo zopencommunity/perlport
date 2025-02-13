@@ -29,7 +29,9 @@ See the [zopen porting guide](https://zopen.community/#/Guides/Porting) for more
 
 # Setting Up CPAN
 
-If `cpan` is not configured correctly, it may not work out of the box. The following are steps to set up `cpan`
+To install Perl modules using cpan, you need to configure it to use the zopen tools.
+
+If cpan is not properly configured, it may not function correctly. Follow these steps to set it up:
 
 ## Prerequisites
 Before setting up CPAN, ensure the following tools are installed via `zopen`:
@@ -85,12 +87,6 @@ cpan install Switch
   rm -rf ~/.cpan
   ```
   Then re-run `cpan` to reconfigure.
-
-## Verification
-To confirm CPAN is working correctly, try installing and using a simple module:
-```sh
-perl -MTest::Simple -e 'print "CPAN setup successful!\\n"'
-```
 
 ## Troubleshooting
 TBD
