@@ -14,6 +14,9 @@ export ZOPEN_CONFIGURE="./Configure"
 export ZOPEN_CONFIGURE_OPTS="-Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Dusedevel -des -Duse64bitall -Dusedl -D ccflags=\"\$CFLAGS \$CPPFLAGS -DOS390 -DZOS -DNO_LOCALE_MESSAGES -DOEMVS -DMAXSIG=39 -D_EXT=1 -fvisibility=default\" -D ldflags=\"\$LDFLAGS\" -D libs=\"\$LIBS\""
 export ZOPEN_CHECK_OPTS="test"
 
+export ZOPEN_EXTRA_CFLAGS="-mzos-target=zosv2r5 -march=z13"
+export ZOPEN_SYSTEM_PREREQS="zos25"
+
 export ZOPEN_COMP=CLANG
 
 # Perl Environment variables
