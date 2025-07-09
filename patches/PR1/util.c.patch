@@ -1,20 +1,8 @@
-diff --git a/util.c b/util.c
-index 3830f47266..cb6966d07f 100644
---- a/util.c
-+++ b/util.c
-@@ -75,6 +75,11 @@ int putenv(char *);
- # include <sys/mman.h>
- #endif
- 
-+#ifdef __MVS__
-+# include <arpa/inet.h>
-+#include <arpa/inet.h>
-+#endif
-+
- #define FLUSH
- 
- /* NOTE:  Do not call the next three routines directly.  Use the macros
-@@ -2403,22 +2408,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
+diff --git i/util.c w/util.c
+index 7cf7a76295..f533e63bb7 100644
+--- i/util.c
++++ w/util.c
+@@ -2464,22 +2464,6 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
  }
  #endif
  
@@ -37,7 +25,7 @@ index 3830f47266..cb6966d07f 100644
  /*
  =for apidoc my_popen_list
  
-@@ -2474,12 +2463,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+@@ -2535,12 +2519,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
          /* Close parent's end of error status pipe (if any) */
          if (did_pipes)
              PerlLIO_close(pp[0]);
@@ -50,7 +38,7 @@ index 3830f47266..cb6966d07f 100644
          /* Now dup our end of _the_ pipe to right position */
          if (p[THIS] != (*mode == 'r')) {
              PerlLIO_dup2(p[THIS], *mode == 'r');
-@@ -2555,20 +2538,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+@@ -2616,20 +2594,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
      }
      if (did_pipes)
           PerlLIO_close(pp[0]);
@@ -71,7 +59,7 @@ index 3830f47266..cb6966d07f 100644
  #else
  #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
      return my_syspopen4(aTHX_ NULL, mode, n, args);
-@@ -2646,12 +2615,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+@@ -2707,12 +2671,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
  #define THAT This
          if (did_pipes)
              PerlLIO_close(pp[0]);
@@ -84,7 +72,7 @@ index 3830f47266..cb6966d07f 100644
          if (p[THIS] != (*mode == 'r')) {
              PerlLIO_dup2(p[THIS], *mode == 'r');
              PerlLIO_close(p[THIS]);
-@@ -2738,19 +2701,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+@@ -2799,19 +2757,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
      }
      if (did_pipes)
           PerlLIO_close(pp[0]);
@@ -96,10 +84,10 @@ index 3830f47266..cb6966d07f 100644
 -    }
 -    return io;
 -  #else
--    return PerlIO_fdopen(p[This], mode);
+     return PerlIO_fdopen(p[This], mode);
 -  #endif
 -#else
-     return PerlIO_fdopen(p[This], mode);
+-    return PerlIO_fdopen(p[This], mode);
 -#endif
  }
  #elif defined(__LIBCATAMOUNT__)
