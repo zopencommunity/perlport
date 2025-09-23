@@ -1,7 +1,7 @@
-diff --git a/doio.c b/doio.c
-index c8fe756ae1..a1ceced20f 100644
---- a/doio.c
-+++ b/doio.c
+diff --git c/doio.c w/doio.c
+index d0681ad6cc..3682834c82 100644
+--- c/doio.c
++++ w/doio.c
 @@ -35,7 +35,7 @@
  #endif
  #ifdef HAS_SHM
@@ -89,7 +89,7 @@ index c8fe756ae1..a1ceced20f 100644
      return tempfd;
  }
  
-@@ -1466,6 +1409,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+@@ -1455,6 +1398,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
  #endif
                  Uid_t fileuid;
                  Gid_t filegid;
@@ -100,7 +100,7 @@ index c8fe756ae1..a1ceced20f 100644
                  AV *magic_av = NULL;
                  SV *temp_name_sv = NULL;
                  MAGIC *mg;
-@@ -1482,6 +1429,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+@@ -1471,6 +1418,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
  #endif
                  PL_filemode = statbuf.st_mode;
                  fileuid = statbuf.st_uid;
@@ -110,8 +110,8 @@ index c8fe756ae1..a1ceced20f 100644
 +#endif
                  filegid = statbuf.st_gid;
                  if (!S_ISREG(PL_filemode)) {
-                     Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
-@@ -1559,6 +1510,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+                     ck_warner_d(packWARN(WARN_INPLACE),
+@@ -1548,6 +1499,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                  PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
                  if (PL_lastfd >= 0) {
                      (void)PerlLIO_fstat(PL_lastfd,&statbuf);
@@ -121,7 +121,7 @@ index c8fe756ae1..a1ceced20f 100644
  #ifdef HAS_FCHMOD
                      (void)fchmod(PL_lastfd,PL_filemode);
  #else
-@@ -2569,6 +2523,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
+@@ -2558,6 +2512,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
              }
            doshell:
              PERL_FPU_PRE_EXEC
