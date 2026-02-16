@@ -1,9 +1,9 @@
 diff --git a/os390/os390.c b/os390/os390.c
 new file mode 100644
-index 0000000000..9a627ab6ea
+index 0000000..d552668
 --- /dev/null
 +++ b/os390/os390.c
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,57 @@
 +#include <string.h>
 +#include <sys/stat.h>
 +#include <stdio.h>
@@ -20,6 +20,7 @@ index 0000000000..9a627ab6ea
 +#include "EXTERN.h"
 +#include "perl.h"
 +#include "XSUB.h"
++#include <zos.h>
 +
 +void
 +zos_copytags_fd(pTHX_ CV *cv)

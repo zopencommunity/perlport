@@ -1,7 +1,7 @@
-diff --git c/doio.c w/doio.c
-index d0681ad6cc..3682834c82 100644
---- c/doio.c
-+++ w/doio.c
+diff --git a/doio.c b/doio.c
+index d0681ad..1a0c08c 100644
+--- a/doio.c
++++ b/doio.c
 @@ -35,7 +35,7 @@
  #endif
  #ifdef HAS_SHM
@@ -11,7 +11,18 @@ index d0681ad6cc..3682834c82 100644
      extern Shmat_t shmat (int, char *, int);
  # endif
  #endif
-@@ -222,57 +222,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
+@@ -60,6 +60,10 @@
+ 
+ #include <signal.h>
+ 
++#ifdef __MVS__
++#include <zos.h>
++#endif
++
+ void
+ Perl_setfd_cloexec(int fd)
+ {
+@@ -222,57 +226,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
  #endif
  }
  
@@ -69,7 +80,7 @@ index d0681ad6cc..3682834c82 100644
  int
  Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
  {
-@@ -302,9 +251,6 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
+@@ -302,9 +255,6 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
  }
  
  #if defined(OEMVS)
@@ -79,7 +90,7 @@ index d0681ad6cc..3682834c82 100644
  static int Internal_Perl_my_mkstemp_cloexec(char *templte)
  {     
      PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
-@@ -321,9 +267,6 @@ int
+@@ -321,9 +271,6 @@ int
  Perl_my_mkstemp_cloexec(char *templte) 
  {
      int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
@@ -89,7 +100,7 @@ index d0681ad6cc..3682834c82 100644
      return tempfd;
  }
  
-@@ -1455,6 +1398,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+@@ -1455,6 +1402,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
  #endif
                  Uid_t fileuid;
                  Gid_t filegid;
@@ -100,7 +111,7 @@ index d0681ad6cc..3682834c82 100644
                  AV *magic_av = NULL;
                  SV *temp_name_sv = NULL;
                  MAGIC *mg;
-@@ -1471,6 +1418,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+@@ -1471,6 +1422,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
  #endif
                  PL_filemode = statbuf.st_mode;
                  fileuid = statbuf.st_uid;
@@ -111,7 +122,7 @@ index d0681ad6cc..3682834c82 100644
                  filegid = statbuf.st_gid;
                  if (!S_ISREG(PL_filemode)) {
                      ck_warner_d(packWARN(WARN_INPLACE),
-@@ -1548,6 +1499,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+@@ -1548,6 +1503,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                  PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
                  if (PL_lastfd >= 0) {
                      (void)PerlLIO_fstat(PL_lastfd,&statbuf);
@@ -121,7 +132,7 @@ index d0681ad6cc..3682834c82 100644
  #ifdef HAS_FCHMOD
                      (void)fchmod(PL_lastfd,PL_filemode);
  #else
-@@ -2558,6 +2512,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
+@@ -2558,6 +2516,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
              }
            doshell:
              PERL_FPU_PRE_EXEC

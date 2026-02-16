@@ -1,0 +1,13 @@
+diff --git a/perl.h b/perl.h
+index f5659ef..b2ad7d5 100644
+--- a/perl.h
++++ b/perl.h
+@@ -4393,7 +4393,7 @@ intrinsic function, see its documents for more details.
+             cBOOL(PerlLIO_setmode(fileno(fp), mode) != -1)
+ #endif
+ 
+-#ifdef __CYGWIN__
++#if defined(__CYGWIN__) || defined(__MVS__)
+ void init_os_extras(void);
+ #endif
+ 
