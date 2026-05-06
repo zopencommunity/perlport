@@ -16,7 +16,7 @@ export ZOPEN_CHECK_OPTS="test"
 
 export ZOPEN_COMP=CLANG
 
-# Perl Environment variables
+# Perl Environment variables....
 export INSTALLFLAGS="+v"
 
 zopen_append_to_zoslib_env() {
