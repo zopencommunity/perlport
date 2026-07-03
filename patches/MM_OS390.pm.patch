@@ -1,7 +1,7 @@
-diff --git i/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm w/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
-index 040c9a4880..74825320f1 100644
---- i/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
-+++ w/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
+diff --git a/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm b/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
+index 3171106..335a221 100644
+--- a/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
++++ b/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
 @@ -62,7 +62,7 @@ sub xs_make_dynamic_lib {
      }
  

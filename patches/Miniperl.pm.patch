@@ -1,5 +1,5 @@
 diff --git a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
-index 18627f8a5e..f5963b51ab 100644
+index c611738..66a34ac 100644
 --- a/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
 +++ b/ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm
 @@ -68,6 +68,7 @@ sub writemain{
