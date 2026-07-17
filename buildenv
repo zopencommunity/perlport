@@ -11,7 +11,7 @@ export ZOPEN_DEV_DEPS="git make zoslib sed gettext"
 export ZOPEN_DEV_URL="https://github.com/Perl/perl5.git"
 
 export ZOPEN_CONFIGURE="./Configure"
-export ZOPEN_CONFIGURE_OPTS="-d -Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Aappend:ccflags=\" \$CFLAGS \$CPPFLAGS\" -Aappend:ldflags=\" \$LDFLAGS\" -Aappend:libs=\" \$LIBS\""
+export ZOPEN_CONFIGURE_OPTS="-de -d -Dprefix=\${ZOPEN_INSTALL_DIR} -Duserelocatableinc -Aappend:ccflags=\" \$CFLAGS \$CPPFLAGS\" -Aappend:ldflags=\" \$LDFLAGS\" -Aappend:libs=\" \$LIBS\""
 export ZOPEN_CHECK_OPTS="test"
 
 export ZOPEN_COMP=CLANG
