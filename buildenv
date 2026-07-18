@@ -1,4 +1,4 @@
-# bump: perl-version /PERL_VERSION="(.*)"/ https://github.com/Perl/perl5.git|semver:*
+# bump: perl-version /PERL_VERSION="(.*)"/ https://github.com/Perl/perl5.git|re:/^\d+\.\d*[02468](?:\.\d+)*$/|semver:*
 PERL_VERSION="5.44.0"
 
 export ZOPEN_BUILD_LINE="STABLE"
