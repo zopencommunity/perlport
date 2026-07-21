@@ -1,12 +1,13 @@
 diff --git a/lib/diagnostics.pm b/lib/diagnostics.pm
-index 842959ab1c..5e0c6aa2c9 100644
+index 842959a..6a5210f 100644
 --- a/lib/diagnostics.pm
 +++ b/lib/diagnostics.pm
-@@ -200,8 +200,11 @@ if ($^O eq 'VMS') {
+@@ -200,8 +200,12 @@ if ($^O eq 'VMS') {
      require VMS::Filespec;
      $privlib = VMS::Filespec::unixify($privlib);
  }
 -my @trypod = (
++my $archlib = $Config{archlibexp};
 +my @trypod = $^O eq 'os390' ? (
  	   "$privlib/pod/perldiag.pod",
 +	   "$privlib/pod/perldiag.pod",
